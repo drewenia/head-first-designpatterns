@@ -1,0 +1,1 @@
+[Strategy Design Pattern](MarkdownFiles/StrategyDesignPattern.md)
