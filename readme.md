@@ -2,3 +2,7 @@
 
 [Observer Design Pattern](MarkdownFiles/ObserverDesignPattern.md)
 
+[Decorator Pattern](MarkdownFiles/DecoratorPattern.md)
+
+
+
