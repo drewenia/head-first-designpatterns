@@ -4,5 +4,7 @@
 
 [Decorator Pattern](MarkdownFiles/DecoratorPattern.md)
 
+[Factory Pattern](MarkdownFiles/FactoryPattern.md)
+
 
 
