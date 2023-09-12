@@ -1,4 +1,4 @@
-package FactoryDesignPattern;
+package FactoryDesignPattern.HeadFirstFactoryDesignPattern;
 
 public class FrozenClams implements Clams {
     @Override

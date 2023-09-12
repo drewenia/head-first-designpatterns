@@ -1,9 +1,10 @@
-package FactoryDesignPattern;
+package FactoryDesignPattern.HeadFirstFactoryDesignPattern;
 
-public class VeggiePizza extends Pizza {
+public class ClamPizza extends Pizza {
+
     PizzaIngredientFactory ingredientFactory;
 
-    public VeggiePizza(PizzaIngredientFactory ingredientFactory) {
+    public ClamPizza(PizzaIngredientFactory ingredientFactory) {
         this.ingredientFactory = ingredientFactory;
     }
 

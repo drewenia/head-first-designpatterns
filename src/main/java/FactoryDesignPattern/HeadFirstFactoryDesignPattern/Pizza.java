@@ -1,4 +1,4 @@
-package FactoryDesignPattern;
+package FactoryDesignPattern.HeadFirstFactoryDesignPattern;
 
 public abstract class Pizza {
     String name;

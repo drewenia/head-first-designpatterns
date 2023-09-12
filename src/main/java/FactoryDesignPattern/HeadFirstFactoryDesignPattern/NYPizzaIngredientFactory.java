@@ -1,7 +1,6 @@
-package FactoryDesignPattern;
+package FactoryDesignPattern.HeadFirstFactoryDesignPattern;
 
-
-public class ChicagoPizzaIngredientFactory implements PizzaIngredientFactory{
+public class NYPizzaIngredientFactory implements PizzaIngredientFactory{
     @Override
     public Dough createDough() {
         return new ThinCrustDough();
@@ -9,17 +8,17 @@ public class ChicagoPizzaIngredientFactory implements PizzaIngredientFactory{
 
     @Override
     public Sauce createSauce() {
-        return new PlumTomatoSauce();
+        return new MarinaraSauce();
     }
 
     @Override
     public Cheese createCheese() {
-        return new Mozzarella();
+        return new ReggianoCheese();
     }
 
     @Override
     public Veggies[] createVeggies() {
-        return new Veggies[]{new BlackOlives(),new EggPlant(),new Spinach()};
+        return new Veggies[]{new Garlic(), new Onion(),new Mushroom(),new RedPepper()};
     }
 
     @Override
@@ -29,6 +28,6 @@ public class ChicagoPizzaIngredientFactory implements PizzaIngredientFactory{
 
     @Override
     public Clams createClam() {
-        return new FrozenClams();
+        return new FreshClams();
     }
 }

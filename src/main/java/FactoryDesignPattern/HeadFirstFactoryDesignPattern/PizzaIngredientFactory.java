@@ -1,4 +1,4 @@
-package FactoryDesignPattern;
+package FactoryDesignPattern.HeadFirstFactoryDesignPattern;
 
 public interface PizzaIngredientFactory {
     Dough createDough(); // hamur

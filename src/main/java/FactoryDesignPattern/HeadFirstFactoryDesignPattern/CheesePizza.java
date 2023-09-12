@@ -1,10 +1,9 @@
-package FactoryDesignPattern;
+package FactoryDesignPattern.HeadFirstFactoryDesignPattern;
 
-public class ClamPizza extends Pizza {
-
+public class CheesePizza extends Pizza{
     PizzaIngredientFactory ingredientFactory;
 
-    public ClamPizza(PizzaIngredientFactory ingredientFactory) {
+    public CheesePizza(PizzaIngredientFactory ingredientFactory) {
         this.ingredientFactory = ingredientFactory;
     }
 
@@ -14,6 +13,5 @@ public class ClamPizza extends Pizza {
         dough = ingredientFactory.createDough();
         sauce = ingredientFactory.createSauce();
         cheese = ingredientFactory.createCheese();
-        clams = ingredientFactory.createClam();
     }
 }
