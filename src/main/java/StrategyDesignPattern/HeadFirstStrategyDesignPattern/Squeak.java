@@ -1,4 +1,4 @@
-package StrategyDesignPattern;
+package StrategyDesignPattern.HeadFirstStrategyDesignPattern;
 
 public class Squeak implements QuackBehavior{
     @Override

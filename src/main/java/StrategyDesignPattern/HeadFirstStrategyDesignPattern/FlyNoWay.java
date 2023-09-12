@@ -1,4 +1,4 @@
-package StrategyDesignPattern;
+package StrategyDesignPattern.HeadFirstStrategyDesignPattern;
 
 public class FlyNoWay implements FlyBehavior{
     @Override

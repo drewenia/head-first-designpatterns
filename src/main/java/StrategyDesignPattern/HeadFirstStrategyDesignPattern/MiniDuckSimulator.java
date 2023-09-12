@@ -1,4 +1,4 @@
-package StrategyDesignPattern;
+package StrategyDesignPattern.HeadFirstStrategyDesignPattern;
 
 public class MiniDuckSimulator {
     public static void main(String[] args) {
