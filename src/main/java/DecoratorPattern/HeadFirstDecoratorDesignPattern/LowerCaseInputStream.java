@@ -1,4 +1,4 @@
-package DecoratorPattern;
+package DecoratorPattern.HeadFirstDecoratorDesignPattern;
 
 import java.io.FilterInputStream;
 import java.io.IOException;

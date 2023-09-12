@@ -1,4 +1,4 @@
-package DecoratorPattern;
+package DecoratorPattern.HeadFirstDecoratorDesignPattern;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;

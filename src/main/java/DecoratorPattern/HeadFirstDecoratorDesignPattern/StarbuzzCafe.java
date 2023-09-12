@@ -1,4 +1,4 @@
-package DecoratorPattern;
+package DecoratorPattern.HeadFirstDecoratorDesignPattern;
 
 public class StarbuzzCafe {
     public static void main(String[] args) {

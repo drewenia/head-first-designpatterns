@@ -1,4 +1,4 @@
-package DecoratorPattern;
+package DecoratorPattern.HeadFirstDecoratorDesignPattern;
 
 public class Mocha extends CondimentDecorator{
     Beverage beverage;
