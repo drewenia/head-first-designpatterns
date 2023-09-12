@@ -1,4 +1,4 @@
-package ObserverDesignPattern;
+package ObserverDesignPattern.HeadFirstObserverDesignPattern;
 
 /* Bu display elemanı Observer interface'ini implement eder, böylece WeatherData nesnesinden değişiklikleri alabilir.
 Aynı zamanda DisplayElement interface'ini de implement eder, çünkü API'miz tüm display elemanlarının bu implemente

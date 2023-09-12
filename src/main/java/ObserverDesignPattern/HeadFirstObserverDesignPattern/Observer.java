@@ -1,4 +1,4 @@
-package ObserverDesignPattern;
+package ObserverDesignPattern.HeadFirstObserverDesignPattern;
 
 public interface Observer {
 
