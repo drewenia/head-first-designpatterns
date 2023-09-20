@@ -6,5 +6,7 @@
 
 [Factory Pattern](MarkdownFiles/FactoryPattern.md)
 
+[Singleton Pattern](MarkdownFiles/SingletonPattern.md)
+
 
 
