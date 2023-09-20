@@ -1,4 +1,4 @@
-package SingletonDesignPattern;
+package SingletonDesignPattern.HeadFirstSingletonDesignPattern;
 
 public class Singleton {
     private volatile static Singleton uniqueInstance;

@@ -1,4 +1,4 @@
-package SingletonDesignPattern;
+package SingletonDesignPattern.HeadFirstSingletonDesignPattern;
 
 public class ChocolateBoiler {
     private boolean empty;
