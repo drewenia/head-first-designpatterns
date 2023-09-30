@@ -8,5 +8,7 @@
 
 [Singleton Pattern](MarkdownFiles/SingletonPattern.md)
 
+[Command Pattern](MarkdownFiles/CommandPattern.md)
+
 
 
