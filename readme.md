@@ -10,5 +10,7 @@
 
 [Command Pattern](MarkdownFiles/CommandPattern.md)
 
+[The Adapter and Facade Patterns](MarkdownFiles/AdapterAndFacadePattern.md)
+
 
 
