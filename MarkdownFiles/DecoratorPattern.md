@@ -1,101 +1,108 @@
 # Decorating Objects
 
-Bu bölümü "Desing Eye for the Inheritance Guy" olarak adlandırın. Tipik inheritance'in overuse (aşırı) kullanımını
-yeniden gözden geçireceğiz ve sınıflarınızı çalışma zamanında nesne composition'ı türünde kullanarak süslemenin nasıl
-yapılacağını öğreneceksiniz. Neden mi? Süslemenin tekniklerini bildiğinizde, temel sınıflara herhangi bir kod
-değişikliği yapmadan kendi (veya başkasının) nesnelerine yeni sorumluluklar ekleyebileceksiniz.
+Bu bölümü "Desing Eye for the Inheritance Guy" olarak adlandırın.
+
+Inheritance'in tipik overuse (aşırı kullanımını) yeniden inceleyeceğiz ve bir tür nesne composition'ı kullanarak
+runtime'da sınıflarınızı nasıl decorate edeceğiniz öğreneceksiniz. Neden mi? Decoration tekniklerini öğrendikten sonra,
+temel sınıflarda herhangi bir kod değişikliği yapmadan kendi (veya başkasının) nesnelerinize yeni sorumluluklar
+verebilirsiniz.
 
 # Welcome to Starbuzz Coffee
 
-Starbuzz Coffee, en hızlı büyüyen kahve dükkanlarından biri olarak kendine bir isim yapmıştır. Yerel köşenizde bir tane
-gördüyseniz, karşıya bakın; başka bir tane daha göreceksiniz.
-
-Hızlı büyüdükleri için, içecek seçeneklerine uyacak şekilde sipariş sistemlerini güncellemeye çalışıyorlar.
-İlk işe başladıklarında sınıflarını şu şekilde tasarladılar...
+Starbuzz Coffee en hızlı büyüyen kahve dükkanı olarak adından söz ettiriyor. Eğer yerel köşenizde bir tane gördüyseniz,
+caddenin karşısına bakın; bir tane daha göreceksiniz. Hızlı büyüdükleri için, içecek seçeneklerine uyacak şekilde
+sipariş sistemlerini güncellemeye çalışıyorlar. İlk işe başladıklarında sınıflarını şu şekilde tasarladılar...
 
 ![img.png](../Images/DecoratorPattern/img.png)
 
-Beverage, kahve dükkanında sunulan tüm içecekler tarafından alt sınıflandırılan abstract bir sınıftır.
+**Beverage** : kahve dükkanında sunulan tüm içeceklerin tarafından alt sınıflandırılan abstract bir sınıftır
 
-cost() methodu abstract bir methoddur; alt sınıflar kendi implementasyonlarını tanımlamalıdır.
+**cost()** methodu abstract'dır; subclass'ların kendi implementasyonlarını tanımlamaları gerekir.
 
-Description instance variable'i her alt sınıfta ayarlanır ve içeceğin bir açıklamasını tutar, örneğin "Most excellent
-dark roast". getDescription() methodu açıklamayı döndürür.
+**description** instance variable'i her subclass'da ayarlanır ve içeceğin "Most Excellent Dark Roast" gibi bir
+açıklamasını tutar. getDescription() methodu açıklamayı döndürür.
 
-Her alt sınıf, içeceğin maliyetini döndürmek için cost() methodunu implement eder.
+Her subclass, içeceğin maliyetini döndürmek için cost() methodunu implement eder.
 
-Kahvenizin yanı sıra, buharlı süt, soya ve moka (diğer adıyla çikolata) gibi birkaç katkı maddesi isteyebilir ve hepsini
-köpüklü süt ile tamamlayabilirsiniz. Starbuzz, bunların her biri için bir miktar ücret alır, bu yüzden bunları sipariş
-sistemlerine dahil etmeleri gerçekten önemlidir. İşte ilk girişimleri...
+Kahvenize ek olarak, buharda pişirilmiş süt, soya ve mocha (çikolata olarak da bilinir) gibi çeşitli çeşniler
+isteyebilir ve hepsini çırpılmış sütle tamamlayabilirsiniz. Starbuzz bunların her biri için biraz ücret alıyor, bu
+yüzden bunları sipariş sistemlerine dahil etmeleri gerekiyor. İşte ilk denemeleri...
 
 ![img_1.png](../Images/DecoratorPattern/img_1.png)
 
-Her cost() methodu, kahve maliyetini siparişteki diğer katkı maddeleriyle birlikte hesaplar.
+Buna "Sınıf patlaması" diyebilir misiniz?
 
-Starbuzz'un kendileri için bir bakım kabusu yarattığı oldukça açık. Sütün fiyatı yükseldiğinde ne yaparlar? Yeni bir
-karamel üstü eklediklerinde ne yaparlar?
+Her cost() methodu, kahvenin maliyetini siparişteki diğer katkı maddeleri ile birlikte hesaplar.
 
-Bu saçma; neden tüm bu sınıflara ihtiyacımız var? Sadece üst sınıfta instance varibles'ları ve miras kullanamaz mıyız
-baharatları takip etmek için?
+Starbuzz'ın kendileri için bir bakım kabusu yarattığı oldukça açık. Sütün fiyatı arttığında ne olacak? Yeni bir karamel
+malzemesi eklediklerinde ne yapacaklar? Bakım sorununun ötesinde düşünecek olursak, şimdiye kadar ele aldığımız tasarım
+ilkelerinden hangilerini ihlal ediyorlar?
 
-Peki, deneyelim. İlk olarak Beverage temel sınıfını oluşturalım ve her içeceğin süt, soya, mocha ve şeker kreması gibi
-instance variables'ları temsil etmesi için ekleyelim...
+Bu aptalca; neden tüm bu sınıflara ihtiyacımız var? Çeşnileri takip etmek için superclass'da instance variable'ları ve
+inheritance kullanamaz mıyız?
+
+Peki, bir deneyelim. Beverage base class'ı ile başlayalım ve her bir içeceğin süt, soya, mocha ve whip içerip
+içermediğini temsil etmek için instance variable'lar ekleyelim...
 
 ![img_2.png](../Images/DecoratorPattern/img_2.png)
 
-Her baharat için yeni boolean değerleri ekleyelim.
+Her condiment (çeşni) için yeni boolean değerleri; (milk,soy,mocha,whip)
 
-Şimdi Beverage içinde cost() methodunu (abstract tutmak yerine) implement edelim, böylece belirli bir içeceğin
-baharatlarla ilişkilendirilen maliyetlerini hesaplayabilsin. Alt sınıflar hala cost() metodunu override edecektir, ancak
-temel içecek maliyetinin yanı sıra eklenen baharatların maliyetini hesaplayabilmeleri için super sürümünü de
-çağıracaklar.
+Şimdi cost() methodunu Beverage'da implement edeceğiz (abstract tutmak yerine), böylece belirli bir içecek instance'i
+için çeşnilerle ilişkili maliyetleri hesaplayabilecek. Subclass'lar cost() methodunu override etmeye devam edecek, ancak
+temel içeceğin toplam maliyetini ve eklenen çeşnilerin maliyetlerini hesaplayabilmek için super sürümü de çağıracaklar.
 
-getter-setter'lar baharatlar için boolean değerlerini get etmek ve set etmek için kullanılır.
+getter-setter'lar çeşniler için boolean değerlerini get etmek ve set etmek için kullanılır.
 
-Şimdi alt sınıfları ekleyelim, menüdeki her içeceğin bir alt sınıfı olsun:
+![img_15.png](../Images/DecoratorPattern/img_15.png)
 
-Üst sınıfın cost() methodu tüm baharatların maliyetini hesaplayacak, alt sınıflardaki override edilmiş cost() methodu
-ise bu işlevselliği o belirli içeceğe özgü maliyetleri içerecek şekilde extend edecektir.
+Şimdi menüdeki her içecek için bir tane olmak üzere subclass'ları ekleyelim:
 
-Her cost() methodunun içeceğin maliyetini hesaplaması ve ardından baharatları eklemesi gerekiyor, bunu yapmak için
-cost() methodu içinde üst sınıfın cost() methodunu çağırmalıdır.
+![img_16.png](../Images/DecoratorPattern/img_16.png)
 
-Bu yaklaşımla ilgili gelecekteki değişikliklerle ilgili bazı potansiyel sorunları düşünerek bazı endişeleriniz olduğunu
-anlıyorum. Tasarımın gelecekte nasıl değişebileceğini düşünüyorsunuz? Belirli endişelerinizi paylaşırsanız, bu konuda
-daha fazla yardımcı olabilirim.
+**cost()** : Superclass cost() tüm çeşnilerin maliyetlerini hesaplarken, subclass'larda ki override edilmiş cost() bu
+işlevi söz konusu içecek türünün maliyetlerini içerecek şekilde extend eder.
+
+Her cost() methodunun içeceğin maliyetini hesaplaması ve ardından cost() superclass implementasyonunu çağırarak
+çeşnileri eklemesi gerekir
+
+**Dialog :** Bak, toplam beş sınıf. Bu kesinlikle gidilecek yol.
+
+**Dialog :** Ben o kadar emin değilim; tasarımın gelecekte nasıl değişmesi gerekebileceğini düşünerek bu yaklaşımla
+ilgili bazı potansiyel sorunları görebiliyorum.
 
 --**DIALOGS**--
 
-Usta: Çekirge, son görüşmemizden bu yana biraz zaman geçti. Miras konusunda derin düşüncelere mi daldın?
+Usta: Çekirge, son görüşmemizden bu yana biraz zaman geçti. Inheritance konusunda derin düşüncelere mi daldın?
 
-Öğrenci: Evet, Usta. Miras güçlü bir kavram olsa da, her zaman en esnek veya sürdürülebilir tasarımlara yol açmadığını
+Öğrenci: Evet, Usta. Inheritance güçlü olsa da, her zaman en esnek veya sürdürülebilir tasarımlara yol açmadığını
 öğrendim.
 
-Usta: Ah, evet, ilerleme kaydetmişsin. Peki, öyleyse miras yoluyla değilse nasıl yeniden kullanım elde edeceksin,
-öğrencim?
+Usta: Ah evet, biraz ilerleme kaydettiniz. Peki, söyle bana öğrencim, inheritance yoluyla değilse nasıl yeniden
+kullanmayı başaracaksın?
 
-Öğrenci: Usta, zamanında "miras alma" yollarının, composition ve delegation yoluyla behavior'a çalışma zamanında aktarma
-yollarının olduğunu öğrendim.
+Öğrenci: Efendim, composition ve delegation atama yoluyla runtime'da behavior'u "inheritance almanın" yolları olduğunu
+öğrendim.
 
 Usta: Devam et?
 
-Öğrenci: Behavior'ı alt sınıflandırma yoluyla miras aldığımda, bu Behavior derleme zamanında statik olarak ayarlanır.
-Ayrıca, tüm alt sınıfların aynı Behavior'ı miras alması gerekir. Ancak, bir nesnenin Behavior'ını composition yoluyla
-extend edebiliyorsam, bunu çalışma zamanında dinamik olarak yapabilirim.
+Öğrenci : Subclassing yoluyla bir behavior'u inherit aldığımda, bu behavior compile time'da statik olarak ayarlanır.
+Ayrıca, tüm subclass'lar aynı behavior'ı inherit etmelidir. Ancak, bir nesnenin behavior'ını composition yoluyla extend
+edebilirsem, bunu runtime'da dinamik olarak yapabilirim.
 
 Usta: Çok iyi, Çekirge, Composition'ın gücünü görmeye başlıyorsun.
 
-Öğrenci: Evet, bu teknikle nesnelere birden fazla yeni sorumluluk eklemek mümkün, hatta üst sınıfın tasarımcısı
-tarafından dahi düşünülmemiş sorumlulukları bile ekleyebilirim. Ve en önemlisi, onların koduna dokunmam gerekmiyor!
+Öğrenci : Evet, bu teknikle nesnelere birden fazla yeni sorumluluk eklemem mümkün, superclass'ın tasarımcısı tarafından
+düşünülmemiş sorumluluklar da dahil. Ve onların kodlarına dokunmak zorunda değilim!
 
 Usta: Composition'ın kodunuzu nasıl sürdürülebilir kıldığı hakkında ne öğrendin?
 
-Öğrenci: İşte bunu anlatmaya çalışıyordum. Nesneleri dinamik olarak composing (birleştirerek) ederek, yeni işlevselliği
-mevcut kodu değiştirmek yerine yeni kod yazarak ekleyebilirim. Mevcut kodu değiştirmiyorum, bu nedenle mevcut kodda
-hataların ortaya çıkma olasılığı veya istenmeyen side-effect'lere neden olma riski çok daha azdır.
+Öğrenci : Ben de bunu anlatmaya çalışıyordum. Nesneleri dinamik olarak composing ederek, mevcut kodu değiştirmek yerine
+yeni kod yazarak yeni işlevler ekleyebilirim. Mevcut kodu değiştirmediğim için, önceden var olan kodda hataların ortaya
+çıkma veya istenmeyen side-effect'lere neden olma olasılığı çok daha düşüktür.
 
-Usta: Çok iyi. Bugün için yeterli, Çekirge. Bu konu hakkında daha fazla düşünmeni isterim... Unutma, kod akşamleyin
-kapalı (değişikliğe kapalı) olmalıdır, ancak sabahleyin açık (genişletmeye açık) olmalıdır, sanki lotus çiçeği gibi.
+Usta : Çok iyi. Bugünlük bu kadar yeter, Çekirge. Gidip bu konu üzerinde biraz daha düşünmeni istiyorum... Unutma, kod
+akşamları lotus çiçeği gibi kapalı (değişime kapalı), sabahları ise lotus çiçeği gibi açık (genişlemeye açık) olmalıdır.
 
 # The Open-Closed Principle
 
@@ -103,58 +110,59 @@ kapalı (değişikliğe kapalı) olmalıdır, ancak sabahleyin açık (genişlet
 
 ![img_3.png](../Images/DecoratorPattern/img_3.png)
 
-**Sınıflar, genişletmeye açık ancak değişikliğe kapalı olmalıdır.**
+**Desing Principle : Sınıflar, genişletmeye açık ancak değişikliğe kapalı olmalıdır.**
 
-Gelin, içeriye buyurun; biz açığız. Sınıflarımızı istediğiniz yeni Behavior'lara genişletmekten çekinmeyin.
-İhtiyaçlarınız veya gereksinimleriniz değişirse (ki değişeceğini biliyoruz), sadece kendi uzantılarınızı yapabilirsiniz.
+İçeri gelin; kapımız açık. Sınıflarımızı istediğiniz yeni behavior'lar ile extend etmekten çekinmeyin. İhtiyaçlarınız
+veya gereksinimleriniz değişirse (ve değişeceğini biliyoruz), devam edin ve kendi extension'larınızı yapın.
 
-Evet, bu kodu doğru ve hatasız bir şekilde hazırlamak için çok zaman harcadık, bu yüzden mevcut kodu değiştirmenize izin
-veremeyiz. Değişikliğe kapalı olarak kalmalıdır. Eğer beğenmezseniz, yöneticiyle konuşabilirsiniz.
+Üzgünüz, kapalıyız. Bu doğru, bu kodu doğru ve hatasız hale getirmek için çok zaman harcadık, bu yüzden mevcut kodu
+değiştirmenize izin veremeyiz. Değişikliğe kapalı kalmalıdır. Eğer beğenmediyseniz, müdürle konuşabilirsiniz.
 
-Amacımız, mevcut kodu değiştirmeden yeni Behavior'ları kolayca eklemek için sınıfları genişletmeyi mümkün kılmaktır.
-Bunu başarırsak ne elde ederiz? Değişikliklere dayanıklı tasarımlar ve değişen gereksinimlere uygun yeni işlevleri
-kolayca entegre edebilen esnek tasarımlar elde ederiz.
+Amacımız, sınıfların mevcut kodu değiştirmeden yeni behavior'ları içerecek şekilde kolayca extended edilebilmesini
+sağlamaktır. Bunu başarırsak ne elde ederiz? Değişime dirençli ve değişen gereksinimleri karşılamak için yeni işlevler
+üstlenebilecek kadar esnek tasarımlar.
 
 --**DIALOGS**--
 
-Q : Genişletmeye açık ve değişikliğe kapalı mı? Bu kulağa çok çelişkili geliyor. Bir tasarım nasıl her ikisi birden
-olabilir?
+Q : Open for extension and closed for modification (Genişletmeye açık ve değişikliğe kapalı mı?) Bu kulağa çok çelişkili
+geliyor. Bir tasarım nasıl her ikisi birden olabilir?
 
-A : Bu çok iyi bir soru. İlk başta kesinlikle çelişkili gibi görünüyor. Sonuçta, değiştirilebilirliği daha az olan bir
-şeyi genişletmek daha zor, değil mi? Ama aslında, altta yatan kodu değiştiremesek bile sistemlerin genişletilmesine izin
-veren bazı zekice nesne yönelimli teknikler bulunmaktadır. Observer Deseni'ni (2. Bölümde) düşünün... yeni Observer'lar
-ekleyerek, Subject'i herhangi bir zamanda genişletebiliriz, Subject'e kod eklememiz gerekmez. Diğer nesne yönelimli
-tasarım teknikleriyle Behavior'ı genişletmenin birkaç başka yolunu da göreceksiniz
+A : Bu çok güzel bir soru. İlk başta kulağa kesinlikle çelişkili geliyor. Sonuçta, bir şey ne kadar az
+değiştirilebilirse, genişletilmesi de o kadar zor olur, değil mi? Ancak altta yatan kodu değiştiremesek bile sistemlerin
+genişletilmesine olanak tanıyan bazı akıllı OO teknikleri olduğu ortaya çıktı. Observer Kalıbını düşünün (Bölüm 2'de)...
+yeni Observer'lar ekleyerek, Subject'e kod eklemeden Subject'i istediğimiz zaman genişletebiliriz. Diğer OO tasarım
+teknikleriyle behavior'u extend etmenin birkaç yolunu daha göreceksiniz.
 
-Q : Observable'ı anladım, ama genellikle bir şeyi genişletilebilir ancak değiştirilemez olarak nasıl tasarlarım
+Q : Tamam, Observable'ı anlıyorum, ancak genel olarak genişletilebilir, ancak değişikliğe kapalı bir şeyi nasıl
+tasarlayabilirim?
 
-A : Çoğu desen, kodunuzu değiştirilmeden genişletme olanağı sağlayarak sizi zaman içinde test edilmiş tasarımlarla
-donatır. Bu bölümde, OpenClosed ilkesini takip etmek için Decorator desenini kullanmanın iyi bir örneğini göreceksiniz
+A : Pattern'lerin çoğu, bir genişletme aracı sağlayarak kodunuzu değiştirilmekten koruyan, zaman içinde test edilmiş
+tasarımlar sunar. Bu bölümde, OpenClosed prensibini takip etmek için Decorator kalıbını kullanmanın iyi bir örneğini
+göreceksiniz.
 
-Q : Tasarımımın her parçasının Open-Close kuralına uymasını nasıl sağlayabilirim? Principle mi?
+Q : Tasarımımın her parçasının Open-Close İlkesine uymasını nasıl sağlayabilirim?
 
-A : Genellikle yapamazsınız. Varolan kodu değiştirmeden nesne yönelimli tasarımı esnek ve genişletilebilir hale getirmek
-zaman ve çaba gerektirir. Genel olarak, tasarımlarımızın her parçasını sıkı bir şekilde belirleme lüksümüz yoktur (ve
-muhtemelen israftır). Open-Closed Prensibini takip etmek genellikle yeni seviyelerde soyutlamaları beraberinde getirir,
-bu da kodumuzu karmaşıklaştırır. Tasarımlarınızda en olası değişecek alanlara odaklanmak ve ilgili prensipleri uygulamak
+A : Genellikle yapamazsınız. OO tasarımını esnek ve mevcut kodu değiştirmeden genişletmeye açık hale getirmek zaman ve
+çaba gerektirir. Genel olarak, tasarımlarımızın her parçasını bağlama lüksüne sahip değiliz (ve bu muhtemelen israf
+olacaktır). Open-Closed Prensibini takip etmek genellikle yeni abstraction seviyeleri getirir ve bu da kodumuza
+karmaşıklık katar. Tasarımlarınızda değişme olasılığı en yüksek olan alanlara odaklanmak ve ilkeleri buralarda uygulamak
 istersiniz.
 
 Q : Hangi değişim alanlarının daha önemli olduğunu nasıl bilebilirim?
 
-A : Bu kısmen nesne yönelimli sistemler tasarlama deneyimine ve çalıştığınız alanı bilme konusuna bağlıdır. Diğer
-örnekleri incelemek, kendi tasarımlarınızda değişim alanlarını tanımak için size yardımcı olacaktır.
+A : Bu kısmen OO sistemleri tasarlama deneyimi ve ayrıca çalıştığınız alanı tanıma meselesidir. Diğer örneklere bakmak,
+kendi tasarımlarınızdaki değişim alanlarını belirlemeyi öğrenmenize yardımcı olacaktır.
 
-Not : Bir çelişki gibi görünebilirken, kodun doğrudan değiştirilmeden genişletilmesine izin veren teknikler vardır.
-Kodun genişletilmesi gereken alanlarını seçerken dikkatli olun; HER YERDE Open-Closed Prensibi uygulamak israf, gereksiz
-ve karmaşık, anlaşılması zor kodlara yol açabilir.
+**Not :**Çelişki gibi görünse de, kodun doğrudan değiştirilmeden genişletilmesine izin veren teknikler vardır.
+Genişletilmesi gereken kod alanlarını seçerken dikkatli olun; Open-Closed İlkesini HER YERDE uygulamak israftır,
+gereksizdir ve karmaşık, anlaşılması zor kodlara yol açabilir.
 
 # Meet the Decorator Pattern
 
-Tamam, içeceklerimizi ve eklerin fiyatlandırma düzenini kalıtım ile temsil etmenin iyi çalışmadığını gördük - sınıf
-patlamaları, katı tasarımlar veya baz sınıfa bazı alt sınıflar için uygun olmayan işlevler ekliyoruz.
-
-Bu nedenle, bunun yerine şunu yapacağız: içeceğimizi başlangıçta alacak ve çalışma zamanında eklemelerle "süsleyeceğiz".
-Örneğin, müşteri bir Dark Roast kahve isterse ve ona Mocha ve Whip eklemek isterse, o zaman şunu yapacağız:
+Tamam, içecek artı çeşni fiyatlandırma şemamızı inheritance yoluyla temsil etmenin pek işe yaramadığını gördük - class
+explosion, rigid desing'lar elde ediyoruz veya base class'a bazı subclass'lar için uygun olmayan işlevler ekliyoruz.
+Bunun yerine şöyle yapacağız: bir içecekle başlayacağız ve runtime'da onu çeşnilerle "decorate edeceğiz". Örneğin,
+müşteri Mocha ve Whip ile Dark Roast istiyorsa, o zaman şöyle yapacağız:
 
 1 - Bir DarkRoast object'i alın
 
@@ -162,91 +170,100 @@ Bu nedenle, bunun yerine şunu yapacağız: içeceğimizi başlangıçta alacak 
 
 3 - Bir Whip object'i ile decorate edin
 
-4 - cost() methodunu çağırıp, eklerin maliyetini eklemek için delege etmeye güveneceğiz.
+4 - cost() methodunu çağırın ve çeşni maliyetlerini eklemek için delegasyona güvenin
 
-Peki, bir nesneyi nasıl "decorate ederiz" ve bu sürecin içinde nasıl delege kullanılır? İpucu: decorator nesnelerini "
-wrapper" olarak düşünün. Nasıl çalıştığını görelim...
+Peki ama bir nesneyi nasıl "decorate edersiniz" ve delegasyon bu işe nasıl dahil olur? Bir ipucu: decorator
+nesnelerini "wrapper" olarak düşünün. Bunun nasıl çalıştığını görelim...
 
 # Constructing a drink order with Decorators
 
-1 - Başlangıcı DarkRoast nesnesi ile yaparız.
+1 - DarkRoast nesnemizle başlıyoruz.
 
 ![img_4.png](../Images/DecoratorPattern/img_4.png)
 
-1 - DarkRoast'ın Beverage'dan miras aldığını ve içeceğin maliyetini hesaplayan bir cost() methodu olduğunu unutmayın.
+DarkRoast'un Beverage'dan inheritance aldığını ve içeceğin maliyetini hesaplayan bir cost() methoduna sahip olduğunu
+unutmayın.
 
-2 - Müşteri Mocha istiyor, bu nedenle bir Mocha nesnesi oluştururuz ve onunla DarkRoast'ın etrafına sararız. Bu,
-DarkRoast nesnesini decorate eder ve Mocha'nın ek işlevselliğini içerir.
+2 - Müşteri Mocha istiyor, bu yüzden bir Mocha nesnesi oluşturuyoruz ve onu DarkRoast'un etrafına wrap ediyoruz.
 
 ![img_5.png](../Images/DecoratorPattern/img_5.png)
 
-Mocha nesnesi bir decorator'dır. Türü, decorate ettiği nesnenin türünü yansıtır, bu durumda Beverage türünü yansıtır. ("
-Mirror"le, aynı tür olduğunu kastediyoruz.) Evet, Mocha'nın da bir cost() methodu vardır ve polymorphism sayesinde
-Mocha ile wrap edilmiş herhangi bir Beverage'ı (çünkü Mocha, Beverage'ın bir alt türüdür) bir Beverage gibi
-işleyebiliriz. Bu, tasarımın esnekliğini ve yeniden kullanılabilirliğini artırır ve Mocha'nın içeceği decorate etmesi
-sonucunda bile Beverage olarak işlem görmesini sağlar.
+**Mocha** nesnesi bir decorator'dır. Türü, decorate ettiği nesneyi, bu durumda bir Beverage'i mirror eder. ("Mirror"
+derken, aynı tür olduğunu kastediyoruz..)
 
-3 - Müşteri aynı zamanda Whip de istiyor, bu nedenle bir Whip decorator'ı oluştururuz ve Mocha'yı bu decorator ile wrap
-ederiz. Bu şekilde, Mocha içeceği artık hem Mocha hem de Whip tarafından decorate edilir.
+Dolayısıyla, Mocha'nın da bir cost() methodu vardır ve polymorphism sayesinde Mocha'ya wrapped edilmiş herhangi bir
+Beverage'ı da bir Beverage olarak ele alabiliriz (çünkü Mocha, Beverage'ın bir subtype'ıdır). Bu, tasarımın esnekliğini
+ve yeniden kullanılabilirliğini artırır ve Mocha'nın Beverage'i decorate etmesi sonucunda bile Beverage olarak işlem
+görmesini sağlar.
+
+3 - Müşteri ayrıca Whip istiyor, bu yüzden bir Whip decorator'ı oluşturup Mocha'yı bununla wrap ediyoruz.
 
 ![img_6.png](../Images/DecoratorPattern/img_6.png)
 
-Whip de bir decorator'dır, bu yüzden DarkRoast'ın türünü yansıtır ve bir cost() methodu içerir. Evet, bir DarkRoast
-içeceği Mocha ve Whip ile decorate edildiğinde bile hala bir Beverage'dır ve bu içecekle bir DarkRoast ile
-yapabileceğiniz her şeyi yapabilirsiniz, bu içeceğin cost() methodunu çağırma dahil
+**Whip** bir decorator'dır, bu nedenle DarkRoast'un türünü de yansıtır ve bir cost() methodu içerir.
 
-4 - Şimdi müşteri için maliyeti hesaplamanın zamanı geldi. Bunu yapmak için dıştaki decorator olan Whip üzerinde cost()
-methodunu çağırıyoruz ve Whip, decorate ettiği nesnelerin maliyetini hesaplamak için delege edecektir. Bir maliyet
-alındığında, Whip'in kendi maliyetini ekleyecektir. Bu sayede içeceğin tam maliyetini hesaplamış oluruz.
+Yani, Mocha ve Whip ile sarılmış bir DarkRoast hala bir Beverage'dir ve onunla, cost() methodunu çağırmak da dahil olmak
+üzere bir DarkRoast ile yapabileceğimiz her şeyi yapabiliriz.
+
+4 - Şimdi sıra müşteri için maliyeti hesaplamaya geldi. Bunu, en dıştaki decorator olan Whip üzerinde cost() methodunu
+çağırarak yapıyoruz ve Whip, maliyeti hesaplama işlemini, decorate ettiği nesnelere devredecek. Bir maliyet elde
+ettiğinde, Whip'in maliyetini ekleyecektir.
 
 ![img_7.png](../Images/DecoratorPattern/img_7.png)
 
+    1 - İlk olarak, en dıştaki decorator olan Whip üzerinde cost() methodunu çağırıyoruz.
+    2 - Whip, Mocha üzerinde cost() methodunu çağırır.
+    3 - Mocha, DarkRoast üzerinde cost() methodu çağırır.
+    4 - DarkRoast 99 cent'e mal oluyor.
+    5 - Mocha, DarkRoast'tan gelen sonuca kendi maliyeti olan 20 cent'i ekler ve yeni toplam olan 1,19 doları döndürür.
+    6 - Whip, Mocha'dan gelen sonuca kendi toplamı olan 10 cent'i ekler ve nihai sonucu verir - 1,29 $.
+
 # Okay, here’s what we know so far...
 
-* Decorators, decorate ettikleri nesnelerle aynı üst türe sahiptir.
-* Bir nesneyi wrap etmek için bir veya daha fazla decorator kullanabiliriz.
-* Decorator, decorate ettiği nesne ile aynı üst türe sahip olduğu için, wrap edilmiş nesnenin yerine decorated edilmiş
-  bir nesneyi geçebiliriz.
-* Decorator, kendi Behavior'ını ekler ve geri kalan işi decorate ettiği nesneye delege eder.
-* Nesneler herhangi bir zamanda decorate edilebilir, bu nedenle çalışma zamanında istediğimiz kadar çok decorator ile
-  nesneleri dinamik olarak decorate edebiliriz.
+* Decorator'lar, decorate ettikleri nesnelerle aynı supertype'a sahiptir.
+* Bir nesneyi wrap etmek için bir veya daha fazla decorator kullanabilirsiniz.
+* Decorator'ın decorate ettiği nesneyle aynı supertype'a sahip olduğu göz önüne alındığında, orijinal (wrapped) nesnenin
+  yerine decorate edilmiş bir nesneyi aktarabiliriz.
+* Decorator, işin geri kalanını yapması için decorate ettiği nesneye yetki vermeden önce ve/veya sonra kendi
+  behavior'ını ekler.
+* Nesneler herhangi bir zamanda decorate edilebilir, bu nedenle nesneleri runtime'da istediğimiz kadar decorator ile
+  dinamik olarak decorate edebiliriz.
 
-Şimdi bu konunun gerçekten nasıl çalıştığını anlamak için Decorator Deseni tanımına bakarak ve biraz kod yazarak devam
-edelim.
+Şimdi Decorator Pattern tanımına bakarak ve biraz kod yazarak tüm bunların gerçekten nasıl çalıştığını görelim.
 
 # The Decorator Pattern defined
 
-Decorator Deseni, bir nesneye dinamik olarak ek sorumluluklar ekler. Decorator'lar, işlevselliği genişletmek için alt
-sınıf oluşturmanın yerine kullanılabilen esnek bir alternatif sunar. Bu tasarım deseni, nesneleri wrap ederek ve daha
-sonra bu wrapper'ları kullanarak bir nesnenin Behavior'ını dinamik olarak genişletmeye olanak tanır. Bu, yazılımın
-open-closed ilkesine uyar ve nesne yönelimli tasarımın esnekliğini artırır.
+İlk olarak Decorator Pattern açıklamasına bir göz atalım:
 
-Bu, Decorator Deseni'nin rolünü tanımlarken, deseni kendi implemente etmemiza nasıl uygulayacağımız hakkında çok fazla
-bilgi
-vermez. Şimdi biraz daha açıklayıcı olan sınıf diyagramına bir göz atalım (bir sonraki sayfada aynı yapının Beverage'a
-uygulandığını göstereceğiz).
+Decorator Pattern, bir nesneye dinamik olarak ek sorumluluklar ekler. Decorator'lar, işlevselliği genişletmek için
+subclassing'e kolay bir alternatif sağlar.
+
+Bu, Decorator Kalıbının rolünü açıklasa da, kalıbı kendi uygulamamıza nasıl implement edeceğimiz konusunda bize çok
+fazla fikir vermiyor. Biraz daha açıklayıcı olan sınıf diyagramına bir göz atalım.
 
 ![img_8.png](../Images/DecoratorPattern/img_8.png)
 
-* ConcreteComponent, dinamik olarak yeni Behavior ekleyeceğimiz nesnedir. Bu, Component'i extend eder
-* Her component tek başına kullanılabilir veya bir decorator tarafından wrap edilebilir.
-* Her decorator, bir component'e HAS-A ilişkisine sahip olur (wrap eder), yani decorator'ın bir component'e referansı
-  tutan bir instance variable'i vardır.
-* Decorator, decorate edecekleri Component ile aynı interface veya abstract sınıfı implement eder
-* Decorators, Component'in state'ini extend edebilir
-* ConcreteDecorator, decorate ettiği şey için bir instance variable bulundurur (Decorator'ın wrap ettiği Component)
-* Decorators yeni methodlar ekleyebilir; ancak genellikle yeni Behavior, component'in mevcut bir methodunun öncesinde
-  veya sonrasında hesaplama yaparak eklenir
+* **ConcreteComponent**, dinamik olarak yeni Behavior ekleyeceğimiz nesnedir. Component'i extend eder
+
+* Her **Component** kendi başına kullanılabilir veya bir decorator tarafından wrap edilebilir
+
+* Her **Decorator** bir Component'e HAS-A ilişkisine sahip olur (wrap eder), bu da Decorator'ın bir Component'e referans
+  tutan bir instance variable'a sahip olduğu anlamına gelir. Decorator'lar, decorate edecekleri Component ile aynı
+  interface'i veya abstract sınıfı implement ederler. Decorator'lar Component'in state'ini extend edebilirler.
+  Decorator'lar yeni methodlar ekleyebilir; ancak yeni behavior genellikle Component'de ki mevcut bir methoddan önce
+  veya sonra hesaplama yapılarak eklenir.
+
+* **ConcreteDecorator**, decorate ettiği şey (Decorator'ın wrap ettiği Component) için bir instance variable'a sahiptir.
 
 # Decorating our Beverages
 
-Şimdi Starbuzz Beverages'larını bu framework'e dahil edelim..
+Tamam, Starbuzz içeceklerimizi bu Framework'e yerleştirelim...
 
 ![img_9.png](../Images/DecoratorPattern/img_9.png)
 
-* Beverage, abstract component sınıfımız olarak hareket eder.
+* **Beverage** abstract Component sınıfımız olarak işlev görür.
 
-* Dört adet concrete component, her biri bir kahve türü için.
+* Her kahve türü için bir tane olmak üzere dört concrete component
 
 1 - HouseBlend
 
@@ -256,8 +273,8 @@ uygulandığını göstereceğiz).
 
 4 - Decaf
 
-* İşte condiment decorator'larımız; fark edeceksiniz ki, sadece cost() değil, aynı zamanda getDescription() metodunu da
-  implement etmeleri gerekiyor. Bunun nedenini birazdan göreceğiz..."
+* Ve işte çeşni decorator'ları; sadece cost()'u değil getDescription()'ı da implement etmeleri gerektiğine dikkat edin.
+  Nedenini birazdan göreceğiz...
 
 1 - Milk
 
@@ -269,10 +286,10 @@ uygulandığını göstereceğiz).
 
 # Cubicle Conversation
 
-Inheritance ile Composition Arasındaki Karışıklık
+Inheritance ve Comnposition konusunda bazı karışıklıklar
 
-Tamam, biraz kafam karıştı... Sanıyordum ki bu desende inheritance kullanmayacağız, bunun yerine composition kullanmayı
-düşünüyorduk
+Tamam, biraz kafam karıştı... Bu modelde inheritance kullanmayacağımızı, bunun yerine Composition'a güveneceğimizi
+sanıyordum.
 
 --**DIALOGS**--
 
@@ -280,50 +297,54 @@ S :  Ne demek istiyorsun?
 
 M : Sınıf diyagramına bakın. CondimentDecorator, Beverage sınıfını extend ediyor. Bu inheritance, değil mi?
 
-S : Doğru. Sanırım buradaki önemli nokta, decorator'lerin decorate edecekleri nesnelerle aynı tipe sahip olmalarının
-önemli olmasıdır. Burada tür eşleşmesini sağlamak için mirası kullanıyoruz, ancak Behavior elde etmek için miras
-kullanmıyoruz.
+S : Doğru. Bence asıl önemli olan nokta, decorator'ları decorate edecekleri nesnelerle aynı type'a sahip olmalarının
+hayati önem taşımasıdır. Yani burada type matching sağlamak için inheritance kullanıyoruz, ancak behavior elde etmek
+için inheritance kullanmıyoruz.
 
-M : Anladım, decorator'ların componentleri wrap ettiği ve component'in yerine geçmesi gerektiği için aynı "interface" e
-sahip olmaları gerektiğini görebiliyorsunuz. Ancak Behavior nerede devreye giriyor?
+M : Tamam, decorator'ların wrap ettikleri Component'ler ile aynı "interface'e" nasıl ihtiyaç duyduklarını görebiliyorum
+çünkü Component'in yerine geçmeleri gerekiyor. Ama behavior nerede devreye giriyor?
 
-S : Decorator'i bir component'le compose ettiğimiz de, yeni Behavior ekliyoruz. Yeni Behavior'ı bir üst sınıftan miras
-almak yerine nesneleri composition ile elde ediyoruz.
+S : Bir Decorator ile bir Component'i compose ettiğimizde, yeni bir behavior eklemiş oluruz. Yeni behavior'u bir
+superclass'dan inheritance alarak değil, nesneleri composing ederek ediniriz.
 
-M : Anladım, abstract sınıf olan Beverage'i alt sınıflamak, doğru tipe sahip olmak için yapılıyor, Behavior'ını miras
-almak için değil. Davranış, decorator'ların temel componentler'i ve diğer decorator'lar ile composition yoluyla geliyor.
+M : Tamam, Beverage abstract sınıfını, behavior'unu inheritance almak için değil, doğru type'a sahip olmak için
+subclass'lara ayırıyoruz. Behavior, decorator'ların base component'lerle ve diğer decorator'lar ile composition'ı
+yoluyla gelir.
 
 S : Bu doğru
 
-M : Anladım. Nesne composition'ı kullandığınız için, hangi condiments'ler ile beverage'ları nasıl karıştıracağınız
-konusunda çok daha fazla esneklik elde edersiniz. Çok akıllıca!
+M : Ve nesne composition'ı kullandığımız için, çeşnileri ve içecekleri nasıl karıştırıp eşleştireceğimiz konusunda çok
+daha fazla esneklik elde ediyoruz.
 
-S : Evet, mirasa dayandığımızda behavior'ımız yalnızca derleme zamanında statik olarak belirlenebilir. Başka bir
-deyişle, yalnızca üst sınıfın bize verdiği behavior'u veya üzerine yazdığımız behavior'u elde ederiz. Composition
-kullanarak ise decorators'ları dilediğimiz gibi karıştırabiliriz... çalışma zamanında
+S : Evet, inheritance'a güveniyorsak, behavior'ımız yalnızca compile time'da statik olarak belirlenebilir. Başka bir
+deyişle, yalnızca superclass'ın bize verdiği veya bizim override ettiğimiz behavior'u elde ederiz. Composition ile,
+decorator'ları runtime'da istediğimiz şekilde karıştırabilir ve eşleştirebiliriz.
 
-M : Anladığım kadarıyla, yeni behavior eklemek için herhangi bir zaman yeni decorator'lar implement edebiliriz. Eğer
-mirasa dayanıyorsak, yeni behavior istediğimizde mevcut kodu her zaman değiştirmemiz gerekebilirdi. Bu nedenle
-composition kullanarak, yeni behaviorları eklemek daha esnek ve sürdürülebilir bir yaklaşım sağlar.
+M : Ve anladığım kadarıyla, yeni behavior'lar eklemek için istediğimiz zaman yeni decorator'lar implement edebiliriz.
+Inheritance'a güveniyor olsaydık, yeni behavior istediğimiz her seferinde mevcut kodu değiştirmemiz gerekirdi
 
 S : Kesinlikle
 
-M : Neden sadece component'in türünü miras almak için abstract bir sınıf yerine Beverage sınıfı için bir interface
-kullanmadık
+M : Eğer inheritance almamız gereken tek şey component'in type'ı ise, neden Beverage sınıfı için abstract
+bir sınıf yerine bir interface kullanmadık?
 
-S : Elbette, kodu aldığınızda Starbuzz zaten bir abstract Beverage sınıfına sahipti. Geleneksel olarak, Decorator Deseni
-bir abstract component belirtir, ancak Java'da açıkça bir interface kullanabilirdik. Ancak mevcut kodu değiştirmekten
-kaçınmaya her zaman çalışırız, bu yüzden abstract sınıf işe yarıyorsa onu "fix etmeye" gerek yoktur.
+S : Hatırlayın, bu kodu aldığımızda Starbuzz zaten abstract bir Beverage sınıfına sahipti. Geleneksel olarak Decorator
+Modeli abstract bir component belirtir, ancak Java'da tabii ki bir interface kullanabiliriz. Ancak her zaman mevcut kodu
+değiştirmekten kaçınmaya çalışırız, bu nedenle abstract sınıf gayet iyi çalışacaksa bunu "düzeltmeyin".
 
 # Writing the Starbuzz code
 
-Şimdi bu tasarımı gerçek bir kod haline getirme zamanı geldi. İlk olarak, Starbuzz'ın orijinal tasarımından Beverage
-sınıfıyla başlayalım. Bir göz atalım:
+Bu tasarımı gerçek bir koda dönüştürmenin zamanı geldi.
+
+Starbuzz'ın orijinal tasarımından değişmesine gerek olmayan Beverage sınıfı ile başlayalım. Bir göz atalım:
 
 ```
+/* Beverage, getDescription() ve cost() methodlarını içeren abstract bir sınıftır */
 public abstract class Beverage {
     String description = "unknown beverage";
 
+    /* getDescription() bizim için zaten implement ediliyor, ancak subclass'larda cost() methodunu implement etmemiz 
+    gerekiyor */
     public String getDescription() {
         return description;
     }
@@ -332,14 +353,14 @@ public abstract class Beverage {
 }
 ```
 
-Beverage, iki method içeren abstract bir sınıftır: getDescription() ve cost(). getDescription() methodu zaten Beverage
-sınıfında implement edilmiş görünüyor. Ancak alt sınıflarda cost() methodunu implement etmemiz gerekecek.
-
-Beverage sınıfı zaten yeterince basit görünüyor. Şimdi Condiments (Decorator) abstract sınıfını da implemente edelim
+Beverage yeterince basittir. Condiment (Decorator) için de abstract sınıfı implements edelim:
 
 ```
+/* İlk olarak, bir Beverage ile değiştirilebilir olmamız gerekiyor, bu yüzden Beverage sınıfını extend ediyoruz */
 public abstract class CondimentDecorator extends Beverage{
 
+    /* Ayrıca, Condiment decorator'ların hepsinin getDescription() methodunu yeniden implemente etmesini gerektireceğiz. 
+    Nedenini birazdan göreceğiz... */
     public abstract String getDescription();
     
     @Override
@@ -350,43 +371,35 @@ public abstract class CondimentDecorator extends Beverage{
 }
 ```
 
-İlk olarak, Beverage ile yer değiştirilebilir (interchangeable) olmamız gerekiyor, bu nedenle Beverage sınıfını extends
-ediyoruz.
-
-Ayrıca, tüm condiment (decorator) sınıflarının getDescription() methodunu reimplement etmelerini gerektireceğiz. Bir
-saniye sonra nedenini göreceğiz.
-
 # Coding beverages
 
-Temel sınıflarımızı hallettikten sonra, bazı içecekleri implement etmeye başlayalım. Espresso ile başlayacağız.
-Unutmayın, belirli bir içeceğin description'ini ayarlamamız ve ayrıca cost() methodunu implemente etmemiz gerekiyor.
+Base class'larımızı aradan çıkardığımıza göre, şimdi bazı Beverage'leri implement edelim. Espresso ile başlayacağız.
+Unutmayın, belirli bir Beverage için bir Description set etmemiz ve ayrıca cost() methodunu implement etmemiz gerekiyor.
 
 ```
+/* Bu bir Beverage olduğu için önce Beverage sınıfını extends ediyoruz */
 public class Espresso extends Beverage{
     
+    /* Description ile ilgilenmek için, bunu sınıfın constructor'ında ayarlarız. description instance variable'inin 
+    Beverage'dan ineritance alındığını unutmayın */
     public Espresso(){
         description = "Espresso";
     }
     
+    /* Son olarak, bir Espresso'nun maliyetini hesaplamamız gerekiyor. Bu sınıfta Condiment ekleme konusunda 
+    endişelenmemize gerek yok, sadece bir Espresso'nun fiyatını döndürmemiz gerekiyor: 1,99 $. */
     @Override
     public double cost() {
         return 1.99;
-    }
-    
+    } 
 }
 ```
-
-İlk olarak, Beverage sınıfını extends ediyoruz.
-
-Description'i halletmek için, bunu sınıfın constructor'ında ayarlarız. Description instance variable'inin Beverage
-sınıfından miras aldığını unutmayın.
-
-Son olarak, Espresso'nun maliyetini hesaplamamız gerekiyor. Bu sınıfta içeceklere katkı maddeleri eklememize gerek yok,
-sadece bir Espresso'nun fiyatını döndürmemiz gerekiyor: 1.9 dolar.
 
 Şimdi HouseBlend içeceğini ekliyoruz;
 
 ```
+/* Tamam, işte başka bir içecek. Tek yapmamız gereken uygun Description olan "House Blend Coffee "yi set etmek ve 
+ardından doğru maliyeti döndürmek: 89¢. */
 public class HouseBlend extends Beverage{
 
     public HouseBlend() {
@@ -434,22 +447,35 @@ public class Decaf extends Beverage{
 
 # Coding condiments
 
-Eğer Decorator Deseni sınıf diyagramına geri dönüyorsanız, şimdi abstract Component'i (Beverage) yazdık, concrete
-component'lerimizi (HouseBlend, Decaf, DarkRoast, Espresso) yazdık ve abstract Decorator'ımızı (CondimentDecorator)
-oluşturduk. Şimdi concrete decoratorları implemente etmenin zamanı geldi. İşte Mocha örneği:
+Decorator Pattern sınıf diyagramına geri dönüp bakarsanız, artık abstract component'imizi (Beverage) yazdığımızı,
+concrete component'lerimizi (HouseBlend, DarkRoast, Decaf) ve abstract decorator'ımızı (CondimentDecorator) yazdığımızı
+göreceksiniz. Şimdi sıra concrete decorator'ları implement etmeye geldi. İşte Mocha:
 
 ```
+/* Mocha bir decorator'dır, bu yüzden CondimentDecorator'ı extends ediyoruz. Unutmayın, CondimentDecorator Beverage'i 
+extends eder */
 public class Mocha extends CondimentDecorator{
+
+    /* Mocha'yı Beverage kullanarak bir referans ile instantiate edeceğiz:
+    1 - Wrap ettiğimiz Beverage'i tutmak için bir instance variable
+    2 - Bu instance variable'i wrap ettiğimiz nesneye set etmenin bir yolu. Burada, wrap ettiğimiz Beverage'i 
+    decorator'ın constructor'ına aktaracağız. */
     Beverage beverage;
 
     public Mocha(Beverage beverage) {
         this.beverage = beverage;
     }
+    
+    /* Description'ın yalnızca Beverage'i - örneğin "Dark Roast" - içermesini değil, aynı zamanda içeceği decorate eden 
+    her bir öğeyi de içermesini istiyoruz, örneğin "Dark Roast, Mocha". Bu nedenle, önce description'i almak için 
+    decorate ettiğimiz nesneye yetki atıyoruz, ardından bu description'a ", Mocha" ekliyoruz. */
     @Override
     public String getDescription() {
         return beverage.getDescription() + ", Mocha";
     }
 
+    /* Şimdi Mocha ile Beverage'imizin maliyetini hesaplamamız gerekiyor. İlk olarak, maliyeti hesaplayabilmesi için 
+    çağrıyı decorated ettiğimiz nesneye delege ediyoruz; ardından Mocha'nın maliyetini sonuca ekliyoruz */
     @Override
     public double cost() {
         return beverage.cost() + .20;
@@ -457,24 +483,7 @@ public class Mocha extends CondimentDecorator{
 }
 ```
 
-Mocha bir decorator olduğundan, CondimentDecorator sınıfını extends ediyoruz. Hatırlatmak gerekirse, CondimentDecorator
-sınıfı Beverage sınıfını extends ediyor.
-
-Mocha'yı bir Beverage referansı ile instantiate edeceğiz:
-
-1 - Bir Beverage'i wrap etmek için bir instance variable tutmak.
-
-2 - Bu instance variable'ini wrap ettiğimiz nesneye ayarlamak için bir yol. Burada, wrap ettiğimiz Beverage'i Decorator'
-in constructor'ına ileteceğiz.
-
-Description'ın sadece Beverage'i değil, Beverage'i decorate eden her öğeyi - örneğin, "Dark Roast" - içermesini
-istiyoruz, yani "Dark Roast, Mocha" gibi. İlk olarak, decorate ettiğimiz nesneye kendi description'ınını almak için
-başvuruyoruz, ardından bu description sonuna ", Mocha" ekliyoruz.
-
-Şimdi Mocha Beverage'inin maliyetini hesaplamamız gerekiyor. İlk olarak, çağrıyı decorate ettiğimiz nesneye iletiyoruz,
-böylece maliyeti hesaplayabilir; sonra, Mocha'nın maliyetini sonuca ekliyoruz.
-
-Soy içinde class'ımızı yazalım;
+Soy Condiments içinde class'ımızı yazalım;
 
 ```
 public class Soy extends CondimentDecorator{
@@ -497,7 +506,7 @@ public class Soy extends CondimentDecorator{
 }
 ```
 
-Whip içinde class'ımızı yaratalım;
+Whip Condiments içinde class'ımızı yaratalım;
 
 ```
 public class Whip extends CondimentDecorator{
@@ -522,132 +531,150 @@ public class Whip extends CondimentDecorator{
 
 # Serving some coffees
 
-Tebrikler! Şimdi geriye yaslanma, birkaç kahve sipariş etme ve Decorator Deseni ile oluşturduğunuz esnek tasarımı
-hayranlıkla izleme zamanı.
+Tebrikler. Şimdi arkanıza yaslanıp birkaç kahve sipariş etme ve Decorator Deseni ile yarattığınız esnek tasarıma hayran
+olma zamanı.
 
 ```
 public class StarbuzzCafe {
     public static void main(String[] args) {
         
+        /* Condiment içermeyen bir espresso sipariş edin description ve cost'u yazdırın */
         Beverage espresso = new Espresso();
         System.out.println(espresso.getDescription() + " " + espresso.cost());
 
+        /* DarkRoast object'i create edin */
         Beverage darkRoast = new DarkRoast();
+        
+        /* Bir Mocha ile wrap edin */
         darkRoast = new Mocha(darkRoast);
+        
+        /* Bir Mocha ile daha wrap edin */
         darkRoast = new Mocha(darkRoast);
+        
+        /* Bir Whip ile wrap edin*/
         darkRoast = new Whip(darkRoast);
+        
+        /* Desciption ve cost'u yazdırın */
         System.out.println(darkRoast.getDescription() + " " + darkRoast.cost());
 
+        /* Son olarak, bize Soya, Mocha ve Whip ile bir HouseBlend verin */
         Beverage houseBlend = new HouseBlend();
+        houseBlend = new Soy(houseBlend);
         houseBlend = new Mocha(houseBlend);
         houseBlend = new Whip(houseBlend);
-        houseBlend = new Soy(houseBlend);
+        
+        /* Desciption ve cost'u yazdırın */
         System.out.println(houseBlend.getDescription() + " " + houseBlend.cost());
         
     }
 }
 ```
 
-Espresso siparişi veriyoruz, condiment olmadan description ve cost'u yazdırıyoruz
-
-DarkRoast siparişi veriyoruz, 2 defa Mocha, 1 defa da Whip ile wrap ediyoruz. Description ve cost yazdırıyoruz
-
-Son olarak HouseBlend sipariş ediyoruz, Mocha, Whip ve Soy ile wrap edip description ve cost yazdırıyoruz
+Factory Pattern'i ve Builder Pattern'i ele aldığımızda decorate edilmiş nesneler oluşturmanın çok daha iyi bir yolunu
+göreceğiz.
 
 ![img_10.png](../Images/DecoratorPattern/img_10.png)
 
 --**DIALOGS**--
 
-Q : Biraz endişeliyim, belirli bir concrete component - mesela, HouseBlend - için test yapabilen bir kod hakkında. Ve
-belirli bir şey yapabilen, mesela bir indirim uygulayabilen bir kod. HouseBlend'i decorator'lar ile wrap ettikten sonra,
-artık bu işe yaramayacak
+Q : Belirli bir concrete component'i (örneğin HouseBlend) test edebilecek ve indirim yapmak gibi bir şey yapabilecek kod
+konusunda biraz endişeliyim. HouseBlend'i decorator'lar ile wrap ettikten sonra, bu artık işe yaramayacak.
 
-A : Tamamen doğru. Eğer concrete component'in türüne dayalı kodlara sahipseniz, decorator'ler bu kodları bozabilir.
-Sadece abstract component türüne karşı kod yazarsanız, decorator'ların kullanımı kodunuz için şeffaf kalır. Ancak
-concrete componentlere karşı kod yazmaya başladığınızda, uygulama tasarımınızı ve decorator'ların kullanımını gözden
-geçirmeniz gerekebilir.
+A : Bu kesinlikle doğru. Concrete Component'in type'ına dayanan bir kodunuz varsa, decorator'lar bu kodu bozacaktır.
+Yalnızca abstract component type'ına karşı kod yazdığınız sürece, decorator'ların kullanımı kodunuz için şeffaf
+kalacaktır. Ancak, concrete component'lere karşı kod yazmaya başladığınızda, uygulama tasarımınızı ve decorator
+kullanımınızı yeniden düşünmek isteyeceksiniz.
 
-Q : Bir Beverage'in client'inin, en dış decorator olmayan bir decorator'a sahip olması kolay olmaz mı? Mesela, bir
-DarkRoast üzerine Mocha, Soy ve Whip eklediysem, Mocha yerine Soy referansına sahip olan bir kod yazmak kolay olabilir,
-bu da siparişte Whip'i içermez anlamına gelir.
+Q : Bir Beverage Client'inin en dıştaki decorator olmayan bir decorator'a sahip olması kolay olmaz mıydı? Örneğin,
+Mocha, Soy ve Whip içeren bir DarkRoast'ım olsaydı, bir şekilde Whip yerine Soy'a referans veren bir kod yazmak kolay
+olurdu, bu da Whip'i sıraya dahil etmeyeceği anlamına gelirdi.
 
-A : Kesinlikle, Decorator Tasarım Deseni ile daha fazla nesneyi yönetmeniz gerektiğini savunabilirsiniz ve bu nedenle
-kod hatalarının, önerdiğiniz türde sorunları ortaya çıkarma olasılığının arttığını söyleyebilirsiniz. Ancak,
-decorator'lar genellikle Factory ve Builder gibi diğer tasarım desenleri kullanılarak oluşturulur. Bu desenleri
-kapsadıktan sonra, concrete component'in decorator'ı ile birlikte oluşturulmasının "well encapsulated" olduğunu ve bu
-tür sorunlara yol açmadığını göreceksiniz.
+A : Decorator Kalıbı ile daha fazla nesneyi yönetmeniz gerektiğini ve bu nedenle kodlama hatalarının önerdiğiniz türden
+sorunlara yol açma olasılığının arttığını kesinlikle iddia edebilirsiniz. Ancak decorator'lar genellikle Factory ve
+Builder gibi diğer kalıplar kullanılarak oluşturulur. Bu kalıpları ele aldığımızda, concrete component'in decorator'ı
+ile birlikte oluşturulmasının "well encapsulated (iyi kapsüllenmiş)" olduğunu ve bu tür sorunlara yol açmadığını
+göreceksiniz.
 
-Q : Decorator'lar, chain halinde uygulandığında genellikle birbirlerini tanımazlar. Ancak, getDecription() gibi bir
-methodu özelleştirmek ve decoration'ların sırasını değiştirmek istiyorsanız, bu durumda en dış decorator'in diğer
-decorator'leri bilmesi gerekebilir. Bu, belirli bir işlevselliği elde etmek için gerekebilecek özel bir tasarım
-gereksinimidir.
+Q : Decorator'lar chain'deki diğer decoration'lar hakkında bilgi sahibi olabilir mi? Diyelim ki getDecription()
+methodumun "Mocha, Whip, Mocha" yerine "Whip, Double Mocha" yazdırmasını istedim? Bu, en dıştaki decorator'ımın
+wrap ettiği tüm decorator'ları bilmesini gerektirir.
 
-A : Decorators, wrap ettikleri nesneye behavior eklemek için tasarlanmışlardır. Decorator chain içinde birden fazla
-katmana bakmanız gerektiğinde, decorator'ın asıl amacının ötesine gitmeye başlıyorsunuz demektir. Bununla birlikte,
-böyle şeyler mümkündür. Düşünün ki son description'i işleyebilen ve "Mocha, Whip, Mocha" yerine "Whip, Double Mocha"
-olarak yazdırabilen bir CondimentPrettyPrint decoratorü olsun. Bu tür bir işlevselliği elde etmek için, getDecription()
-bu işi kolaylaştırmak için bir description listesi (ArrayList) döndürebilir.
+A : Decorator'ler, wrap ettikleri nesneye behavior eklemek içindir. Decorator chain'inde birden fazla katmana göz
+atmanız gerektiğinde, Decorator'ü gerçek amacının ötesine itmeye başlarsınız. Bununla birlikte, bu tür şeyler mümkündür.
+Son açıklamayı ayrıştıran ve "Mocha, Whip, Mocha" ifadesini "Whip, Double Mocha" olarak yazdırabilen bir
+CondimentPrettyPrint Decorator'ü düşünün. Bunu kolaylaştırmak için getDecription() methodunun bir ArrayList of
+descriptions döndürebileceğini unutmayın.
 
 # Real World Decorators: Java I/O
 
-Java.io paketindeki çok sayıda sınıf... sizi sıkabilir. İlk (ve ikinci ve üçüncü) kez bu API'ye baktığınızda "vay"
-dediyseniz, yalnız hissetmeyin. Ancak Artık Decorator Tasarım Deseni'ni bildiğinize göre, java.io paketinin büyük ölçüde
-Decorator üzerine kurulu olduğunu anlamalısınız. İşte bir dosyadan veri okuma işlevselliği eklemek için decorator'ları
-kullanan tipik bir nesne kümesi:
+java.io paketindeki çok sayıda sınıf... bunaltıcıdır. Bu API'ye ilk (ve ikinci ve üçüncü) kez baktığınızda "vay be"
+dediyseniz kendinizi yalnız hissetmeyin. Ancak artık Decorator Pattern'i bildiğinize göre, java.io paketi büyük ölçüde
+Decorator'a dayandığı için I/O sınıfları daha anlamlı olacaktır. İşte bir file'den veri okumaya işlevsellik eklemek
+için Decorator'ları kullanan tipik bir nesne kümesi:
 
 ![img_11.png](../Images/DecoratorPattern/img_11.png)
 
-FileInputStream, decorate edilen component'in kendisidir. Java I/O kütüphanesi, FileInputStream,
-StringBufferInputStream, ByteArrayInputStream gibi birkaç component'i içeren bir dizi component sağlar. Tüm bunlar,
-baytları okumak için temel bir component sunar.
+**FileInputStream : **, decorated edilen Component'dir Java I/O kütüphanesi, FileInputStream, StringBufferInputStream,
+ByteArrayInputStream ve diğerleri dahil olmak üzere çeşitli Component'ler sağlar. Tüm bunlar bize byte'ları
+okuyabileceğimiz base bir component sağlar.
 
-BufferedInputStream, concrete bir decorator'dır. BufferedInputStream, iki şekilde behavior ekler: performansı artırmak
-için input'u buffer'a alır ve character-based input'u satır satır okumak için yeni bir method olan readLine() ile
-interface'i extend eder
+**BufferedInputStream : ** concrete bir Decorator'dır. BufferedInputStream iki şekilde behavior ekler: performansı
+artırmak için input'u buffer'a alır ve ayrıca character based inputu her seferinde bir satır okumak için yeni bir
+readLine() methodu ile interface'i güçlendirir.
 
-LineNumberInputStream, aynı zamanda concrete bir decorator'dır. Bu sınıf, verileri okurken satır numaralarını sayabilme
-yeteneği ekler.
+**LineNumberInputStream : ** de concrete bir Decorator'dır. Verileri okurken satır numaralarını sayma yeteneği ekler.
 
-BufferedInputStream ve LineNumberInputStream her ikisi de FilterInputStream sınıfından extends edilir.
-FilterInputStream, abstract decorator sınıf olarak işlev görür
+BufferedInputStream ve LineNumberInputStream'in her ikisi de Abscract Decorator sınıf olarak görev yapan
+FilterInputStream'i extend ederler.
 
 # Decorating the java.io classes
 
 ![img_12.png](../Images/DecoratorPattern/img_12.png)
 
-FilterInputStream abstract decorator'dır
+**InputStream :** İşte abstract component'imiz
 
-Bu InputStream sınıfları, decorator'lar ile wrap edeceğimiz concrete component'ler olarak hareket ederler.
-Göstermediğimiz birkaç tane daha var, örneğin ObjectInputStream gibi.
+**FilterInputStream :** abstract bir decorator'dır
 
 ![img_13.png](../Images/DecoratorPattern/img_13.png)
 
-Concrete decorator'larımız:
+Bu InputStream'ler, decorator'lar ile wrap edeceğimiz concrete component'ler olarak işlev görür. ObjectInputStream gibi
+göstermediğimiz birkaç tane daha var.
 
 ![img_14.png](../Images/DecoratorPattern/img_14.png)
 
-Görünüşe göre bu, Starbuzz tasarımından çok farklı değil. Şimdi, java.io API belgelerini inceleyebilir ve çeşitli input
-stream'ler üzerine decorator'lar oluşturabilirsiniz.
+Ve son olarak, işte tüm concrete decorator'larımız
 
-Aynı tasarımın output stream'leri için de geçerli olduğunu göreceksiniz. Ve muhtemelen reader/writer stream'leri (
-character-based veriler için) stream sınıflarının tasarımını yakından takip ediyor (bazı farklılıklar ve tutarsızlıklar
-olabilir, ancak ne olduğunu anlamak için yeterince yakın).
+Bunun Starbuzz tasarımından çok da farklı olmadığını görebilirsiniz. Artık java.io API dokümanlarına göz atmak ve
+çeşitli input stream'leri üzerinde decorator'lar oluşturmak için iyi bir konumda olmalısınız.
 
-Ancak, Java I/O aynı zamanda Decorator Deseni'nin dezavantajlarından birini de gösteriyor: bu deseni kullanan tasarımlar
-genellikle geliştiriciyi bunaltabilecek birçok küçük sınıfa yol açar. Ancak şimdi Decorator'ın nasıl çalıştığını
-bildiğiniz için, perspektifi koruyabilir ve başkasının Decorator ağırlıklı API'sini kullanırken, sınıflarının nasıl
-düzenlendiğini anlayarak istediğiniz behavior'u elde etmek için wrapping kullanabilirsiniz.
+Ve output stream'lerinin de aynı tasarıma sahip olduğunu göreceksiniz. Ve muhtemelen Reader/Writer stream'lerinin (
+character-based data'lar için) stream sınıflarının tasarımını yakından yansıttığını (birkaç farklılık ve tutarsızlıkla
+birlikte, ancak neler olup bittiğini anlamak için yeterince yakın) zaten bulmuşsunuzdur.
+
+Ancak Java I/O, Decorator Deseninin dezavantajlarından birine de dikkat çeker: Bu deseni kullanan tasarımlar genellikle
+Decorator tabanlı API'yi kullanmaya çalışan bir geliştirici için bunaltıcı olabilecek çok sayıda küçük sınıfla
+sonuçlanır. Ancak artık Decorator'ın nasıl çalıştığını bildiğinize göre, işleri perspektif içinde tutabilir ve başka
+birinin Decorator ağırlıklı API'sini kullanırken, sınıflarının nasıl organize edildiğini inceleyebilir, böylece
+istediğiniz behavior'u elde etmek için wrapper'ları kolayca kullanabilirsiniz.
 
 # Writing your own Java I/O Decorator
 
-Şuna ne dersiniz: input stream'de ki tüm büyük harfleri küçük harfe dönüştüren bir decorator yazın.
+Tamam, Decorator Desenini biliyorsunuz, I/O sınıf diyagramını gördünüz. Kendi input decorator'ınızı yazmaya hazır
+olmalısınız
+
+Şuna ne dersiniz: InputStream'de ki tüm büyük harfleri küçük harfe dönüştüren bir decorator yazın. Başka bir deyişle, "
+Decorator Kalıbını biliyorum, bu nedenle HÜKÜMDARIM!" yazısını okursak, decorator'ınız bunu "decorator kalıbını
+biliyorum, bu nedenle hükümdarım!" şekline dönüştürür.
 
 ```
+/* İlk olarak, tüm InputStream'ler için abstract decorator olan FilterInputStream'i extends edin */
 public class LowerCaseInputStream extends FilterInputStream {
     protected LowerCaseInputStream(InputStream in) {
         super(in);
     }
 
+    /* Şimdi iki read() methodu implement etmemiz gerekiyor. Bunlar bir byte (veya byte array'i) alır ve her byte'ı 
+    (bir karakteri temsil eden) büyük harf ise küçük harfe dönüştürür */
     @Override
     public int read() throws IOException {
         int c = super.read();
@@ -664,9 +691,6 @@ public class LowerCaseInputStream extends FilterInputStream {
 }
 ```
 
-Şimdi iki read methodu implement etmemiz gerekiyor. Bunlar bir byte (veya byte array'ini) alır ve her byte'ı (bir
-karakteri temsil ediyorsa) büyük harfse küçük harfe dönüştürür.
-
 # Test out your new Java I/O Decorator
 
 ```
@@ -674,7 +698,11 @@ public class InputTest {
     public static void main(String[] args) {
         int c;
         try{
+            /* FileInputStream'i kurun ve önce bir BufferedInputStream ve ardından yepyeni LowerCaseInputStream 
+            filtresi ile decorate edin */
             InputStream in = new LowerCaseInputStream(new BufferedInputStream(new FileInputStream("test.txt")));
+            
+            /* File'in sonuna kadar karakterleri okumak için stream'i kullanın ve ilerledikçe print edin */
             while ((c = in.read())>=0){
                 System.out.print((char) c);
             }
@@ -686,61 +714,82 @@ public class InputTest {
 }
 ```
 
-FileInputStream'ı kurun ve önce onu BufferedInputStream ile decorate edin, ardından kendi yeni LowerCaseInputStream
-filtresiyle decorate edin.
+![img_17.png](../Images/DecoratorPattern/img_17.png)
 
 --**DIALOGS**--
 
-Q : Hoş geldiniz, Decorator Tasarım Deseni. Son zamanlarda biraz moralinizin bozuk olduğunu duymuştuk.
+HeadFirst : Decorator Pattern'e Hoş Geldiniz. Son zamanlarda kendinizi biraz kötü hissettiğinizi duyduk.
 
-A : Evet, dünya beni büyüleyici bir tasarım deseni olarak görüyor gibi görünebilir, ama herkes gibi benim de payıma
-düşen sorunlarım var, bilirsiniz.
+Decorator : Evet, dünyanın beni göz alıcı bir tasarım modeli olarak gördüğünü biliyorum ama herkes gibi benim de
+sorunlarım var.
 
-Q : Yaşadığınız bazı sıkıntıları bizimle paylaşabilir misiniz?
+HeadFirst : Yaşadığınız bazı sıkıntıları bizimle paylaşabilir misiniz?
 
-A : Evet, Decorator Tasarım Deseni, tasarımlara esneklik eklemekte kesinlikle güçlü bir araçtır. Ancak, bu esneklik
-getirirken tasarıma çok sayıda küçük sınıf ekleyebilme gücü, kodun karmaşıklığını artırabilir ve diğer geliştiriciler
-için anlaması zor hale getirebilir. Bu nedenle, Decorator Deseni'ni kullanırken iyi tasarım prensiplerine dikkat etmek
-ve gereksiz karmaşıklığı önlemek önemlidir.
+Decorator: Elbette. Tasarımlara esneklik katma gücüne sahip olduğumu biliyorsunuz, bu kesin, ancak aynı zamanda karanlık
+bir tarafım da var. Gördüğünüz gibi, bazen bir tasarıma çok sayıda küçük sınıf ekleyebiliyorum ve bu bazen başkalarının
+anlaması için basit olmayan bir tasarımla sonuçlanıyor.
 
-Q : Bir örnek verebilir misiniz?
+HeadFirst : Bize bir örnek verebilir misiniz?
 
-A : Java Input/Output kütüphanelerini ele alalım. Bu, başta insanlar için anlaması ünlü zor bir konudur. Ancak eğer
-sınıfları sadece bir InputStream etrafında wrap eder olarak görselerdi, işler çok daha kolay olurdu.
+Decorator: Java I/O kütüphanelerini ele alalım. Bunları insanların ilk başta anlaması oldukça zordur. Ancak sınıfları
+sadece bir InputStream etrafında bir dizi wrapper olarak görürlerse, hayat çok daha kolay olacaktır.
 
-Q : Kulağa o kadar da kötü gelmiyor. Sen hala harika bir modelsin ve bunu geliştirmek sadece bir halk eğitimi meselesi,
-değil mi?
+HeadFirst: Kulağa o kadar da kötü gelmiyor. Hala harika bir modelsiniz ve bunu geliştirmek sadece bir halk eğitimi
+meselesi, değil mi?
 
-A : Sorunlarım var, görüyorsunuz ki bazen insanlar belirli türleri kullanan bir client kodu parçasını alır ve her şeyi
-düşünmeden Decorator'ları ekler. Şimdi, benimle ilgili harika bir şey, genellikle Decorator'ları şeffaf bir şekilde
-ekleyebilmenizdir ve client'in bir decorator'la uğraştığını bilmesi gerekmez. Ancak dediğim gibi, bazı kodlar belirli
-türlere bağlıdır ve Decorator'ları eklemeye başladığınızda, pat! Kötü şeyler olur
+Decorator : Korkarım dahası da var. Yazım sorunlarım var: görüyorsunuz, insanlar bazen belirli türlere dayanan bir
+client kod parçasını alıp her şeyi düşünmeden Decorator'ler ekliyorlar. Şimdi, benimle ilgili harika bir şey,
+Decorator'leri genellikle şeffaf bir şekilde ekleyebilmeniz ve client'in bir Decorator'ler ile uğraştığını asla bilmek
+zorunda olmamasıdır. Ancak dediğim gibi, bazı kodlar belirli türlere bağımlıdır ve Decorator'leri tanıtmaya
+başladığınızda, boom! Kötü şeyler olur.
 
-Q : Sanırım herkes Decorator'ları eklerken dikkatli olmanız gerektiğini anlar, kendinize fazla sıkıntı yapmanız
-gerektiğini düşünmüyorum
+HeadFirst : Sanırım herkes Decorator'ları yerleştirirken dikkatli olmanız gerektiğini anlıyor, bunun kendinize çok fazla
+yüklenmek için bir neden olduğunu düşünmüyorum.
 
-A : Biliyorum, olabildiğince sıkıntı yapmamaya çalışıyorum. Ayrıca Decorator'ları eklemenin, component'i başlatmak için
-gereken kodun karmaşıklığını artırma sorunum var. Bir kez decorator'lar eklediğinizde, sadece component'i başlatmakla
-kalmaz, aynı zamanda kaç tane decorator ile wrap etmeniz gerektiğini de düşünmelisiniz
+Decorator : Biliyorum, öyle olmamaya çalışıyorum. Ayrıca, Decorator'lerin kullanılmasının component'i oluşturmak için
+gereken kodun karmaşıklığını artırması gibi bir sorunum da var. Decorator'lere sahip olduğunuzda, yalnızca componenti
+instantiate etmekle kalmayıp, aynı zamanda kim bilir kaç tane Decorator'le wrap etmeniz gerekir.
 
-Q : Gelecek hafta Factory ve Builder tasarımlarını görüşeceğim - duyduğuma göre bu konuda çok yardımları olabilir?"
+HeadFirst : Önümüzdeki hafta Factory ve Builder modelleriyle röportaj yapacağım - bu konuda çok yardımcı
+olabileceklerini duydum?
 
-A : Doğru, bu konuda daha sık onlarla konuşmalıyım
+Decorator : Bu doğru; o adamlarla daha sık konuşmalıyım.
 
-Q : Herkes senin esnek tasarımlar oluşturmak ve Open-Closed Prensibe sadık kalmak için harika bir örnek olduğunu
-düşünüyor, bu yüzden başını dik tutmaya ve olumlu düşünmeye devam et!"
+HeadFirst : Hepimiz esnek tasarımlar yaratma ve Open-Closed Principle'a sadık kalma konusunda harika bir model
+olduğunuzu düşünüyoruz, bu yüzden çenenizi dik tutun ve olumlu düşünün!
+
+# Tools for your Design Toolbox
+
+Classes should be open for extension but closed for modification. (Sınıflar genişlemeye açık ancak değişiklik için
+kapalı olmalıdır)
+
+Artık bize rehberlik edecek Open-Closed Principle'imiz var. Sistemimizi, kapalı kısımların yeni genişletmelerimizden
+izole edileceği şekilde tasarlamaya çalışacağız.
+
+Decorator - Bir nesneye dinamik olarak ek sorumluluklar ekleyin. Decorator'lar, işlevselliği extending etmek için
+subclassing'e esnek bir alternatif sağlar
 
 --**BULLET POINTS**--
 
-* Inheritance, extension'ın bir türüdür, ancak tasarımlarımızda esnekliği elde etmenin her zaman en iyi yolu değildir.
-* Tasarımlarımızda, mevcut kodu değiştirmeye gerek olmadan behaviour'un genişletilmesine izin vermelisiniz.
-* Composition ve delegation, genellikle çalışma zamanında yeni behavior'lar eklemek için kullanılabilir.
-* Decorator Deseni, behavior'u genişletmek için alt sınıflandırmanın bir alternatifini sunar.
-* Decorator Deseni, concrete componentleri wrap etmek için kullanılan bir dizi decorator sınıfını içerir.
-* Decorator sınıfları, decorate ettikleri componentlerin türünü yansıtır. (Aslında, bunlar, componentleri kalıtım veya
-  interface implementasyonu yoluyla decorate ettikleri componentlerle aynı türdedir.)
-* Decorator'lar, component'lerine yönelik method çağrılarına yeni işlevselliği ekleyerek component'lerinin behavior'unu
-  değiştirirler (method çağrılarından önce ve/veya sonra hatta yerine).
-* Bir component'i istediğiniz sayıda decorator ile wrap edebilirsiniz.
-* Decorator'lar, genellikle component'in client'ina şeffaf olur; yani, client componentin concrete türüne dayanmıyorsa.
-* Decorator'lar, tasarımımızda birçok küçük nesneye neden olabilir ve aşırı kullanım karmaşıklığa yol açabilir.
+* Inheritance, extension'ın bir biçimidir, ancak tasarımlarımızda esneklik elde etmenin en iyi yolu olmayabilir.
+
+* Tasarımlarımızda, mevcut kodu değiştirmeye gerek kalmadan Behavior'un extended edilmesine izin vermeliyiz.
+
+* Composition ve delegation genellikle runtime'da yeni Behavior'lar eklemek için kullanılabilir.
+
+* Decorator Kalıbı, Behavior extending için subclassing'e bir alternatif sunar
+
+* Decorator Kalıbı, concrete component'leri wrap etmek için kullanılan bir dizi Decorator sınıfını içerir.
+
+* Decorator sınıflar, decorate ettikleri component'lerin type'ını yansıtır. (Aslında, inheritance ya da interface
+  implementasyonu yoluyla decorate ettikleri componentler ile aynı type'dadırlar)
+
+* Decorator'lar, component'e yapılan method çağrılarından önce ve/veya sonra (hatta bunların yerine) yeni işlevler
+  ekleyerek component'lerin behavior'larını değiştirir.
+
+* Bir componenti istediğiniz sayıda Decorator ile wrap edebilirsiniz
+
+* Decorator'lar genellikle component'in client'ina karşı şeffaftır; yani, client component'in concrete type'ına
+  güvenmediği sürece.
+
+* Decorator'lar tasarımımızda çok sayıda küçük nesneye yol açabilir ve overuse (aşırı kullanım) karmaşık olabilir.
