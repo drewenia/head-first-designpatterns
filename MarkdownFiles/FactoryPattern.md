@@ -1,27 +1,33 @@
-# Baking with OO Goodness
+# Baking with OO Goodness (OO Goodness ile Pişirme)
 
-Loosely Coupled nesneleri pişirmeye hazır olun. Nesneleri yaratmak sadece new() operatörünü kullanmaktan daha
-fazlasıdır. Instantiation (başlatma), her zaman genel alanda yapılması gereken bir faaliyet olmamalıdır ve sıklıkla
-bağlantı sorunlarına yol açabilir. Ve bunu istemezsiniz, değil mi? Factory Desenlerinin sizi utanç verici
-bağımlılıklardan kurtarmaya nasıl yardımcı olabileceğini öğrenin.
+Bazı Loosely Coupled OO tasarımlarını pişirmeye hazır olun. Nesne oluşturmada new operatörünü kullanmaktan daha fazlası
+vardır. Instantiation (Örneklemenin) her zaman herkese açık olarak yapılmaması gereken bir etkinlik olduğunu ve
+genellikle bağlanma sorunlarına yol açabileceğini öğreneceksiniz. Ve siz bunu istemezsiniz, değil mi? Factory
+Kalıplarının sizi utanç verici bağımlılıklardan kurtarmaya nasıl yardımcı olabileceğini öğrenin.
+
+Tamam, üç bölüm oldu ve hala new ile ilgili sorumu yanıtlamadınız. Bir implementasyona programlama yapmamamız gerekiyor
+ama ne zaman new kullansam, tam olarak bunu yapıyorum, değil mi?
 
 "new" kelimesini gördüğünüz de "concrete'i" düşünün
 
-Evet, 'new' kullandığınızda kesinlikle concrete bir sınıfın instance'ini oluşturuyorsunuz, bu kesinlikle bir
-implementasyon, bir interface değil. Ve bu iyi bir soru; kodunuzu concrete bir sınıfa bağlamak, onu daha kırılgan ve
+Evet, new kullandığınızda kesinlikle concrete bir sınıfı instantiating etmiş olursunuz, yani bu kesinlikle bir
+implementasyondur, bir interface değil. Ve bu iyi bir soru; kodunuzu concrete bir sınıfa bağlamanın onu daha kırılgan ve
 daha az esnek hale getirebileceğini öğrendiniz.
 
 ```Duck duck = new MallardDuck();```
 
-Esnek bir kod elde etmek için interface'leri kullanmak istiyoruz. Ancak bir concrete sınıfın bir instance'ini
-oluşturmamız gerekiyor!
+Kodu esnek tutmak için interface'leri kullanmak istiyoruz ```Duck```
 
-İlgili bir dizi concrete sınıfa sahip olduğunuzda, sıklıkla şöyle bir kod yazmak zorunda kalırsınız:
+Ancak concrete bir sınıfın instance'ini oluşturmamız gerekiyor! ```new MallardDuck()```
+
+Birbiriyle ilişkili bir dizi concrete sınıfınız olduğunda, genellikle bu şekilde kod yazmak zorunda kalırsınız:
 
 ```
 Duck duck;
 
 if (picnic) {
+    /* Bir sürü farklı Duck sınıfımız var ve runtime'a kadar hangisini instantiate (örneklememiz) gerektiğini 
+    bilmiyoruz */
     duck = new MallardDuck();
     } else if (hunting) {
         duck = new DecoyDuck();
@@ -30,39 +36,44 @@ if (picnic) {
 }
 ```
 
-Çeşitli Duck sınıflarımız var ve hangi sınıfı başlatmamız gerektiğini çalışma zamanına kadar bilmiyoruz.
+Burada instantiated (örneklenen) birkaç concrete sınıfımız var ve hangisinin instantiate (örnekleneceğine) runtime'da
+bazı koşullara bağlı olarak karar veriliyor
 
-İşte birkaç concrete sınıfın başlatıldığı bir durum var ve hangisinin başlatılacağı, belirli bir koşul kümesine bağlı
-olarak çalışma zamanında belirleniyor. Bu tür kodları gördüğünüzde, değişiklikler veya uzantılar zamanı geldiğinde, bu
-kodu yeniden açmanız ve eklenmesi gereken (veya silinmesi gereken) şeyleri incelemeniz gerektiğini biliyorsunuz. Bu tür
-kodlar genellikle uygulamanın birkaç bölümünde yer alır ve bakımı ve güncellemeleri daha zor ve hata yapma olasılığını
-artırır.
+Böyle bir kod gördüğünüzde, değişiklik veya ekleme zamanı geldiğinde bu kodu yeniden açmanız ve nelerin eklenmesi (veya
+silinmesi) gerektiğini incelemeniz gerekeceğini bilirsiniz. Genellikle bu tür kodlar uygulamanın çeşitli bölümlerinde
+yer alır ve bu da bakım ve güncellemeleri daha zor ve hataya açık hale getirir.
 
-Ancak belirli bir noktada bir nesne oluşturmanız gerekiyor ve Java bize nesne oluşturmanın tek bir yolunu sunuyor, değil
-mi? Peki, bu durumda ne yapmalıyız?
+Ancak bir noktada bir nesne oluşturmanız gerekir ve Java bize bir nesne oluşturmanın yalnızca bir yolunu sunar, değil
+mi? Peki ne oluyor?
 
-"new" de yanlış olan ne var?
+### "new" in nesi var?
 
-Teknik olarak bakıldığında, 'new' ile herhangi bir sorun yoktur çünkü sonuçta bu, Java'nın temel bir parçasıdır. Gerçek
-sorun, esasen değişiklik olan ve değişikliğin 'new' kullanımımıza nasıl etki ettiğidir.
+Teknik olarak "new" ile ilgili yanlış bir şey yok, sonuçta Java'nın temel bir parçası. Asıl suçlu eski dostumuz CHANGE
+ve change'in "new" kullanımımızı nasıl etkilediğidir.
 
-Bir interface'e kod yazarak, gelecekte sisteme gelebilecek birçok değişiklikten kendinizi izole edebileceğinizi
-biliyorsunuz. Neden mi? Kodunuz bir interface'e yazıldığında, o interface'i implement eden herhangi yeni sınıflarla çok
-biçimlilik (polimorfizm) aracılığıyla çalışacaktır. Ancak, birçok concrete sınıf kullanan kodunuz varsa, sorun
-arıyorsunuz demektir, çünkü yeni concrete sınıflar eklenirken bu kodun değiştirilmesi gerekebilir. Yani başka bir
-deyişle, kodunuz "closed for modification" olmayacak. Yeni concrete türlerle extend etmek için onu yeniden açmanız
-gerekecektir.
+Bir interface'e göre kodlama yaparak, ileride sistemde meydana gelebilecek pek çok değişiklikten kendinizi izole
+edebileceğinizi bilirsiniz. Neden mi? Kodunuz bir interface'e göre yazılmışsa, polymorphism yoluyla bu interface'i
+implement eden tüm yeni sınıflarla çalışacaktır. Ancak, çok sayıda concrete sınıf kullanan bir kodunuz varsa, yeni
+concrete sınıflar eklendikçe bu kodun değiştirilmesi gerekebileceğinden başınız belaya girebilir. Yani, başka bir
+deyişle, kodunuz "closed for modification (değişikliğe kapalı)" olmayacaktır. Yeni concrete türlerle extend etmek için
+yeniden açmanız gerekecektir.
 
-Peki ne yapabilirsiniz? Bu tür durumlarda, ipuçları aramak için OO Tasarım Prensiplerine geri dönebilirsiniz. Unutmayın,
-ilk prensibimiz değişiklikle ilgilidir ve değişen yönleri tanımlamamıza ve sabit kalanlardan ayırmamıza rehberlik eder.
+Peki ne yapabilirsiniz? İşte böyle zamanlarda ipucu aramak için OO Tasarım İlkelerine başvurabilirsiniz. Unutmayın, ilk
+ilkemiz değişimle ilgilidir ve bize değişen yönleri tanımlamamız ve bunları aynı kalanlardan ayırmamız için rehberlik
+eder.
+
+Uygulamanızın concrete sınıfları instantiate (örnekleyen) tüm parçalarını alıp bunları uygulamanızın geri kalanından
+nasıl ayırabilir veya encapsulate edebilirsiniz?
 
 # Identifying the aspects that vary (Farklılık gösteren yerlerin belirlenmesi)
 
-Diyelim ki bir pizza dükkanınız var ve Objectville'deki son teknoloji bir pizza dükkanı sahibi olarak şöyle bir kod
-yazmanız gerekebilir:
+Diyelim ki bir pizza dükkanınız var ve Objectville'de son teknoloji bir pizza dükkanı sahibi olarak bunun gibi bazı
+kodlar yazabilirsiniz:
 
 ```
 Pizza orderPizza() {
+    /* Esneklik için, bunun gerçekten abstract bir sınıf veya interface olmasını istiyoruz, ancak bunlardan herhangi 
+    birini doğrudan instantiate (örnekleyemiyoruz) edemiyoruz */
     Pizza pizza = new Pizza();
     pizza.prepare();
     pizza.bake();
@@ -72,16 +83,17 @@ Pizza orderPizza() {
 }
 ```
 
-Esneklik açısından, bunun bir abstract sınıf veya interface olmasını istiyoruz, ancak bu ikisini doğrudan instantiate
-edemeyiz.
+### Ama birden fazla pizza çeşidine ihtiyacınız var...
 
-Birden fazla pizza çeşidine ihtiyacınız var? O zaman uygun pizza tProductü belirleyen ve ardından pizzayı yapmaya
-başlayan kod eklersiniz:
+Böylece, uygun pizza type'ını belirleyen ve ardından pizzayı yapmaya devam eden bir kod eklersiniz:
 
 ```
+/* Şimdi sipariş edilecek pizza type'ini giriyoruz orderPizza */
 Pizza orderPizza(String type) {
     Pizza pizza;
     
+    /* Pizza type'ina bağlı olarak, doğru concrete sınıfı instantiate (örneklendirir) eder ve pizza instance variable'ina 
+    atarız. Buradaki her pizzanın Pizza interface'ini implement etmesi gerektiğini unutmayın */
     if (type.equals(“cheese”)) {
         pizza = new CheesePizza();
     } else if (type.equals(“greek”) {
@@ -94,69 +106,81 @@ Pizza orderPizza(String type) {
     pizza.bake();
     pizza.cut();
     pizza.box();
+    
+    /* Pizzayı hazırladıktan sonra (bilirsiniz, hamuru açıyoruz, sosu koyuyoruz, malzemeleri ve peyniri ekliyoruz), 
+    pişiriyoruz, kesiyoruz ve kutuluyoruz */
     return pizza;
 }
 ```
 
-Pizza tProducte bağlı olarak doğru concrete sınıfı oluştururuz ve onu pizza instance variable'ina atarız. Burada her
-pizza'nın Pizza interface'ini implemente etmesi gerektiğini unutmayın.
+Her Pizza subtype'ı (CheesePizza, VeggiePizza, vb.) kendini nasıl hazırlayacağını bilir.
 
-Pizza'yı bir kez elde ettiğimizde, onu hazırlarız (hamuru açarız, sosu koyarız ve üstleri ile peyniri ekleriz), ardından
-pişiririz, keseriz ve paketleriz! Her Pizza alt türü (CheesePizza, VeggiePizza vb.) kendini nasıl hazırlayacağını bilir.
+# But the pressure is on to add more pizza types (Ancak daha fazla pizza çeşidi eklemek için baskı yapılıyor)
 
-# But the pressure is on to add more pizza types
+Tüm rakiplerinizin menülerine birkaç moda pizza eklediğini fark ettiniz: Clam Pizza ve Veggie Pizza. Açıkçası
+rekabete ayak uydurmanız gerekiyor, bu yüzden bu Productleri menünüze ekleyeceksiniz. Son zamanlarda çok fazla Greek
+Pizzası satamadığınız için bunları menüden çıkarmaya karar verdiniz:
 
-Tüm rakiplerinizin menülerine birkaç trend pizza eklediğini fark edersiniz: Clam Pizza ve Veggie Pizza. Açıkçası
-rekabetle adım atmanız gerekiyor, bu yüzden bu öğeleri menünüze ekleyeceksiniz. Ve son zamanlarda çok fazla Greek Pizza
-satmıyorsanız, menüden çıkarmaya karar verirsiniz:
+![img_26.png](../Images/FactoryDesignPattern/img_26.png)
 
-Bu kod "closed for modification" değil. Eğer Pizza Dükkanı pizza seçeneklerini değiştirirse, bu kodu değiştirmemiz
-gerekecektir. Zamanla pizza seçimi değiştikçe, bu kodu tekrar tekrar değiştirmeniz gerekecektir.
+Bu kod closed for modification (değişikliğe KAPALI) DEĞİLDİR. Pizza Dükkanı pizza seçeneklerini değiştirirse, bu koda
+girmeli ve onu değiştirmeliyiz.
 
-```
-pizza.prepare();
-pizza.bake();
-pizza.cut();
-pizza.box();
-return pizza;
-```
+![img_27.png](../Images/FactoryDesignPattern/img_27.png)
 
-Bu kısmım aynı kalmasını beklediğimiz kısmıdır. Pizza hazırlama, pişirme ve paketleme büyük ölçüde yıllar boyunca aynı
-kalmıştır. Bu yüzden bu kodun değişmesini beklemiyoruz, sadece üzerinde çalıştığı pizzaların değişeceğini bekliyoruz.
+Değişen şey budur. Pizza seçimi zaman içinde değiştikçe, bu kodu tekrar tekrar değiştirmeniz gerekecektir
 
-Açıkça görülüyor ki hangi concrete sınıfın başlatıldığı, orderPizza() metodunu karmaşık hale getiriyor ve değişiklik
-için kapalı olmasını engelliyor. Ancak şimdi neyin değişken olduğunu ve neyin sabit kaldığını bildiğimize göre, bunu
-encapsulate zamanı geldiğini söyleyebiliriz.
+![img_28.png](../Images/FactoryDesignPattern/img_28.png)
 
-# Encapsulating object creation
+Aynı kalmasını beklediğimiz şey budur. Bir pizzanın hazırlanması, pişirilmesi ve paketlenmesi çoğunlukla yıllardır aynı
+kalmıştır. Dolayısıyla, bu kodun değişmesini beklemiyoruz, sadece üzerinde çalıştığı pizzaların değişmesini bekliyoruz.
 
-Şimdi nesne oluşturmayı orderPizza() metodundan çıkarmamızın daha iyi olacağını biliyoruz. Peki, nasıl yapacağız? İşte
-yapacaklarımız, oluşturma kodunu alıp başka bir nesneye taşımak, bu nesnenin yalnızca pizzaları oluşturmayla
-ilgileneceği bir nesne oluşturmaktır.
+Açıkçası, hangi concrete sınıfın instantiated (örneklendiği) ile uğraşmak orderPizza() methodumuzu gerçekten
+karıştırıyor ve closed for modification'ı (değişiklik için kapatılmasını) engelliyor. Ancak artık neyin değişip neyin
+değişmediğini bildiğimize göre, muhtemelen bunu encapsule etmenin zamanı gelmiştir.
+
+# Encapsulating object creation (Nesne oluşturmayı kapsülleme)
+
+Artık nesne oluşturma işlemini orderPizza() methodunun dışına taşımamızın daha iyi olacağını biliyoruz. Ama nasıl?
+Yapacağımız şey, oluşturma kodunu almak ve sadece pizza oluşturmakla ilgilenecek başka bir nesneye taşımak.
 
 ![img.png](../Images/FactoryDesignPattern/img.png)
 
-Bu yeni nesnenin bir adı var: ona bir Factory diyoruz. Factory'ler, nesne oluşturmanın ayrıntılarıyla ilgilenirler. Bir
-SimplePizzaFactory'ye sahip olduğumuzda, orderPizza() metodumuz yalnızca bu nesnenin bir client'i olur. Bir pizza
-gerektiğinde her seferinde pizza factory'e bir tane yapması için istekte bulunur. Artık orderPizza() metodunun Greek
-ve Clam pizzaları hakkında bilgi sahibi olması gereken günler geride kaldı. Şimdi orderPizza() methodu, sadece Pizza
-interface'ini implement eden bir pizzayı alıp almadığını önemser, böylece prepare(), bake(), cut() ve box() methodlarını
-çağırabiliriz.
+![img_29.png](../Images/FactoryDesignPattern/img_29.png)
 
-Henüz burada doldurulacak bazı ayrıntılarımız var; örneğin, orderPizza() metodu oluşturma kodunu neyle değiştirir? Pizza
-dükkanı için basit bir factory'i implement edelim ve bulalım...
+İlk olarak nesne oluşturma kodunu orderPizza(String type) methodundan çıkarıyoruz
 
-# Building a simple pizza factory
+![img_30.png](../Images/FactoryDesignPattern/img_30.png)
 
-İlk olarak factory ile başlayalım. Yapmamız gereken, tüm pizzaların nesne oluşturmasını encapsulates eden bir sınıfı
-tanımlamaktır. İşte bu sınıf...
+Daha sonra bu kodu sadece pizza oluşturma konusunda endişelenecek bir nesneye yerleştiririz. Eğer başka bir nesnenin
+pizza yaratması gerekirse, bu nesneye başvurulacaktır. Bu yeni nesne için bir adımız var: ona **Factory** diyoruz.
+
+Factory'ler nesne oluşturma ayrıntılarını ele alır. Bir SimplePizzaFactory'ye sahip olduğumuzda, orderPizza() metodumuz
+sadece bu nesnenin bir client'i haline gelir. Ne zaman bir pizzaya ihtiyaç duysa pizza Factory'sinden bir pizza
+yapmasını ister. orderPizza() metodunun Greek ve Clam pizzaları hakkında bilgi sahibi olması gereken günler geride
+kaldı. Artık orderPizza() metodu sadece Pizza interface'ini implement eden bir pizza almakla ilgileniyor, böylece
+prepare(), bake(), cut() ve box() metotlarını çağırabiliyor.
+
+Burada hala doldurmamız gereken birkaç ayrıntı var; örneğin, orderPizza() metodu oluşturma kodunu ne ile değiştiriyor?
+Pizza mağazası için basit bir Factory implement edelim ve öğrenelim...
+
+# Building a simple pizza factory (Basit bir pizza fabrikası inşa etmek)
+
+Factory'nin kendisi ile başlayacağız. Yapacağımız şey, tüm pizzalar için nesne oluşturmayı encapsulate eden bir sınıf
+tanımlamak. İşte burada...
 
 ```
+/* İşte yeni sınıfımız, SimplePizzaFactory. Hayatta tek bir işi var: client'ları için pizza yaratmak */
 public class SimplePizzaFactory {
+
+    /* İlk olarak Factory'de bir createPizza() metodu tanımlıyoruz. Bu, tüm client'ların yeni nesneyi 
+    instatiate (örneklemek) için kullanacağı methoddur */
     public Pizza createPizza(String type) {
         
         Pizza pizza = null;
         
+        /* İşte orderPizza() metodundan çıkardığımız kod. Bu kod, tıpkı orijinal orderPizza() methodumuzda olduğu gibi 
+        pizza type'ına göre parametrelendirilmiştir.*/
         if (type.equals(“cheese”)) {
             pizza = new CheesePizza();
         } else if (type.equals(“pepperoni”)) {
@@ -172,40 +196,36 @@ public class SimplePizzaFactory {
 }
 ```
 
-İlk olarak, factory'de bir createPizza() methodu tanımlıyoruz. Bu method, tüm client'ların yeni nesneleri instantiate
-etmek için kullanacağı methoddur.
-
-Bu kod hala pizzanın tProducte göre parameterized olarak çalışmaktadır, tam olarak orijinal orderPizza() metodumuz gibi.
-
 --**DIALOGS**--
 
-Q : Bunun avantajı nedir? Görünüşe göre sadece sorunu başka bir nesneye aktarır.
+Q : Bunun avantajı nedir? Görünüşe göre sorunu başka bir nesneye itiyoruz.
 
-A : SimplePizzaFactory'nin birçok client'a sahip olabileceğidir. Sadece orderPizza() methodunu gördük; ancak
-PizzaShopMenu sınıfı, factory'i mevcut açıklamaları ve fiyatları için pizzalar almak için kullanabilir. Ayrıca PizzaShop
-sınıfımızdan farklı bir şekilde pizzaları işleyen ancak yine de factoryn'nin bir client'ı olan HomeDelivery sınıfımız
-olabilir. Yani, pizza oluşturmayı bir sınıfta encapsulate ederek, uygulama kodunda değişiklik yapmanız gerektiğinde
-yapmanız gereken tek bir yeriniz vardır. Ayrıca, unutmayın, aynı zamanda client kodumuzdan concrete instantiations'ları
-kaldırmak üzereyiz!
+A : Unutulmaması gereken bir şey SimplePizzaFactory'nin birçok client'i olabileceğidir. Biz sadece orderPizza() metodunu
+gördük; ancak, mevcut description ve price için pizzaları almak üzere Factory'i kullanan bir PizzaShopMenu sınıfı
+olabilir. Ayrıca, pizzaları PizzaShop sınıfımızdan farklı bir şekilde işleyen ancak aynı zamanda Factory'nin bir client'
+i olan bir HomeDelivery sınıfımız da olabilir. Böylece, pizza oluşturmayı tek bir sınıfta encapsulating ederek,
+implementasyon değiştiğinde değişiklik yapmak için artık tek bir yerimiz var. Unutmayın, concrete instantiations (
+örneklemeleri) client kodumuzdan da kaldırmak üzereyiz!
 
-Q : Benzer bir tasarımı, bu tür bir factory'nin bir static method olarak tanımlandığı bir yapıda gördüm. Aralarındaki
-fark nedir?
+Q : Bunun gibi bir Factory'nin static bir method olarak tanımlandığı benzer bir tasarım gördüm. Aradaki fark nedir?
 
-A : Bir basit factory'i bir statik method olarak tanımlamak yaygın bir tekniktir ve genellikle "static factory" olarak
-adlandırılır. Neden bir statik method kullanılır? Çünkü create methodini kullanmak için bir nesne örneği oluşturmanıza
-gerek yoktur. Ancak unutmayın ki, create methodunun behavior'unu alt sınıflandırarak ve değiştirerek değiştiremezsiniz,
-bu da bir dezavantaj olabilir.
+A : Basit bir Factory'i static bir method olarak tanımlamak yaygın bir tekniktir ve genellikle Static Factory olarak
+adlandırılır. Neden static bir method kullanılır? Çünkü create metodunu kullanmak için bir nesneyi instantiate
+(örneklemeniz) gerekmez. Ancak bunun, subclass oluşturamama ve create method'unun behavior'unu değiştirememe gibi bir
+dezavantajı olduğunu da unutmayın.
 
-# Reworking the PizzaStore class
+# Reworking the PizzaStore class (PizzaStore sınıfını yeniden işleme)
 
-Şimdi müşteri kodumuzu düzeltme zamanı geldi. Pizzaları oluşturmak için factory'e güvenmek istiyoruz. İşte yapılacak
-değişiklikler:
+Şimdi sıra client kodumuzu düzeltmeye geldi. Yapmak istediğimiz şey, pizzaları bizim için oluşturması için Factory'e
+güvenmek. İşte değişiklikler:
 
 ```
 public class PizzaStore {
     
+    /* Şimdi PizzaStore'a bir SimplePizzaFactory referansı veriyoruz */
     SimplePizzaFactory factory;
 
+    /* PizzaStore, constructor'da kendisine aktarılan Factory'i alır */
     public PizzaStore(SimplePizzaFactory factory) {
         this.factory = factory;
     }
@@ -213,6 +233,9 @@ public class PizzaStore {
     public Pizza orderPizza(String type){
         Pizza pizza;
 
+        /* Ve orderPizza() methodu, pizzalarını oluşturmak için sadece siparişin type'ını aktararak Factory'i kullanır. 
+        new operatörünü factory nesnesi üzerinde bir create metodu ile değiştirdiğimize dikkat edin. Burada artık 
+        concrete instantiations (örnekleme) yok! */
         pizza = factory.createPizza(type);
 
         pizza.prepare();
@@ -224,78 +247,73 @@ public class PizzaStore {
 }
 ```
 
-Şimdi PizzaStore'a bir SimplePizzaFactory referansı veriyoruz. PizzaStore, factory'i constructor method aracılığıyla
-alır.
+# The Simple Factory defined (Basit Fabrika tanımlandı)
 
-Ve orderPizza() methodu, siparişin tProductü sadece ileterek pizzalarını oluşturmak için factory'i kullanır.
+SimpleFactory aslında bir Tasarım Kalıbı değildir; daha çok bir programlama idiom'udur. Ancak yaygın olarak
+kullanılmaktadır. Bazı geliştiriciler bu deyimi "Factory Pattern" ile karıştırıyor.
 
-Dikkat edin, "new" operatörünü factory nesnesindeki bir create methoduyla değiştirdik. Artık burada concrete
-instantiations yok!
-
-# The Simple Factory defined
-
-SimpleFactory aslında bir Tasarım Deseni değil, daha çok bir programlama idiyomudur. Bazı geliştiriciler bu idiyomu "
-Factory Deseni" ile karıştırır.
-
-Sadece SimpleFactory gerçek bir desen olmasa da, nasıl bir araya getirildiğini incelemememiz gerektiği anlamına gelmez.
-Yeni PizzaStore'un sınıf diyagramına bir göz atalım:
+SimpleFactory'nin REAL bir kalıp olmaması, nasıl bir araya getirildiğini kontrol etmememiz gerektiği anlamına gelmez.
+Yeni Pizza Mağazamızın sınıf diyagramına bir göz atalım:
 
 ![img_1.png](../Images/FactoryDesignPattern/img_1.png)
 
-Factory'nin Client'i PizzaStore'dur. PizzaStore, artık pizza instance'larını almak için SimplePizzaFactory üzerinden
-geçer.
+**PizzaStore** : Bu, factory'nin client'idir. PizzaStore şimdi pizza instance'larını (örneklerini) almak için
+SimplePizzaFactory'den geçer.
 
-SimplePizzaFactory : pizzaları oluşturduğumuz factory'dir; uygulamamızın concrete Pizza sınıflarına başvuran tek bölümü
-olmalıdır. create methodu genellikle statik olarak tanımlanır.
+**SimplePizzaFactory** : Bu, pizzaları oluşturduğumuz factory'dir; uygulamamızın Concrete Pizza sınıflarına atıfta
+bulunan tek parçası olmalıdır... create methodu genellikle static olarak bildirilir
 
-Pizza : Bu, factory'nin product'ıdır. Pizza'yı bazı yardımcı uygulamalar içeren bir abstract sınıf olarak tanımladık ve
-bu implementasyonların overridden olduğunu belirttik.
+**Pizza** : Bu factory'nin product'ı : pizza! Pizza'yı, overriden edebilecek bazı yararlı implementasyonlarla birlikte
+abstract bir sınıf olarak tanımladık.
 
-CheesePizza, VeggiePizza, ClamPizza, PepperonPizza Bunlar, concrete product'larımızdır. Her product, Pizza interface'ini
-implement etmelidir (bu durumda "abstract Pizza sınıfını extends etmek" anlamına gelir) ve concrete olmalıdır. Bu koşul
-karşılandığı sürece, factory tarafından oluşturulabilir ve client'a teslim edilebilir.
+**CheesePizza, VeggiePizza, ClamPizza, PepperonPizza** : Bunlar bizim concrete product'larımızdır. Her Product'in Pizza
+interface'ini implement etmesi (bu durumda "Abstract Pizza sınıfını extends etmek" anlamına gelir) ve concrete olması
+gerekir. Durum böyle olduğu sürece, factory tarafından oluşturulabilir ve client'a geri verilebilir.
 
-SimpleFactory'i bir hazırlık olarak düşünebilirsiniz. Bir sonraki aşamada, her ikisi de factory'ler olan iki yoğun
-deseni keşfedeceğiz. Ancak endişelenmeyin, daha fazla pizza var gelecek!
+SimpleFactory'i bir ısınma olarak düşünün. Daha sonra, her ikisi de factory olan iki ağır hizmet modelini keşfedeceğiz.
+Ama endişelenmeyin, daha çok pizza gelecek!
 
-Bir hatırlatma daha: tasarım desenlerinde "bir interface'i implements etmek" ifadesi HER ZAMAN "Java interface'ini
-implements eden bir sınıf yazmak, sınıf bildiriminde "implements" anahtar kelimesini kullanmak" anlamına gelmez.
-Genel kullanım bağlamında, bir concrete sınıfın bir üst tProduct (bir sınıf veya interface olabilir) methodunu implement
-etmesi, hala bu üst tProduct "interface'ini implemente etmek" olarak kabul edilir.
+Bir hatırlatma daha: tasarım kalıplarında "bir interface'i implemente etmek" ifadesi her zaman "sınıf bildiriminde
+implements" anahtar sözcüğünü kullanarak bir Java interface'ini implement eden bir sınıf yazmak" anlamına GELMEZ.
+İfadenin genel kullanımında, bir supertype'dan (bir sınıf veya interface olabilir) bir methodu implement eden concrete
+bir sınıf, yine de o supertype'ın "interface'ini implement ediyor" olarak kabul edilir.
 
-# Franchising the pizza store
+# Franchising the pizza store (Pizza dükkanının franchisingi)
 
-Objectville PizzaStore'ünüz o kadar başarılı oldu ki rekabeti alt etti ve şimdi herkes kendi mahallesinde bir PizzaStore
-istiyor. Franchise veren olarak, franchise operasyonlarının kalitesini sağlamak istiyorsunuz, bu yüzden onların zamanla
-test edilmiş kodunuzu kullanmasını istiyorsunuz.
+Objectville PizzaStore'unuz o kadar iyi iş çıkardı ki rekabeti alt üst ettiniz ve şimdi herkes kendi mahallesinde bir
+PizzaStore istiyor. Franchise veren olarak, franchise operasyonlarının kalitesinden emin olmak istiyorsunuz ve bu
+nedenle zaman içinde test edilmiş kodunuzu kullanmalarını istiyorsunuz.
 
-Ancak bölgesel farklılıklar ne olacak? Her franchise, franchise mağazasının bulunduğu yere ve yerel pizza uzmanlarının
-tatlarına bağlı olarak farklı pizza tarzları sunmak isteyebilir (New York, Chicago ve California gibi birkaç örnek
-verilebilir).
+Peki ya bölgesel farklılıklar? Her franchise, franchise mağazasının bulunduğu yere ve yerel pizza uzmanlarının
+zevklerine bağlı olarak farklı pizza stilleri (birkaç isim vermek gerekirse New York, Chicago ve California) sunmak
+isteyebilir.
 
 ![img_2.png](../Images/FactoryDesignPattern/img_2.png)
 
-Tüm franchise pizza mağazalarının, pizzaların aynı şekilde hazırlandığından yararlanmasını istiyorsunuz, bu yüzden
-PizzaStore kodunuzu kullanmalarını istiyorsunuz.
+**PizzaStore** : Tüm franchise pizza mağazalarının **PizzaStore** kodunuzdan yararlanmasını istiyorsunuz, böylece
+pizzalar aynı şekilde hazırlanıyor
 
-Bir franchise, NY tarzı pizzaları yapan bir factory istiyor: ince hamur, lezzetli sos ve sadece az miktarda peynir
-içeren pizzalar.
+**NYPizzaFactory** : Bir franchise NY tarzı pizzalar yapan bir Factory istiyor: ince hamur, lezzetli sos ve az peynir.
 
-Başka bir franchise, Chicago tarzı pizzaları yapan bir factory istiyor; müşterileri kalın hamurlu, bol soslu ve bol
-peynirli pizzaları tercih ediyorlar.
+**ChicagoPizzaFactory** : Başka bir franchise Chicago tarzı pizza yapan bir Factory istiyor; müşterileri kalın hamurlu,
+zengin soslu ve tonlarca peynirli pizzalardan hoşlanıyor.
 
-Görülen bir yaklaşım... Eğer SimplePizzaFactory'i çıkarır ve üç farklı factory oluşturursak (NYPizzaFactory,
-ChicagoPizzaFactory ve CaliforniaPizzaFactory), o zaman sadece PizzaStore'u uygun factory ile birleştirebiliriz ve bir
-franchise işlem yapmaya hazır olur. Bu bir yaklaşım.
+### Bir yaklaşım gördük...
+
+SimplePizzaFactory'yi çıkarır ve NYPizzaFactory, ChicagoPizzaFactory ve CaliforniaPizzaFactory olmak üzere üç farklı
+Factory oluşturursak, PizzaStore'u uygun Factory ile compose edebiliriz ve bir franchise hazır olur. Bu da bir yaklaşım.
+Bunun neye benzeyeceğini görelim...
 
 ```
+/* Burada NY tarzı pizza yapmak için bir Factory oluşturuyoruz */
 NYPizzaFactory nyFactory = new NYPizzaFactory();
+
+/* Ardından bir PizzaStore oluşturuyoruz ve NY Factory'sine bir referans iletiyoruz */
 PizzaStore nyStore = new PizzaStore(nyFactory);
+
+/* ...ve pizza yaptığımızda, NY tarzı pizzalar elde ediyoruz */
 nyStore.order(“Veggie”);
 ```
-
-İşte NY tarzı pizzalar yapmak için bir factory oluşturuyoruz. Sonra bir PizzaStore oluşturuyoruz ve ona NY factory'sine
-bir referans iletiyoruz. Ve pizza yaparken NY tarzı pizzalar elde ediyoruz.
 
 ```
 ChicagoPizzaFactory chicagoFactory = new ChicagoPizzaFactory();
@@ -303,35 +321,38 @@ PizzaStore chicagoStore = new PizzaStore(chicagoFactory);
 chicagoStore.order(“Veggie”);
 ```
 
-Aynı şekilde Chicago pizza mağazaları için: Chicago pizzaları için bir factory oluştururuz ve bir Chicago factory'si ile
-composed edilmiş bir mağaza oluştururuz. Pizza yaparken Chicago tarzı olanları elde ederiz.
+Aynı şekilde Chicago pizza mağazaları için de: Chicago pizzaları için bir Factory yaratıyoruz ve Chicago Factory'sinden
+composed edilmiş bir mağaza yaratıyoruz. Pizzaları yaptığımızda, Chicago aromalı olanları alıyoruz
 
-Ancak biraz daha kalite kontrol istiyorsunuz gibi görünüyor... Bu nedenle SimpleFactory fikrini test ettiğinizde
-bulduğunuz şey, franchise'ların pizzaları oluşturmak için factory'nizi kullanmalarına rağmen, geri kalan süreç için
-kendi özel prosedürlerini kullanmaya başladıklarıydı: farklı şekillerde pişiriyorlardı, pizzayı kesmeyi unutuyorlardı ve
-3rd party kutularını kullanıyorlardı.
+### Ama biraz daha kalite kontrol istiyorsunuz...
 
-Problemi tekrar düşündüğünüzde, aslında mağazayı ve pizza oluşturmayı bir araya getiren ancak esnekliği korumayı
-sağlayan bir framework oluşturmak istediğinizi görüyorsunuz.
+Böylece SimpleFactory fikrini test ettiniz ve franchise'ların pizza yapmak için Factory'nizi kullandığını, ancak sürecin
+geri kalanında kendi geliştirdikleri prosedürleri uygulamaya başladıklarını gördünüz: farklı şekillerde pişiriyorlardı,
+pizzayı kesmeyi unutuyorlar ve third-party kutuları kullanıyorlardı.
 
-Early code'da, SimplePizzaFactory öncesi, pizza yapma kodu PizzaStore'a bağlıydı, ancak esnek değildi. Peki, hem
-pizzamızı yemek hem de onu korumak için ne yapabiliriz?
+Sorunu biraz daha düşündüğünüzde, aslında yapmak istediğiniz şeyin mağaza ile pizza yaratımını birbirine bağlayan, ancak
+yine de işlerin esnek kalmasına izin veren bir framework oluşturmak olduğunu görüyorsunuz.
 
-# A framework for the pizza store
+SimplePizzaFactory'den önceki ilk kodumuzda, pizza yapma kodu PizzaStore'a bağlıydı, ancak esnek değildi
 
-Pizza yapımıyla ilgili tüm faaliyetleri PizzaStore sınıfına yerelleştirmenin, aynı zamanda şubelere kendi bölgesel
-tarzlarını sürdürme özgürlüğü vermenin bir yolu vardır. Ne yapacağız, createPizza() methodunu PizzaStore'a geri
-koyacağız, ancak bu sefer abstract bir method olarak eklemek ve ardından her bölgesel tarz için bir PizzaStore alt
-sınıfı oluşturacağız. İlk olarak, PizzaStore'daki değişikliklere bakalım.
+# A framework for the pizza store (Pizza dükkanı için bir framework)
+
+Tüm pizza yapma faaliyetlerini PizzaStore sınıfına yerelleştirmenin ve yine de franchise'lara kendi bölgesel stillerine
+sahip olma özgürlüğü vermenin bir yolu var. Yapacağımız şey, createPizza() methodunu PizzaStore'a geri koymak, ancak bu
+kez abstract bir method olarak koymak ve ardından her bölgesel stil için bir PizzaStore subclass'ı oluşturmaktır. İlk
+olarak, PizzaStore'daki değişikliklere bakalım:
 
 ```
+/* PizzaStore artık abstract */
 public abstract class PizzaStore {
     public Pizza orderPizza(String type){
 
         Pizza pizza;
 
+        /* Artık createPizza, bir Factory nesnesi yerine PizzaStore'daki bir methoda yapılan çağrıya geri dönüyor */
         pizza = createPizza(type);
 
+        /* Bunların hepsi aynı görünüyor */
         pizza.prepare();
         pizza.bake();
         pizza.cut();
@@ -339,83 +360,90 @@ public abstract class PizzaStore {
         return pizza;
     }
 
+    /* Şimdi Factory nesnemizi bu methoda taşıdık. PizzaStore'da "Factory Methodumuz" artık abstract */
     abstract Pizza createPizza(String type);
 }
 ```
 
-PizzaStore şimdi abstract;
+Şimdi subclass'ları bekleyen bir mağazamız var; her bölgesel tip için bir subclass'ımız olacak (NYPizzaStore,
+ChicagoPizzaStore, CaliforniaPizzaStore) ve her subclass bir pizzayı neyin oluşturduğuna karar verecek. Şimdi bunun
+nasıl çalışacağına bir göz atalım.
 
-Şimdi createPizza, bir factory nesnesindeki bir method çağrısı olmaktan çıkıp doğrudan PizzaStore içindeki bir method
-çağrısı olarak geri döndü.
+# Allowing the subclasses to decide (Subclass'ların karar vermesine izin vermek)
 
-```abstract Pizza createPizza(String type);``` Şimdi factory nesnemizi bu methoda taşıdık. Artık "factory methodu"
-PizzaStore içinde abstract bir methoddur
+PizzaStore'un orderPizza() methodunda zaten iyi geliştirilmiş bir sipariş sistemine sahip olduğunu ve bunun tüm
+franchise'larda tutarlı olmasını sağlamak istediğinizi unutmayın.
 
-Şimdi alt sınıfları bekleyen bir mağazamız var; her bölgesel tür için bir alt sınıfımız olacak (NYPizzaStore,
-ChicagoPizzaStore, CaliforniaPizzaStore) ve her alt sınıf, bir pizzanın ne oluşturduğuna karar verme görevini
-üstlenecektir. Bunun nasıl çalışacağını görelim.
-
-# Allowing the subclasses to decide
-
-Hatırlayın, PizzaStore'un zaten orderPizza() methodunda iyi ayarlanmış bir sipariş sistemi bulunuyor ve bunun tüm
-şubeler arasında tutarlı olmasını istiyorsunuz. Bölgesel PizzaStore'lar arasında değişen şey, yapmakta oldukları
-pizzaların tarzıdır - New York Pizza ince hamur, Chicago Pizza kalın hamur ve benzerleri - ve tüm bu farklılıkları
-createPizza() methoduna iteleyip doğru türde pizzayı oluşturma sorumluluğunu ona veriyoruz. Bunu yapmanın yolu,
-PizzaStore'un her alt sınıfının createPizza() methodunun nasıl görüneceğini tanımlamasına izin vermektir. Bu nedenle
-PizzaStore'un concrete alt sınıflarına sahip olacağız, her biri kendi pizza varyasyonlarına sahip olacak ve hepsi
-PizzaStore framework'unun içine uyacak ve yine de iyi ayarlanmış orderPizza() methodunu kullanacaktır.
+Bölgesel PizzaStore'lar arasında farklılık gösteren şey, yaptıkları pizzaların tarzıdır - New York Pizza ince
+hamurludur, Chicago Pizza kalın hamurludur vb - ve tüm bu varyasyonları createPizza() methoduna aktaracağız ve doğru
+pizza tProductü oluşturmaktan sorumlu kılacağız. Bunu yapmanın yolu, PizzaStore'un her bir subclass'ının createPizza()
+methodunun neye benzediğini tanımlamasına izin vermektir. Böylece, PizzaStore'un her biri kendi pizza varyasyonlarına
+sahip, hepsi PizzaStore framework'u içinde yer alan ve yine de iyi ayarlanmış orderPizza() methodunu kullanan bir dizi
+concrete subclass'ımız olacak.
 
 ![img_3.png](../Images/FactoryDesignPattern/img_3.png)
 
-Her alt sınıf, createPizza() methodunu override eder, ancak tüm alt sınıflar PizzaStore'da tanımlanan orderPizza()
-methodunu kullanır. Eğer istenirse, bu behavior'u zorlamak için orderPizza() methodunu final yapabiliriz.
+**PizzaStore** : Her subclass createPizza() methodunu override ederken, tüm subclass'lar PizzaStore'da tanımlanan
+orderPizza() methodunu kullanır. Bunu gerçekten zorlamak istiyorsak orderPizza() methodunu final yapabiliriz.
 
-Bir franchise müşterileri için NY tarzı pizzalar istiyorsa, kendi createPizza() methoduna sahip olan NY alt sınıfını
-kullanır ve bu alt sınıf NY tarzı pizzaları oluşturur.
+**NYStylePizzaStore** : Bir franchise, müşterileri için NY tarzı pizzalar istiyorsa, NY tarzı pizzalar oluşturan kendi
+createPizza() methoduna sahip NY subclass'ını kullanır.
 
-Benzer şekilde, Chicago alt sınıfını kullanarak, Chicago malzemeleriyle createPizza() methodunun implementation'ınını
-elde ederiz.
+![img_31.png](../Images/FactoryDesignPattern/img_31.png)
 
-Unutmayın: createPizza() PizzaStore içinde abstract bir methoddur, bu nedenle tüm pizza mağazası alt türleri bu methodu
-IMPLEMENT ETMEK ZORUNDADIR.
+**ChicagoStylePizzaStore** : Benzer şekilde, Chicago subclass'ını kullanarak, Chicago içerikli bir createPizza()
+implementasyonu elde ederiz.
+
+![img_32.png](../Images/FactoryDesignPattern/img_32.png)
+
+Unutmayın: createPizza() PizzaStore'da abstract'dır, bu nedenle tüm pizza mağazası subtype'ları bu methodu implement
+etmelidir.
+
+Anlamıyorum. PizzaStore subclass'ları sadece subclass'lar. Herhangi bir şeye nasıl karar veriyorlar?
+NYStylePizzaStore'da mantıklı bir karar verme kodu göremiyorum....
+
+PizzaStore'un orderPizza() methodu açısından düşünün: Abstract PizzaStore'da tanımlanmıştır, ancak concrete type'lar
+yalnızca subclass'da oluşturulur.
 
 ![img_4.png](../Images/FactoryDesignPattern/img_4.png)
 
-Anlamıyorum. PizzaStore alt sınıfları sadece alt sınıflar. Herhangi bir şeye nasıl karar veriyorlar?
-NYStylePizzaStore'da mantıklı bir karar verme kodu göremiyorum....
+orderPizza() subclass'lar da değil, Abstract PizzaStore'da tanımlanmıştır. Dolayısıyla, methodun hangi subclass'ın kodu
+çalıştırdığı ve pizzaları yaptığı hakkında hiçbir fikri yoktur
 
-PizzaStore'un orderPizza() methodu açısından düşünün: Bu method, abstract PizzaStore içinde tanımlanır, ancak concrete
-tipler sadece alt sınıflarda oluşturulur
+Şimdi, bunu biraz daha ileri götürmek gerekirse, orderPizza() methodu bir Pizza nesnesiyle birçok şey yapar (hazırlamak,
+pişirmek, kesmek, kutulamak gibi), ancak Pizza abstract olduğu için, orderPizza()'nın hangi gerçek concrete sınıfların
+dahil olduğu hakkında hiçbir fikri yoktur. Başka bir deyişle, bu method bağımsızdır! (decoupled)
 
-orderPizza() methodu abstract PizzaStore sınıfında tanımlanmıştır, alt sınıflar değil. Bu nedenle, bu methodun hangi alt
-sınıfın kodu çalıştırdığını ve pizzaları hazırladığının bilgisi yoktur.
+![img_33.png](../Images/FactoryDesignPattern/img_33.png)
 
-Bunu biraz daha ileri taşımak için, orderPizza() methodu bir Pizza nesnesiyle birçok işlem yapar (hazırla, pişir,
-dilimle, kutula), ancak Pizza abstract olduğundan, orderPizza() hangi gerçek concrete sınıfların dahil olduğunu bilmez.
-Yani, başka bir deyişle, bu method bağımsızdır (decoupled)!
+orderPizza(), gerçekten bir pizza nesnesi almak için createPizza() işlevini çağırır. Ama hangi tür pizzayı alacak?
+orderPizza() methodu karar veremez; nasıl karar vereceğini bilemez. Peki kim karar verecek?
 
-orderPizza() createPizza() methodunu çağırarak aslında bir pizza nesnesi alır. Ancak hangi tür pizza alınacak?
-orderPizza() methodu karar veremez; nasıl yapılacağını bilmez. Peki, kim karar verir?
+orderPizza() işlevi createPizza() işlevini çağırdığında, alt sınıflarınızdan biri bir pizza oluşturmak için harekete
+geçecektir. Ne tür bir pizza yapılacak? Buna sipariş verdiğiniz pizza mağazasının seçimi karar verir: NYStylePizzaStore
+veya ChicagoStylePizzaStore.
 
-orderPizza() createPizza() methodunu çağırdığında, alt sınıflardan biri devreye girer ve bir pizza oluşturur. Hangi tür
-pizza yapılacak? İşte bu, sipariş verdiğiniz pizza dükkanının seçimine bağlıdır: NYStylePizzaStore veya
-ChicagoStylePizzaStore.
+Peki, subclass'ların verdiği real-time bir karar var mı? Hayır, ancak orderPizza() açısından bakıldığında, eğer bir
+NYStylePizzaStore seçtiyseniz, bu subclass hangi pizzanın yapılacağını belirler. Yani subclass'lar gerçekten "karar
+vermiyor" - hangi mağazayı istediğinize karar veren sizsiniz - ancak hangi tür pizzanın yapılacağını onlar belirliyor
 
-Öyleyse, alt sınıflar gerçek zamanlı bir karar mı veriyor? Hayır, ancak orderPizza() methodunun perspektifinden
-bakıldığında, eğer bir NYStylePizzaStore seçtiyseniz, o alt sınıf hangi pizza'nın yapılacağını belirler. Yani alt
-sınıflar gerçekten "karar vermiyor" - kararı hangi dükkanı seçtiyseniz siz veriyorsunuz - ancak hangi tür pizza'nın
-yapılacağını belirliyorlar.
+# Let’s make a PizzaStore (Hadi bir PizzaStore yapalım)
 
-# Let’s make a PizzaStore
-
-Franchise olmanın avantajları var. Tüm PizzaStore işlevselliğini ücretsiz olarak alırsınız. Bölgesel dükkanların yapması
-gereken tek şey PizzaStore sınıfını alt sınıf yapmak ve kendi Pizza tarzlarını uygulayan bir createPizza() methodu
-sağlamaktır. Franchise sahipleri için büyük üç pizza tarzını biz hallederiz. İşte New York bölgesel tarzı:
+Franchise olmanın avantajları vardır. Tüm PizzaStore işlevselliğini ücretsiz olarak elde edersiniz. Bölgesel mağazaların
+yapması gereken tek şey PizzaStore subclass'ını oluşturmak ve kendi Pizza stillerini uygulayan bir createPizza() methodu
+sağlamaktır. Franchise'lar için üç büyük pizza stilini biz halledeceğiz. İşte New York bölgesel tarzı:
 
 ```
+/* createPizza() bir Pizza döndürür ve subclass hangi concrete Pizza'yı instatiate edeceğinden tamamen kendisi 
+sorumludur. NYPizzaStore, PizzaStore'u extends eder, bu nedenle orderPizza() methodunu (diğerlerinin yanı sıra) 
+inherit eder */
 public class NYPizzaStore extends PizzaStore {
+
+    /* PizzaStore'da abstract olduğu için createPizza() methodunu implement etmemiz gerekir */
     @Override
     Pizza createPizza(String item) {
+    
+        /* Concrete sınıflarımızı burada oluşturuyoruz. Her Pizza türü için NY stilini oluşturuyoruz */
         if (item.equals("cheese")) {
             return new NYStyleCheesePizza();
         } else if (item.equals("veggie")) {
@@ -429,20 +457,18 @@ public class NYPizzaStore extends PizzaStore {
 }
 ```
 
-createPizza() bir Pizza döndürür ve alt sınıf, hangi concrete Pizza instance'ini oluşturacağı konusunda tamamen
-sorumludur. PizzaStore içinde abstract bir şekilde tanımlandığı için createPizza() methodunu implement etmemiz gerekiyor
-If block'ları içerisinde concrete sınıflarımızı oluşturuyoruz. Her tür Pizza için NY tarzını oluşturuyoruz.
+Superclass'da ki orderPizza() methodunun hangi Pizza'yı oluşturduğumuz hakkında hiçbir fikri olmadığını unutmayın;
+sadece onu hazırlayabileceğini, pişirebileceğini, kesebileceğini ve kutulayabileceğini biliyor!
 
-Unutmayın ki üst sınıftaki orderPizza() methodu, hangi Pizza'yı oluşturduğumuz hakkında hiçbir fikre sahip değil; sadece
-onu hazırlayabileceğini, pişirebileceğini, dilimleyebileceğini ve kutlayabileceğini biliyor!
+# Declaring a factory method (Factory methodu bildirme)
 
-# Declaring a factory method
-
-PizzaStore'a yaptığımız sadece birkaç dönüşümle, concrete sınıflarımızın instantiation'ınını bir nesnenin
-üstlenmesinden, şimdi bu sorumluluğu üstlenen bir dizi alt sınıfa geçtik. Biraz daha yakından inceleyelim:
+PizzaStore'da yaptığımız birkaç değişiklikle, concrete sınıflarımızın instatiation'larını bir nesnenin üstlenmesinden,
+artık bu sorumluluğu üstlenen bir dizi subclass'a geçtik. Şimdi daha yakından bakalım:
 
 ```
 public abstract class PizzaStore {
+    
+    /* PizzaStore'un subclass'ları createPizza() methodunda bizim için nesne oluşturma işlemini gerçekleştirir */
     public Pizza orderPizza(String type){
 
         Pizza pizza;
@@ -456,65 +482,62 @@ public abstract class PizzaStore {
         return pizza;
     }
 
+    /* Pizzaları instantiating etmek için tüm sorumluluk, Factory görevi gören bir methoda taşındı */
     abstract Pizza createPizza(String type);
 }
 ```
 
-PizzaStore'un alt sınıfları, createPizza() methodu içinde nesne oluşturmayı bizim için yönetirler.
+Bir Factory methodu nesne oluşturma işlemini gerçekleştirir ve bunu bir subclass'da encapsulate eder. Bu, superclass'da
+ki client kodunu subclass'da ki nesne oluşturma kodundan ayırır.
 
-```abstract Pizza createPizza(String type);``` Pizzaları instantiating ile ilgili tüm sorumluluk, bir factory gibi işlev
-gören bir methoda taşınmıştır. Factory method nesne oluşturmayı ele alır ve bunu bir alt sınıfta encapsulate eder. Bu,
-üst sınıftaki client kodunu alt sınıftaki nesne oluşturma kodundan bağımsız hale getirir.
+```abstract Product factoryMethod (String type);```
 
-Bir factory methodu, bir Productün çeşitli varyasyonları arasında seçim yapmak için parameterized ```(String type)```
-olarak kullanılabilir (veya kullanılmayabilir).
+Bir Factory Method, bir Product'ın çeşitli varyasyonları arasından seçim yapmak için parametrelendirilebilir (veya
+parametrelendirilemez) ```(String type)```
 
-Bir factory methodu abstract olduğu için alt sınıflar nesne oluşturmayı ele alması beklenir
+Bir Factory Method, Client'i (orderPizza() gibi superclass'da ki kod) gerçekte ne tür bir Concrete Product
+oluşturulduğunu bilmekten izole eder. ```factoryMethod()```
 
-Bir factory methodu genellikle üst sınıfta tanımlanan methodlar içinde kullanılan bir Product (Product) döndürür.
+Factory Method, tipik olarak superclass'da tanımlanan methodlar da kullanılan bir Product döndürür. ```Product```
 
-Bir factory methodu, client'i (üst sınıftaki kodu, örneğin orderPizza()) gerçekte hangi tür concrete Productün
-oluşturulduğunu bilmekten izole eder.
+Bir Factory Methodu abstract'dır, bu nedenle subclass'ların nesne oluşturma işlemini gerçekleştireceği varsayılır.
 
-# Let’s see how it works: ordering pizzas with the pizza factory method
+# Let’s see how it works: ordering pizzas with the pizza factory method (Nasıl çalıştığını görelim: pizza factory methodu ile pizza siparişi vermek)
 
 ![img_5.png](../Images/FactoryDesignPattern/img_5.png)
 
-Peki nasıl sipariş veriyorlar?
+### Peki nasıl sipariş veriyorlar?
 
-1 - İlk olarak, Joel ve Ethan bir PizzaStore instance'ina ihtiyaç duyarlar. Joel, bir ChicagoPizzaStore instance'i
-oluşturmalıdır ve Ethan bir NYPizzaStore instance'i oluşturmalıdır.
+1 - İlk olarak, Joel ve Ethan'ın bir PizzaStore instance'ina ihtiyacı vardır. Joel'in bir ChicagoPizzaStore ve Ethan'ın
+da bir NYPizzaStore instance'ina ihtiyacı var.
 
-2 - PizzaStore'a sahip olduktan sonra, hem Ethan hem de Joel orderPizza() methodunu çağırır ve istedikleri pizza
-tProductü (peynirli, sebzeli vb.) geçirirler.
+2 - Ellerinde bir PizzaStore bulunan Ethan ve Joel, orderPizza() methodunu çağırır ve istedikleri pizza type'ını (
+peynirli, sebzeli vb.) iletirler.
 
-3 - Pizzaları oluşturmak için, createPizza() methodu çağrılır, bu method NYPizzaStore ve ChicagoPizzaStore alt
-sınıflarında tanımlanmıştır. Bizim tanımladığımız şekilde, NYPizzaStore NY tarzı bir pizza instance'i oluştururken ve
-ChicagoPizzaStore Chicago tarzı bir pizza instance2i oluştururken, her iki durumda da Pizza orderPizza() methoduna geri
-döndürülür.
+3 - Pizzaları oluşturmak için, NYPizzaStore ve ChicagoPizzaStore subclass'ların da tanımlanan createPizza() methodu
+çağrılır. Tanımladığımız gibi, NYPizzaStore NY tarzı bir pizzayı, ChicagoPizzaStore ise Chicago tarzı bir pizzayı
+instantiates eder. Her iki durumda da Pizza, orderPizza() methoduna döndürülür.
 
-4 - orderPizza() methodu oluşturulan pizzanın tProductü bilmez, ancak bir pizza olduğunu bilir ve onu Ethan ve Joel için
-hazırlar, pişirir, dilimler ve kutular.
+4 - orderPizza() methodunun ne tür bir pizza yaratıldığı hakkında hiçbir fikri yoktur, ancak bunun bir pizza olduğunu
+bilir ve Ethan ve Joel için pizzayı hazırlar, pişirir, keser ve kutular.
 
-# Let’s check out how these pizzas are really made to order...
+# Let’s check out how these pizzas are really made to order... (Bu pizzaların gerçekten sipariş üzerine nasıl yapıldığına bir göz atalım...)
 
-1 - Ethan'ın siparişini takip edelim: İlk olarak bir NY PizzaStore'a ihtiyacımız var:
+1 - Ethan'ın sırasını takip edelim: önce bir NY PizzaStore'a ihtiyacımız var:
 
-```PizzaStore nyPizzaStore = new NYPizzaStore();``` NYPizzaStore için bir instance create et
+```PizzaStore nyPizzaStore = new NYPizzaStore();``` NYPizzaStore'un bir instance'ini oluşturur.
 
-2 - Şimdi bir dükkanımız olduğuna göre, bir sipariş alabiliriz:
+2 - Artık bir mağazamız olduğuna göre, sipariş alabiliriz:
 
-```nyPizzaStore.orderPizza(“cheese”);```
-
-orderPizza() methodu nyPizzaStore instance'inda çağrılır (PizzaStore içinde tanımlanan method çalışır).
+```nyPizzaStore.orderPizza(“cheese”);``` orderPizza() methodu nyPizzaStore instance'in da çağrılır (PizzaStore'un içinde
+tanımlanan method çalışır).
 
 3 - orderPizza() methodu daha sonra createPizza() methodunu çağırır:
 
-```Pizza pizza = createPizza(“cheese”);```
+```Pizza pizza = createPizza(“cheese”);``` Factory methodu olan createPizza()'nın subclass'da implement edildiğini
+unutmayın. Bu durumda bir NY Cheese Pizza döndürür.
 
-Unutmayın ki createPizza(), yani factory methodu, alt sınıfta uygulanır. Bu durumda bir NY Peynirli Pizza döndürüyor.
-
-4 - Sonunda hazırlanmamış pizza elimizde ve orderPizza() methodu onu hazırlamayı tamamlar:
+4 - Sonunda hazır olmayan pizzayı elimize aldık ve orderPizza() methodu pizzayı hazırlamayı bitirdi:
 
 ```
 pizza.prepare();
@@ -523,25 +546,28 @@ pizza.cut();
 pizza.box();
 ```
 
+Bu methodların tümü NYPizzaStore'da tanımlanan createPizza() factory methodundan döndürülen belirli bir pizzada
+tanımlanmıştır
+
 orderPizza() methodu, tam olarak hangi concrete sınıf olduğunu bilmeden bir Pizza alır.
 
-Tüm bu methodlar, NYPizzaStore içinde tanımlanan createPizza() factory methodu tarafından döndürülen özel pizzada
-tanımlanmıştır.
+# We’re just missing one thing: PIZZA! (Sadece bir şey eksik: PİZZA!)
 
-![img_6.png](../Images/FactoryDesignPattern/img_6.png)
-
-# We’re just missing one thing: PIZZA!
-
-Pizzasız bir PizzaStore pek popüler olmayacak, o yüzden onları implement edelim:
+PizzaStore'umuz pizzalar olmadan çok popüler olmayacak, bu yüzden onları implement edelim :
 
 ```
+/* Abstract bir Pizza sınıfı ile başlayacağız ve tüm concrete pizzalar bundan türetilecek */
 public abstract class Pizza {
+
+    /* Her Pizza'nın bir name'i, bir dough (hamur türü), bir sauce (sos) türü ve bir dizi toppings (malzemesi) vardır */
     String name;
     String dough; // hamur
     String sauce; // sos
 
     ArrayList<String> toppings = new ArrayList<>(); // üst malzemeler
 
+    /* Abstract sınıf, baking (pişirme), cutting (kesme) ve boxing (kutulama) için bazı temel varsayılanlar sağlar. 
+    Prepare (Hazırlık), belirli bir sırayla bir dizi adımı takip eder. */
     void prepare() {
         System.out.println("Preparing " + name);
         System.out.println("Tossing dough...");
@@ -571,242 +597,239 @@ public abstract class Pizza {
 }
 ```
 
-Bir abstract Pizza sınıfıyla başlayacağız ve tüm concrete pizzalar bundan türeyecek.
-
-Her Pizza'nın bir name'i, bir dough (hamur) çeşidi, bir sauce (sos) çeşidi ve bir dizi toppings (malzemesi) vardır.
-
-Abstract sınıf, bake, cut ve box için bazı temel varsayılanlar sağlar. Preperation belirli bir sırayla birkaç adımı
-takip eder.
-
-# Now we just need some concrete subclasses... how about defining New York and Chicago style cheese pizzas?
+# Now we just need some concrete subclasses... how about defining New York and Chicago style cheese pizzas? (Şimdi sadece bazı concrete subclass'lara ihtiyacımız var... New York ve Chicago tarzı peynirli pizzaları tanımlamaya ne dersiniz?)
 
 ```
 public class NYStyleCheesePizza extends Pizza{
 
+    /* NY Pizza'nın kendine has marinara tarzı sosu ve ince hamuru vardır */
     public NYStyleCheesePizza() {
         name = "NY Style sauce and cheese pizza";
         dough = "Thin Crust Dough";
         sauce = "Marinara sauce";
-
+        
+        /* Ve bir tane de reggiano peyniri! */
         toppings.add("Grated Reggiano Cheese");
     }
-    
 }
 ```
-
-NYStyle Pizza'nın kendi marinara tarzı sosu ve ince hamuru vardır. Ve bir malzeme olarak reggiano peyniri!
 
 ```
 public class ChicagoStyleCheesePizza extends Pizza{
     
     public ChicagoStyleCheesePizza() {
+        /* Chicago Pizza, ekstra kalın kabuğunun yanı sıra sos olarak erik domates kullanır */
         name = "Chicago Style Deep Dish Cheese Pizza";
         dough = "Extra Thick Crust Dough";
         sauce = "Plum Tomato Sauce";
 
+        /* Chicago tarzı derin tabak pizzada bol miktarda mozzarella peyniri var! */
         toppings.add("Shredded Mozzarella Cheese");
     }
 
+    /* Chicago tarzı pizza ayrıca cut() methodunu override eder, böylece parçalar kareler halinde kesilir */
     @Override
     void cut() {
         System.out.println("Cutting the pizza into square slices");
     }
-    
 }
 ```
 
-Chicago Pizza, ekstra kalın hamur ile birlikte erik domatesleri kullanır.
-
-Chicago tarzı derin taban pizza, bol miktarda mozzarella peyniri içerir!
-
-Chicago tarzı pizza, parçaların kareler halinde kesilir ve cut() methodunu override eder
-
-# You’ve waited long enough, time for some pizzas!
+# You’ve waited long enough, time for some pizzas! (Yeterince beklediniz, biraz pizza zamanı!)
 
 ```
 public class PizzaTestDrive {
 
     public static void main(String[] args) {
-        PizzaStore nyStore = new NYPizzaStore();
-        Pizza pizza = nyStore.orderPizza("cheese");
-        System.out.println("Ethan ordered a " + pizza.getName());
-    }
     
+        /* İlk olarak iki farklı mağaza oluşturuyoruz */
+        PizzaStore nyStore = new NYPizzaStore();
+        PizzaStore chicagoStore = new ChicagoPizzaStore();
+        
+        /* Ethan'ın siparişini vermek için tek bir mağaza kullanın */
+        Pizza pizza = nyStore.orderPizza(“cheese”);
+        System.out.println(“Ethan ordered a “ + pizza.getName() + “\n”);
+        
+        /* Diğeri de Joel'in */
+        pizza = chicagoStore.orderPizza(“cheese”);
+        System.out.println(“Joel ordered a “ + pizza.getName() + “\n”);
+    }
 }
 ```
 
-# It’s finally time to meet the Factory Method Pattern
+![img_6.png](../Images/FactoryDesignPattern/img_6.png)
 
-Tüm factory desenleri nesne oluşturmayı kapsar. Factory Method Deseni, alt sınıfların hangi nesneleri oluşturacağını
-belirlemelerine izin vererek nesne oluşturmayı kapsüller. Bu desenin içinde kimlerin rol aldığını görmek için bu sınıf
-diyagramlarına bir göz atalım:
+# It’s finally time to meet the Factory Method Pattern (Sonunda Factory Methodu Pattern'i ile tanışma zamanı geldi)
 
-### The Creator classes
+Tüm Factory kalıpları nesne oluşturmayı encapsulate eder. Factory Methodu Kalıbı, subclass'ların hangi nesnelerin
+oluşturulacağına karar vermesine izin vererek nesne oluşturmayı encapsulate eder. Bu kalıptaki oyuncuların kimler
+olduğunu görmek için bu sınıf diyagramlarına göz atalım:
+
+### The Creator classes (Creator class'lar)
 
 ![img_7.png](../Images/FactoryDesignPattern/img_7.png)
 
-Bu, abstract bir creator sınıfımızdır. Alt sınıfların product üretmek için implemente ettiği abstract bir factory
-methodu tanımlar. Sıklıkla creator, bir alt sınıf tarafından üretilen concrete bir product'a bağımlı olan kod içerir.
-Creator aslında hangi concrete product'ın üretildiğini asla bilmez.
+**PizzaStore** : Bu bizim Abstract Creator sınıfımızdır. Subclass'ların Product üretmek için implement edeceği abstract
+bir factory methodu tanımlar. Genellikle Creator, bir subclass tarafından üretilen Abstract bir Product'a bağlı olan kod
+içerir. Creator hangi concrete Product'ın üretildiğini asla bilemez.
 
-createPizza() methodu, factory methodudur. Product'ları üretir.
+**NYPizzaStore** : createPizza() methodu bizim Factory metodumuzdur. Product üretir.
 
-Her franchise, kendi PizzaStore alt sınıfını aldığı için, kendi pizza tarzını createPizza() methodunu implement ederek
-özgürce oluşturabilir.
+Her franchise PizzaStore'un kendi subclass'ına sahip olduğundan, createPizza() methodunu implement ederek kendi pizza
+stilini yaratmakta özgürdür
 
-Product üreten sınıflar "concrete creators" olarak adlandırılır.
+**NYPizzaStore - ChicagoPizzaStore** : Product üreten sınıflara concrete creator denir
 
-### The Product classes
+### The Product classes (Product class'ları)
 
 ![img_8.png](../Images/FactoryDesignPattern/img_8.png)
 
-Factory'ler Product'ları üretir ve PizzaStore içinde Product'ımız bir Pizzadır.
+**Pizza** : Factory'ler Product üretir ve PizzaStore'da Product'ımız bir Pizza'dır.
 
 ![img_9.png](../Images/FactoryDesignPattern/img_9.png)
 
-Yukarıdaki resimdekinler concrete Product'lardır - dükkanlarımız tarafından üretilen tüm pizzalardır.
+Bunlar concrete Product'lar - mağazalarımız tarafından üretilen tüm pizzalar.
 
-# Another perspective: parallel class hierarchies
+# Another perspective: parallel class hierarchies (Başka bir bakış açısı: paralel sınıf hiyerarşileri)
 
-Gördük ki factory method, bir factory methodu ile combined edilen orderPizza() methodunu sağlayarak bir framework sunar.
-Bu deseni bir framework olarak görmek için başka bir yol, her creator'a Product bilgisini encapsule etme şeklinde
-açıklanabilir.
-
-İki paralel sınıf hiyerarşisine bakalım ve nasıl ilişkilendiklerini görelim:
+Factory methodunun, bir factory methodu ile combined edilen bir orderPizza() methodu sağlayarak bir framework
+sağladığını gördük. Bu kalıba bir framework olarak bakmanın bir başka yolu da Product bilgisini her bir Creator'a
+encapsulate etme biçimidir. İki paralel sınıf hiyerarşisine bakalım ve nasıl ilişkili olduklarını görelim:
 
 ![img_10.png](../Images/FactoryDesignPattern/img_10.png)
 
-Bu sınıf hiyerarşilerinin nasıl paralel olduğuna dikkat edin: her ikisi de abstract sınıfları içerir ve bu abstract
-sınıflar, NY ve Chicago için belirli implementasyonları bilen concrete sınıflar tarafından extends edilir
+**The Product Classes - The Creator Classes** : Bu sınıf hiyerarşilerinin nasıl paralel olduğuna dikkat edin: her ikisi
+de NY ve Chicago için özel implementasyonları bilen concrete sınıflar tarafından extends edilen abstract sınıflara
+sahiptir
 
-NYPizzaStore, NY tarzı pizza yapmanın tüm bilgisini encapsulate eder.
+**NYPizzaStore**, NY tarzı pizzaların nasıl yapılacağı hakkındaki tüm bilgileri encapsulate eder
 
-ChicagoPizzaStore, Chicago tarzı pizza yapma bilgisini encapsulate eder.
+**ChicagoPizzaStore**, NY tarzı pizzaların nasıl yapılacağı hakkındaki tüm bilgileri encapsulate eder
 
 Factory method, bu bilgiyi encapsulating etmek için anahtardır.
 
-# Factory Method Pattern defined
+# Factory Method Pattern defined (Factory Methodu Kalıbı tanımlandı)
 
-Factory Methodu Deseni'nin resmi tanımını sunma zamanı geldi:
+Factory Method Kalıbının resmi tanımını yayınlamanın zamanı geldi:
 
-Factory Method Deseni, bir nesne oluşturmak için bir interface tanımlar, ancak alt sınıfların hangi sınıfın
-instance'inin oluşturacağına karar vermesine izin verir. Factory Method, bir sınıfın instantiation işini alt sınıflara
-defer etmesine izin verir.
+![img_34.png](../Images/FactoryDesignPattern/img_34.png)
 
-Her factory gibi, Factory Methodu Deseni bize concrete tiplerin instantiations'larını encapsule etmemiz için bir yol
-sunar. Aşağıdaki sınıf diyagramına baktığınızda, Abstract Creator size nesneler oluşturmak için bir method içeren bir
-interface sunar, bu method aynı zamanda "factory method" olarak bilinir. Abstract Creator'da implemente edilen diğer
-methodlar, factory methodu tarafından üretilen Product'lar üzerinde çalışacak şekilde yazılır. Yalnızca alt sınıflar
-factory methodunu gerçekten implemente ederler ve Product'ları oluştururlar.
+Factory Methodu Kalıbı, bir nesne oluşturmak için bir interface tanımlar, ancak hangi sınıfın instantiate edileceğine
+subclass'ların karar vermesine izin verir. Factory Methodu, bir sınıfın instantiate işini (örnek oluşturmayı)
+subclass'lara defer etmesini sağlar.
 
-Resmi tanıma benzer şekilde, geliştiriciler sıklıkla Factory Methodu'nun alt sınıfların hangi sınıfı instantiate
-edeceğine karar vermesine izin verdiğini söylerler. Decides (karar verir) derler çünkü desen alt sınıfların çalışma
-zamanında kendilerinin karar vermesine izin vermez, ancak Creator sınıf, oluşturulacak gerçek Product'lardan bilgisiz
-bir şekilde yazıldığı için, kullanılan alt sınıf seçimine bağlı olarak sadece alt sınıflar tarafından implemente edilir.
+Her Factory'de olduğu gibi, Factory Metodu Kalıbı da bize concrete tiplerin instantiations'larını encapsule etmenin bir
+yolunu sunar. Aşağıdaki sınıf diyagramına baktığınızda, Abstract Creator'ın size "Factory Methodu" olarak da bilinen
+nesne oluşturma Methoduna sahip bir interface sunduğunu görebilirsiniz. Abstract Creator'da implement edilen diğer tüm
+methodlar, Factory Methodu tarafından üretilen Product'lar üzerinde çalışmak üzere yazılmıştır. Yalnızca subclass'lar
+gerçekte Factory Methodunu implement eder ve Product'lar oluşturur.
+
+Resmi tanımda olduğu gibi, geliştiricilerin sık sık Factory Methodu'nun subclass'ların hangi sınıfı instatiate edeceğini
+karar vermesine izin verdiğini söylediklerini duyacaksınız. "Karar verir" demelerinin nedeni, kalıbın subclass'ların
+runtime'da karar vermesine izin vermesi değil, Creator sınıfın oluşturulacak Real Product'lar hakkında bilgi sahibi
+olmadan yazılması ve buna tamamen kullanılan subclass'ın seçimiyle karar verilmesidir.
 
 ![img_11.png](../Images/FactoryDesignPattern/img_11.png)
 
-Product : Tüm Product'lar, product'ları kullanan sınıfların concrete sınıf yerine interface'e başvurabilmesi için aynı
-interface'i implemente etmelidir
+**Product** : Tüm Product'lar aynı interface'i implement etmelidir, böylece Product'ları kullanan sınıflar concrete
+sınıfa değil interface'e başvurabilir
 
-Creator : Factory method hariç tüm Product'ları manipüle etmek için gerekli olan tüm methodların implementasyonlarını
-içeren bir sınıftır. Abstract factory methodu (factoryMethod()), tüm Creator alt sınıflarının implemente etmesi gereken
-bir methoddur.
+**Creator** : Creator, Factory Methodu hariç, Product'ları manipüle etmek için kullanılan tüm methodların
+implementasyonlarını içeren bir sınıftır. Abstract factoryMethod(), tüm Creator subclass'larının implement etmesi
+gereken şeydir
 
-ConcreteCreator : Gerçekte Product'ları üreten factory methodunu (factoryMethod()) implemente eder. ConcreteCreator
-bir veya daha fazla concrete product oluşturmakla sorumludur. Bu Product'ları nasıl oluşturacağına dair bilgiye
-sahip tek sınıftır.
+**ConcreteCreator** : ConcreteCreator, Product'ları gerçekten üreten method olan factoryMethod() Methodunu implement
+eder. ConcreteCreator bir veya daha fazla Concrete Product oluşturmaktan sorumludur. Bu Product'ların nasıl
+oluşturulacağı bilgisine sahip olan tek sınıftır.
 
 --**DIALOGS**--
 
 Q : Yalnızca bir ConcreteCreator'ınız olduğunda Factory Method Pattern'in avantajı nedir?
 
-A : Factory Methodu Deseni, yalnızca bir concrete creator'a sahipseniz faydalıdır, çünkü Product'ın implementasyonunu
-kullanımından ayırmış olursunuz. Ek Product'lar eklerseniz veya bir Product'ın implementasyonunu değiştirirseniz,
-Creator'ınıza herhangi bir etkisi olmaz (çünkü Creator, herhangi bir Concrete Product'la tightly coupled değildir).
+A : Factory Methodu Kalıbı, yalnızca tek bir concrete creator'ınız varsa kullanışlıdır çünkü Product'ın
+implementasyonunu kullanımından ayırırsınız. Ek Product'lar eklerseniz veya bir Product'ın implementasyonunu
+değiştirirseniz, bu durum Creator'ınızı etkilemeyecektir (çünkü Creator herhangi bir ConcreteProduct'a sıkı sıkıya bağlı
+değildir).
 
-Q : NY ve Chicago mağazalarımızın SimpleFactory kullanılarak hayata geçirildiğini söylemek doğru olur mu? Tıpkı ona
+Q : NY ve Chicago mağazalarımızın Simple Factory kullanılarak hayata geçirildiğini söylemek doğru olur mu? Tıpkı ona
 benziyorlar.
 
-A : Bu iki yaklaşım benzerdir, ancak farklı şekillerde kullanılırlar. Her concrete mağaza implementasyonu
-SimplePizzaFactory'ye çok benziyor gibi görünse de, unutmayın ki concrete mağazalar, createPizza() methodunu abstract
-bir method olarak tanımlayan bir sınıfı extends etmektedir. Her mağaza, createPizza() methodunun behavior'unu
-tanımlamakla yükümlüdür. SimpleFactory yaklaşımında, factory PizzaStore ile composed edilen başka bir nesnedir.
+A : Benzerdirler, ancak farklı şekillerde kullanılırlar. Her concrete mağazanın implementasyonu SimplePizzaFactory'ye
+çok benzese de, concrete mağazaların createPizza() methodunu abstract bir method olarak tanımlayan bir sınıfı extends
+ettiğini unutmayın. createPizza() methodunun behavior'unu tanımlamak her bir mağazaya bağlıdır. Simple Factory'de
+Factory, PizzaStore ile birlikte oluşturulan başka bir nesnedir.
 
 Q : Factory methodu ve Creator hep abstract mı olmalı?
 
 A : Hayır, concrete bir Product üretmek için varsayılan bir factory methodu tanımlayabilirsiniz. Böylece, Creator'ın
-alt sınıfları olmasa bile her zaman bir Product yaratma aracınız olur.
+subclass'ları olmasa bile her zaman Product oluşturmak için bir aracınız olur.
 
-Q : Her mağaza, geçilen türe dayalı olarak dört farklı türde pizza yapabilir. Tüm concrete creator'lar birden fazla
-Product'mı yapar, yoksa bazen sadece bir tane mi yaparlar?
+Q : Her mağaza, iletilen türe göre dört farklı çeşit pizza yapabiliyor. Tüm Concrete Creator'lar birden fazla Product mı
+üretiyor yoksa bazen sadece bir tane mi üretiyorlar?
 
-A : Implement ettiğimiz şey, parameterized factory method olarak bilinen şeydir. Bir parametreye dayalı olarak birden
-fazla nesne yaratabilir, fark ettiğiniz gibi. Ancak genellikle bir factory sadece bir nesne üretir ve parametre
-almayabilir. Her ikisi de desenin geçerli biçimleridir.
+A : Parameterized Factory Methodu olarak bilinen yöntemi implement ettik. Fark ettiğiniz gibi, geçirilen bir
+parametreye bağlı olarak birden fazla nesne oluşturabilir. Bununla birlikte, genellikle bir factory sadece bir nesne
+üretir ve parametrelendirilmez. Her ikisi de kalıbın geçerli biçimleridir.
 
 Q : Parameterized tipleriniz "type-safe" gibi görünmüyor. Sadece bir String geçiriyorum! Eğer "CalmPizza" istesem ne
 olurdu?
 
-A : Kesinlikle doğru söylüyorsunuz ve bu, iş dünyasında "runtime error" olarak adlandırdığımız bir soruna neden
-olurdu. Parametreleri daha "type-safe" hale getirmek için kullanabileceğiniz daha sofistike birkaç teknik
-bulunmaktadır veya başka bir deyişle, parametre hatalarını derleme zamanında yakalamak için kullanılabilir. Örneğin,
-parametre tiplerini temsil eden nesneler oluşturabilir, statik sabitleri kullanabilir veya Java 5'te enumlar
-kullanabilirsiniz.
+A : Kesinlikle haklısınız ve bu, sektörde "runtime error" olarak adlandırdığımız bir duruma neden olur.
+Parametreleri daha "type-safety" hale getirmek ya da başka bir deyişle, parametrelerdeki hataların compile time'da
+yakalanabilmesini sağlamak için kullanılabilecek daha karmaşık birkaç teknik daha vardır. Örneğin, parametre türlerini
+temsil eden nesneler oluşturabilir, statik sabitler kullanabilir veya Java 5'te enum'ları kullanabilirsiniz.
 
-Q : Aradaki fark konusunda kafam hala biraz karışık. SimpleFactory ve Factory Method arasında. Factory Method'da pizzayı
-döndüren sınıfın bir alt sınıf olması dışında birbirlerine çok benzerler. Açıklayabilir misin?
+Q : Simple Factory ve Factory Method arasındaki fark konusunda hala biraz kafam karışık. Factory Method'da pizzayı
+döndüren sınıfın bir subclass olması dışında çok benzer görünüyorlar. Açıklayabilir misiniz?
 
-A : Alt sınıfların SimpleFactory'e çok benzediği konusunda haklısınız, ancak SimpleFactory'yı bir seferlik bir işlem
-olarak düşünün, Factory Method ile alt sınıfların hangi implementasyonu kullanılacağına karar vermesine izin veren bir
-framework oluşturduğunuzu düşünün. Örneğin, Factory Method'daki orderPizza() methodu, bir pizzayı oluşturmak için bir
-factory methoda dayanan genel bir framework sağlar. Pizza yapımında kullanılan concrete sınıfları gerçekten oluşturur.
-PizzaStore sınıfını alt sınıflandırarak, orderPizza() tarafından döndürülen pizzanın yapımında hangi concrete
-Productlerin
-kullanılacağına siz karar verirsiniz. SimpleFactory ile karşılaştırırsanız, nesne oluşturmayı encapsule etmenin bir
-yolunu verir, ancak Factory Method'un esnekliğini vermez çünkü oluşturduğunuz Product'ları değiştirmenin bir yolu
-yoktur.
+A : Subclass'ların Simple Factory'ye çok benzediği konusunda haklısınız, ancak Simple Factory'yi tek seferlik bir
+anlaşma olarak düşünün, Factory Method ile subclass'ların hangi implementasyonun kullanılacağına karar vermesine izin
+veren bir framework oluşturuyorsunuz. Örneğin, Factory Method'daki orderPizza() methodu, pizza yapmak için kullanılan
+concrete sınıfları oluşturmak için bir factory methoduna dayanan pizza oluşturmak için genel bir framework sağlar.
+PizzaStore sınıfını subclass'lara ayırarak, orderPizza() methodunun döndürdüğü pizzanın yapımında hangi Concrete
+Product'ların kullanılacağına siz karar verirsiniz. Bunu SimpleFactory ile karşılaştırın, bu size nesne oluşturmayı
+encapsulate etmenin bir yolunu sunar, ancak oluşturduğunuz Product'ları değiştirmenin bir yolu olmadığı için size
+Factory Methodunun esnekliğini vermez.
 
 --**DIALOGS**--
 
 Usta : Çekirge, eğitimin nasıl gidiyor, bana anlat.
 
 Öğrenci: Usta, encapsulate what varies (ne değişken ise kapsayın) ilkesi üzerine olan çalışmalarımı daha da ileriye
-taşıdım.
+taşıdım. "farklılıkları encapsulate etme" çalışmamı daha da ileri götürdüm.
 
 Usta : Devam et!
 
-Öğrenci : Öğrendim ki nesneleri oluşturan kodu da encapsulate edebiliriz. Concrete sınıfları instantiates ettiğimizde,
-bu sıkça değişen bir alandır. "factory" olarak adlandırılan bir teknik öğrendim ve bu instantiaon'ının behavior'unu
-encapsule etmememize olanak tanır.
+Öğrenci : Nesneleri oluşturan kodun encapsulate edilebileceğini öğrendim. Concrete sınıfları instantiates eden bir
+kodunuz olduğunda, bu sık sık değişen bir alandır. "Factory'ler" adı verilen ve bu instantitation behavior'unu
+encapsulete etmemize olanak tanıyan bir teknik öğrendim.
 
-Usta : Ve bu "factory," ne gibi faydalar sağlar?
+Usta : Peki bu "factory'ler" ne işe yarıyor?
 
-Öğrenci : Bunların birçok faydası var. Tüm oluşturma kodumu bir nesne veya methodda toplayarak kodumda tekrarı önlerim
-ve bakım yapmak için tek bir yer sağlarım. Bu aynı zamanda client'ların nesneleri instatiate etmek için gerekli olan
-concrete sınıflar yerine yalnızca interface'lerden bağımlı olmaları anlamına gelir. Çalışmalarım sırasında öğrendiğim
-gibi, bu, bir implementasyona değil bir interface programlama yapmamı sağlar ve bu da kodumu gelecekte daha esnek ve
-genişletilebilir hale getirir.
+Öğrenci: Çok sayıda var. Tüm creation kodumu tek bir nesne ya da methoda yerleştirerek kodumda yinelemeyi önler ve
+bakım için tek bir yer sağlarım. Bu aynı zamanda client'ların nesneleri oluşturmak için gereken concrete sınıflar yerine
+yalnızca interface'lere bağlı olduğu anlamına gelir. Çalışmalarımda öğrendiğim gibi bu, "to program to an interface, not
+an implmentation", ve bu da kodumu gelecekte daha esnek ve genişletilebilir hale getiriyor.
 
 Usta : Evet, çekirge, nesne yönelimli programlama içgüdüleriniz gelişiyor gibi görünüyor. Bugün benim için herhangi bir
 sorunuz var mı?
 
-Öğrenci : Usta, nesne oluşturmayı encapsulate ederek abstraction'lara kod yazdığımı ve client kodumu gerçek
-implementasyonlardan ayırdığımı biliyorum. Ancak factory kodum hala gerçek nesneleri instantiate etmek için concrete
-sınıfları kullanmalıdır. Kendi kendime bir oyun mu oynuyorum?
+Öğrenci: Efendim, nesne yaratımını encapsulate ederek abstraction'lara kodlama yaptığımı ve client kodumu gerçek
+implementasyonları ayırdığımı biliyorum. Ancak Factory kodum hala gerçek nesneleri instantiate etmek için concrete
+sınıflar kullanmalıdır. Kendi kendimi kandırmış olmuyor muyum?
 
-Usta : Çekirge, nesne oluşturma hayatın bir gerçeğidir; nesneleri oluşturmalıyız, aksi takdirde tek bir Java programı
-bile oluşturamayız. Ancak, bu gerçeği bilerek, kodumuzu tasarlayabiliriz, böylece bu oluşturma kodunu, gözlerinizi
-kapattığınız koyunun yünü gibi kontrol altına almış oluruz. Bir kez kontrol altına alındığında, oluşturma kodunu
-koruyabilir ve bakımını yapabiliriz. Eğer oluşturma kodumuzu serbest bırakırsak, o zaman "yününü" asla toplayamayız.
+Usta: Çekirge, nesne yaratma hayatın bir gerçeğidir; nesneler yaratmak zorundayız yoksa asla tek bir Java programı bile
+yaratamayız. Ancak, bu gerçekliğin bilgisiyle, kodumuzu tasarlayabiliriz, böylece bu Creation kodunu, yününü gözünüzün
+üzerinden çekeceğiniz koyun gibi ağıllaştırmış oluruz. Bir kez çembere aldıktan sonra, yaratılış kodunu koruyabilir ve
+ona özen gösterebiliriz. Yaratılış kodumuzun başıboş dolaşmasına izin verirsek, onun "yününü" asla toplayamayız.
 
 Öğrenci : Usta, bunun gerçek olduğunu görüyorum.
 
-# A very dependent PizzaStore
+# A very dependent PizzaStore (Çok bağımlı bir pizzastore)
 
-Haydi, bir OO (Object-Oriented) factory'sini hiç duymamış gibi davranalım. Aşağıda bir factory kullanmayan PizzaStore'un
-bir sürümü verilmiştir; bu sınıfın bağımlı olduğu concrete pizza nesnelerinin sayısını hesaplayın. Bu PizzaStore'a
-California tarzı pizzalar eklediğinizde, o zaman kaç nesneye bağımlı olurdu?
+OO factory'sini hiç duymadığınızı varsayalım. İşte PizzaStore'un factory kullanmayan bir versiyonu; bu sınıfın bağımlı
+olduğu concrete pizza nesnelerinin sayısını hesaplayın. Eğer bu PizzaStore'a California tarzı pizzalar eklerseniz, o
+zaman kaç nesneye bağımlı olur?
 
 ```
 public class DependentPizzaStore {
@@ -814,6 +837,7 @@ public class DependentPizzaStore {
     
         Pizza pizza = null;
         
+        /* Tüm NY tarzı pizzaları idare eder */
         if (style.equals(“NY”)) {
             if (type.equals(“cheese”)) {
                 pizza = new NYStyleCheesePizza();
@@ -824,6 +848,8 @@ public class DependentPizzaStore {
             } else if (type.equals(“pepperoni”)) {
                 pizza = new NYStylePepperoniPizza();
             }
+            
+        /* Tüm Chicago tarzı pizzaları idare eder */
         } else if (style.equals(“Chicago”)) {
             if (type.equals(“cheese”)) {
                 pizza = new ChicagoStyleCheesePizza();
@@ -848,195 +874,172 @@ public class DependentPizzaStore {
 }
 ```
 
-# Looking at object dependencies
+# Looking at object dependencies (Nesne bağımlılıklarına bakma)
 
-Doğrudan bir nesne instance'i oluşturduğunuzda, bu nesnenin concrete sınıfına bağımlı hale geliyorsunuz. Bir sayfa
-önceki oldukça bağımlı PizzaStore örneğimize bir göz atın. PizzaStore sınıfının içinde pizza nesnelerini doğrudan
-oluşturuyor, bunun yerine bir factory'e iletmiyor. Eğer PizzaStore'un bu sürümünü ve ona bağımlı olan tüm nesneleri
-temsil eden bir diyagram çizersek, işte böyle görünüyor:
+Bir nesneyi doğrudan instantiate ettiğinizde, onun concrete sınıfına bağımlı olursunuz. Bir sayfa önceki çok bağımlı
+PizzaStore'umuza bir göz atın. Tüm pizza nesnelerini bir factory'e delege etmek yerine doğrudan PizzaStore sınıfında
+oluşturur. PizzaStore'un bu versiyonunu ve bağımlı olduğu tüm nesneleri temsil eden bir diyagram çizersek, işte böyle
+görünür:
 
 ![img_12.png](../Images/FactoryDesignPattern/img_12.png)
 
-Bu sınıfların implementasyonları değişirse, o zaman PizzaStore sınıfını da değiştirmemiz gerekebilir.
+**PizzaStore** : PizzaStore'un bu sürümü tüm bu pizza nesnelerine bağlıdır, çünkü onları doğrudan oluşturur. Bu
+sınıfların implementasyonu değişirse, PizzaStore'da değişiklik yapmamız gerekebilir. Pizzaların concrete
+implementasyonlarında yapılan herhangi bir değişiklik PizzaStore'u etkilediğinden, PizzaStore'un pizza
+implementasyonlarına "bağlı" olduğunu söyleriz.
 
-Bu PizzaStore sürümü, bu pizza nesnelerine bağımlıdır, çünkü bunları doğrudan oluşturur.
+Eklediğimiz her yeni pizza türü PizzaStore için başka bir bağımlılık yaratıyor.
 
-Pizza implemetasyonlarının concrete implementasyonlarında yapılacak herhangi bir değişiklik, PizzaStore'u etkilediğinde,
-PizzaStore'un pizza implementasyonlarına "bağımlı" olduğunu söyleyebiliriz.
+# The Dependency Inversion Principle (Bağımlılığın Tersine Çevrilmesi İlkesi)
 
-Eklediğimiz her yeni pizza türü, PizzaStore için başka bir bağımlılık yaratır.
-
-# The Dependency Inversion Principle
-
-Kodumuzdaki concrete sınıflara olan bağımlılıkları azaltmanın "iyi bir şey" olduğu açıktır. Aslında, bu kavramı
-resmileştiren bir nesne yönelimli tasarım ilkesine sahibiz; hatta büyük, resmi bir adı bile var: Dependency Inversion
-Principle. İşte genel prensip:
+![img_35.png](../Images/FactoryDesignPattern/img_35.png)
 
 **Abstraction'lara bağımlı olun. Concrete sınıflara bağımlı olmayın.**
 
-![img_13.png](../Images/FactoryDesignPattern/img_13.png)
+İlk başta bu ilke kulağa "Program to an interface, not an implementation" gibi geliyor, değil mi? Benzerdir; ancak
+Dependency Inversion Principle abstraction hakkında daha da güçlü bir açıklama yapar. High-level component'lerimizin
+low-level component'lerimize bağlı olmaması gerektiğini, bunun yerine her ikisinin de abstraction'lara bağlı olması
+gerektiğini öne sürer. Ama bu ne anlama geliyor?
 
-Başlangıçta, bu prensip "Program to an interface, not an implementation" gibi görünüyor, değil mi? Benzerdir; ancak
-Dependency Inversion Principle, abstraction hakkında daha da güçlü bir ifade yapar.
+"High-level" bir component, behavior'u diğer "low-level" componentler açısından tanımlanan bir sınıftır. Örneğin,
+PizzaStore high-level bir component'dir çünkü behavior'u pizzalar açısından tanımlanmıştır - tüm farklı pizza
+nesnelerini oluşturur, hazırlar, pişirir, keser ve kutular, kullandığı pizzalar ise low-level componentlerdir.
 
-Bu, high-level componentlerimizin low-level componentlerimize bağımlı olmaması gerektiğini, bunun yerine her ikisinin
-de abstraction'lara bağımlı olması gerektiğini önerir. Peki, bu ne anlama geliyor?
+Bir önceki sayfadaki pizza mağazası diyagramına tekrar bakarak başlayalım. PizzaStore bizim "high-level componentimiz",
+pizza implementasyonları ise "low-level componentlerimizdir" ve PizzaStore'un concrete pizza sınıflarına bağımlı olduğu
+açıktır.
 
-Neyse, önce bir önceki sayfadaki pizza dükkanı diyagramına tekrar göz atarak başlayalım. PizzaStore, "high-level
-componentimiz" ve pizza implementasyonları "low-level componentlerimiz"dir ve açıkça PizzaStore'un concrete pizza
-sınıflarına bağımlı olduğunu göstermektedir.
+Şimdi, bu ilke bize kodumuzu concrete sınıflara değil abstraction'lara bağlı olacak şekilde yazmamız gerektiğini söyler.
+Bu hem high-level modüllerimiz hem de low-level modüllerimiz için geçerlidir.
 
-Şimdi, bu prensip bize kodumuzu abstractionları, concrete sınıflara bağımlı olmadan yazmamız gerektiğini söyler. Bu, hem
-high-level modüllerimiz için hem de low-level modüllerimiz için geçerli olan bir ilkedir.
+Ama bunu nasıl yapacağız? Bu prensibi Very Dependent PizzaStore uygulamamıza nasıl implement edeceğimiz düşünelim...
 
-Peki, bunu nasıl yaparız? Bu ilkeyi Very Dependent PizzaStore uygulamamıza nasıl uygulayacağımızı düşünelim...
+# Applying the Principle (Prensibin Uygulanması)
 
-Bir high-level component, behavior'u diğer "low-level" componentlere göre tanımlanan bir sınıftır. Örneğin, PizzaStore,
-behavior'u pizzalarla ilişkilendirilen bir high-level componentdir - farklı pizza nesnelerini oluşturur, hazırlar,
-pişirir, keser ve paketler, bu sırada kullandığı pizzalar low-level componentlerdir.
+Şimdi, Çok Bağımlı PizzaStore ile ilgili temel sorun, orderPizza() methodunda aslında concrete türleri instatiate ettiği
+için için her pizza tProducte bağımlı olmasıdır.
 
-# Applying the Principle
-
-Çok Bağımlı PizzaStore'un temel sorunu, her tür pizzaya bağımlı olmasıdır, çünkü orderPizza() methodunda concrete
-tipleri gerçekten instantiates eder.
-
-Bir abstraction olan Pizza'yı oluşturduk, ancak yine de bu kodda concrete Pizza'ları oluşturuyoruz, bu nedenle bu
-abstraction'dan pek fazla yararlanamıyoruz.
-
-Bu instantiations'ları orderPizza() methodunun dışına nasıl çıkarabiliriz? İşte, Factory Method bunu yapmamıza izin
-verir. Dolayısıyla Factory Method'u uyguladıktan sonra diyagramımız şöyle görünüyor:
+Pizza adında bir abstraction oluşturmuş olsak da, bu kodda concrete Pizzalar oluşturuyoruz, bu nedenle bu
+abstraction'dan çok fazla yararlanamıyoruz. Bu instatiations'ları orderPizza() methodundan nasıl çıkarabiliriz?
+Bildiğimiz gibi, Factory Methodu tam da bunu yapmamıza olanak tanır. Factory Methodunu implement ettikten sonra
+diyagramımız şöyle görünür:
 
 ![img_14.png](../Images/FactoryDesignPattern/img_14.png)
 
-Şimdi PizzaStore, yalnızca Pizza adlı abstract sınıfa bağımlıdır.
+**PizzaStore** : artık yalnızca abstract sınıf olan Pizza'ya bağlıdır.
 
-Pizza, abstract bir sınıftır... bir abstraction
+**Pizza** : abstract bir sınıftır... bir abstraction. Concrete pizza sınıfları da Pizza abstraction'ına bağlıdır, çünkü
+Pizza abstract sınıfındaki Pizza interface'ini (genel anlamda "interface" kullandığımızı unutmayın) implement ederler.
 
-Concrete pizza sınıfları da Pizza abstraction'ına bağımlıdır, çünkü Pizza abstract sınıfında Pizza interface'ini
-implement ederler (hatırlatmak gerekirse, "interface" terimini genel anlamıyla kullanıyoruz).
+Factory Methodunu implement ettikten sonra, high-level componentimiz olan PizzaStore'un ve low-level componentlerimiz
+olan pizzaların her birinin de abstraction olan Pizza'ya bağlı olduğunu fark edeceksiniz. Factory Method, Dependency
+Inversion Principle'a bağlı kalmak için tek teknik değildir, ancak en güçlü tekniklerden biridir.
 
-Factory Method'u implement ettikten sonra, high-level componentimiz olan PizzaStore ve low-level componentlerimiz olan
-Pizzaların her ikisi de abstraction olan Pizza'ya bağımlıdır. Dependency Inversion Principle'a uymak için
-kullanabileceğiniz tek teknik Factory Method değildir, ancak daha güçlü tekniklerden biridir.
+Tamam, bağımlılık kısmını anladım ama neden buna dependency inversion deniyor?
 
-Tamam, dependency (bağımlılık) kısmını anladım ama neden buna dependency inversion deniyor?
+Dependency Inversion Principle'daki "inversion (tersine çevirme)" nerede?
 
-Dependency Inversion Principle İlkesi'ndeki "inversion (tersine çevirme)" nerede?
+Dependency Inversion Principle adındaki "inversion", OO tasarımınız hakkında tipik olarak düşünebileceğiniz
+yolu tersine çevirdiği için oradadır. Önceki sayfadaki diyagrama bakın, low-level componentlerin artık daha high-level
+bir abstraction'a bağlı olduğuna dikkat edin. Aynı şekilde, high-level component de aynı abstraction'a bağlıdır.
+Dolayısıyla, birkaç sayfa önce çizdiğimiz yukarıdan aşağıya bağımlılık şeması tersine dönmüş, high-level hem de
+low-level modüller artık abstraction'a bağlı hale gelmiştir. Tipik tasarım sürecinin arkasındaki düşünceyi de gözden
+geçirelim ve prensibi uygulamaya koymanın tasarım hakkındaki düşüncelerimizi nasıl tersine çevirebileceğini görelim...
 
-"Dependency Inversion Principle" adındaki "inversion" ifadesi, genellikle OO tasarımınızı düşünme şeklinizi
-tersine çevirdiği için kullanılır. Bir önceki sayfadaki diyagrama bakın, low-level componentlerin şimdi daha yüksek
-seviyeli bir abstraction'a bağımlı olduğunu fark edin. Aynı şekilde, high-level component de aynı abstraction'a
-bağlıdır.
+# Inverting your thinking... (Düşünceni tersine çeviriyorsun.)
 
-Bu nedenle, birkaç sayfa önce çizdiğimiz yukarıdan aşağıya bağımlılık şeması kendini tersine çevirmiş durumda, hem
-high-level hem de low-level modüller şimdi abstraction'a bağlıdır.
+Hmmm, Pizza Dükkanları pizza hazırlar, pişirir ve kutular. Yani, dükkanımın bir sürü farklı pizza yapabilmesi gerekiyor:
+CheesePizza, VeggiePizza, ClamPizza, vb.
 
-Ayrıca, tipik tasarım süreci arkasındaki düşünceyi de inceleyelim ve bu ilkenin tasarım düşünme şeklimizi nasıl tersine
-çevirebileceğini görelim...
+Tamam, bir PizzaStore'u hayata geçirmeniz gerekiyor. Aklınıza gelen ilk düşünce nedir?
 
-# Inverting your thinking...
+CheesePizza, VeggiePizza ve ClamPizza sadece Pizzadır, bu yüzden bir Pizza interface'i paylaşmalıdırlar.
 
-Bir PizzaStore implement etmeniz gerekiyor. Aklınıza ilk gelen düşünce nedir?
+Doğru, en üstten başlayıp concrete sınıflara kadar her şeyi takip edersiniz. Ancak, gördüğünüz gibi, mağazanızın
+concrete pizza türlerini bilmesini istemezsiniz, çünkü o zaman tüm bu concrete sınıflara bağımlı olacaktır! Şimdi,
+düşüncenizi "tersine çevirelim"... en üstten başlamak yerine, Pizzalardan başlayın ve neleri abstract yapabileceğinizi
+düşünün. Doğru ya! Pizza abstraction'ı hakkında düşünüyorsunuz. Şimdi geri dönün ve Pizza Mağazasının tasarımını tekrar
+düşünün.
 
-CheesePizza, VeggiePizza ve ClamPizza hepsi sadece Pizza olduğundan, bir Pizza interface'ini paylaşmalılar.
+Artık bir Pizza abstraction'ına sahip olduğum için, Pizza Mağazamı tasarlayabilir ve concrete pizza sınıfları hakkında
+endişelenmeyebilirim.
 
-Evet, başlangıcı yukarıdan yaparsınız ve aşağıya doğru devam edersiniz. Ancak, gördüğünüz gibi, mağazanızın concrete
-pizza türlerini bilmesini istemezsiniz, çünkü o zaman tüm bu concrete sınıflara bağımlı olacaktır!
+Yakın. Ancak bunu yapmak için bu concrete sınıfları Pizza Mağazanızdan çıkarmak üzere bir factory'e güvenmeniz gerekir.
+Bunu yaptıktan sonra, farklı concrete pizza türleriniz yalnızca bir abstraction'a bağlıdır ve mağazanız da öyle.
+Mağazanın concrete sınıflara bağlı olduğu bir tasarımı aldık ve bu bağımlılıkları tersine çevirdik (sizin düşüncenizle
+birlikte).
 
-Şimdi düşünce yapınızı "tersine çevirelim"... en üstten başlamak yerine, Pizza türlerinden başlayın ve neyi
-abstact yapabileceğinizi düşünün.
-
-Doğru! Şu anda Pizza abstraction'ını düşünüyorsunuz. Şimdi, Pizza Dükkanı tasarımını tekrar düşünün.
-
-Şimdi bir Pizza abstraction'ım olduğuna göre, Pizza Dükkanımı tasarlayabilirim ve concrete pizza sınıfları hakkında
-endişe etmem gerekmez.
-
-Yaklaşık olarak doğru! Ancak bunu yapabilmek için mağazanızdan bu concrete sınıfları çıkarmak için bir factory'e
-güvenmelisiniz. Bunu yaptığınızda, farklı concrete pizza türleri sadece bir abstraction'a bağımlı olur ve mağazanız da
-öyle. Mağazanın concrete sınıflara bağımlı olduğu bir tasarımı alıp bu bağımlılıkları tersine çevirdik (ve düşünce
-yapınızı).
-
-# A few guidelines to help you follow the Principle...
+# A few guidelines to help you follow the Principle... (Prensibi takip etmenize yardımcı olacak birkaç kılavuz)
 
 Dependency Inversion Principle'i ihlal eden nesne yönelimli tasarımlardan kaçınmanıza yardımcı olabilecek aşağıdaki
 kurallar:
 
-* Hiçbir variable, bir concrete sınıfa referans tutmamalıdır. Eğer "new" kullanıyorsanız, concrete bir sınıfa referans
-  tutmuş olursunuz. Bu durumu aşmak için bir factory kullanın!
+* Hiçbir variable concrete bir sınıfa referans tutmamalıdır. Eğer "new" kullanırsanız, concrete bir sınıfa referans
+  tutmuş olursunuz. Bunu aşmak için bir factory kullanın!
 
-* Bir sınıf, bir concrete sınıftan türetilmemelidir. Bir concrete sınıftan türetiyorsanız, concrete bir sınıfa bağımlı
-  hale geliyorsunuz demektir. Bir abstraction'dan, örneğin bir interface veya abstract bir sınıftan türetin.
+* Hiçbir sınıf concrete bir sınıftan türetilmemelidir. Concrete bir sınıftan türetirseniz, Concrete bir sınıfa bağlı
+  olursunuz. Bir interface veya abstract sınıf gibi bir abstraction'dan türetebilirsiniz.
 
-* Hiçbir method, temel sınıflarının implement edilen methodlarını override etmemelidir. Eğer bir implemente edilen
-  methodu override ediyorsanız, temel sınıfınız aslında başlangıçta bir abstraction değildi demektir. Temel sınıfta
-  implemente edilen bu methodlar, tüm alt sınıflarınız tarafından paylaşılmak üzere tasarlanmıştır.
+* Hiçbir method, base sınıflarından herhangi birinin implement edilen bir methodunu override etmemelidir. Implement
+  edilen bir methodu override ediyorsanız, base sınıfınız başlangıçta gerçekten bir abstraction değildir. Base sınıfta
+  implemente edilen bu methodların tüm subclass'larınız tarafından paylaşılması gerekir.
 
 Ama durun, bu yönergeleri takip etmek imkansız değil mi? Eğer bunlara uyarsam, asla tek bir program bile yazamam!
 
-Tamamen doğru söylüyorsunuz! Birçok ilkimiz gibi, bu bir yönerme olan ve her zaman takip etmeniz gereken bir kural
-yerine uğraşmanız gereken bir kılavuzdur.
+Kesinlikle haklısınız! İlkelerimizin çoğu gibi, bu da her zaman uymanız gereken bir kuraldan ziyade, çaba göstermeniz
+gereken bir kılavuzdur. Açıkçası, şimdiye kadar yazılmış her bir Java programı bu yönergeleri ihlal ediyor! Ancak, bu
+ilkeleri içselleştirir ve tasarım yaparken aklınızın bir köşesinde tutarsanız, ilkeyi ne zaman ihlal ettiğinizi
+bilirsiniz ve bunu yapmak için iyi bir nedeniniz olur. Örneğin, değişme ihtimali olmayan bir sınıfınız varsa ve bunu
+biliyorsanız, kodunuzda concrete bir sınıf instantiate etmek dünyanın sonu değildir. Bir düşünün; String nesnelerini iki
+kez düşünmeden her zaman instantiate ediyoruz. Bu ilkeyi ihlal eder mi? Evet. Peki bu doğru mu? Evet. Neden mi? Çünkü
+String'in değişmesi pek olası değil. Öte yandan, yazdığınız bir sınıfın değişme olasılığı varsa, bu değişikliği
+encapsule etmek için Factory Method gibi bazı iyi tekniklere sahipsiniz.
 
-Açıkça, bugüne kadar yazılmış her Java programı bu kılavuzları ihlal ediyor! Ancak, bu kılavuzları içselleştirir ve
-tasarlarken aklınızda bulundurursanız, ilkeyi ihlal ettiğinizi bileceksiniz ve bunu yapmak için iyi bir nedeniniz
-olacak. Örneğin, değişmeyecek bir sınıfınız varsa ve bunu biliyorsanız, kodunuzda concrete bir sınıfı instantiate
-etmenin dünya sonu olmadığını düşünün.
+# Meanwhile, back at the PizzaStore... (Bu arada, PizzaStore'da.)
 
-Düşünün; String nesnelerini düşünmeden sürekli olarak instantiate ediyoruz. Bu ilkeyi ihlal ediyor mu? Evet. Bu sorun
-mu? Hayır. Neden? Çünkü String çok olası bir şekilde immutable'dır. Öte yandan, yazdığınız bir sınıfın değişmesi
-muhtemelse, bu değişikliği kapsamak için Factory Method gibi iyi tekniklere sahipsiniz.
-
-# Meanwhile, back at the PizzaStore...
-
-PizzaStore'un tasarımı gerçekten şekilleniyor: esnek bir framework'u var ve tasarım ilkelerine uyum sağlama konusunda
-iyi bir iş çıkarıyor.
-
-Şimdi, Objectville Pizza'nın başarısının anahtarı her zaman taze, kaliteli malzemeler olmuştur, ve keşfettiğiniz şey,
-yeni framework ile şubelerinizin prosedürlerinizi takip ettiği, ancak bazı şubelerin maliyetleri düşürmek ve
-kârlılıklarını artırmak için pastalarında kalitesiz malzemeleri ikame ettikleri.
-
-Bunu yapmanız gerektiğini biliyorsunuz, çünkü uzun vadede bu, Objectville markasına zarar verecektir!
+PizzaStore'un tasarımı gerçekten şekilleniyor: esnek bir framework var ve tasarım ilkelerine bağlı kalarak iyi bir iş
+çıkarıyor. Objectville Pizza'nın başarısının anahtarı her zaman taze, kaliteli malzemeler olmuştur ve keşfettiğiniz şey,
+yeni framework ile franchise'larınızın prosedürlerinizi takip ettiği, ancak birkaç franchise'ın maliyetleri düşürmek ve
+marjlarını artırmak için turtalarında daha düşük malzemeler kullandıklarıdır. Bir şeyler yapmanız gerektiğini
+biliyorsunuz, çünkü uzun vadede bu Objectville markasına zarar verecek!
 
 ### Malzemelerinizde tutarlılık sağlamak
 
-Peki, her bir şubenin kaliteli malzemeleri kullanmasını nasıl sağlayacaksınız? Bu işi üreten ve şubelere sevk eden bir
-factory inşa edeceksiniz!
-
-Ancak bu planın tek bir sorunu var: şubeler farklı bölgelerde bulunuyor ve New York'ta kırmızı sos, Chicago'da kırmızı
-sos değil. Bu nedenle, New York'a gönderilmesi gereken bir dizi malzeme ve Chicago'ya gönderilmesi gereken farklı bir
-dizi malzeme var. Daha yakından bakalım:
+Peki her franchise'ın kaliteli malzemeler kullandığından nasıl emin olacaksınız? Bunları üreten ve bayilerinize gönderen
+bir Factory kuracaksınız! Şimdi bu planla ilgili tek bir sorun var: Franchise'lar farklı bölgelerde yer alıyor ve New
+York'ta kırmızı sos olan şey Chicago'da kırmızı sos değil. Dolayısıyla, New York'a gönderilmesi gereken bir dizi
+malzemeniz ve Chicago'ya gönderilmesi gereken farklı bir setiniz var. Daha yakından bakalım:
 
 ![img_15.png](../Images/FactoryDesignPattern/img_15.png)
 
-Aynı Product ailelerine (hamur, sos, peynir, sebzeler, etler) sahibiz, ancak bölgeye bağlı olarak farklı
-implementasyonlara sahibiz.
+Aynı Product ailelerine sahibiz (hamur, sos, peynir, sebzeler, etler) ancak bölgelere göre farklı implementasyonları
+var
 
 ### Malzemelerin aileleri...
 
-New York bir dizi malzemeyi kullanıyor ve Chicago ise başka bir dizi malzemeyi kullanıyor. Objectville Pizza'nın
-popülaritesi göz önüne alındığında, yakın zamanda California'ya başka bir bölgesel malzeme setini göndermeniz
-gerekebilir, ve ardından ne geliyor? Seattle mı? Bu işlemi başarılı bir şekilde yürütebilmek için malzeme ailelerini
-nasıl yöneteceğinizi çözmeniz gerekecek.
+New York bir dizi malzeme kullanırken Chicago başka bir malzeme kullanıyor. Objectville Pizza'nın popülaritesi göz önüne
+alındığında, California'ya başka bir dizi bölgesel malzeme göndermeniz gerekmesi uzun sürmeyecektir ve sırada ne var?
+Seattle'a mı? Bunun işe yaraması için, malzeme ailelerini nasıl idare edeceğinizi bulmanız gerekecek.
 
 ![img_16.png](../Images/FactoryDesignPattern/img_16.png)
 
-Tüm Objectville Pizzaları aynı component'lerden yapılıyor, ancak her bölgenin bu component'lere farklı bir
-implementasyonu var.
+Tüm Objectville's Pizzaları aynı component'lerden yapılır, ancak her bölge bu component'lerin farklı bir
+implementasyonuna sahiptir. Her aile bir tür hamur, bir tür sos, bir tür peynir ve bir deniz Productü sosundan oluşur (
+sebzeler ve baharatlar gibi göstermediğimiz birkaç şeyle birlikte). Toplamda bu üç bölge malzeme ailelerini oluşturmakta
+ve her bölge eksiksiz bir malzeme ailesi implement etmektedir
 
-Her aile, bir tür hamur, bir tür sos, bir tür peynir ve bir deniz Productü üstü (sebzeler ve baharatlar gibi
-göstermediğimiz birkaç tane daha dahil) içerir.
+# Building the ingredient factories (Malzeme factory'lerinin inşası)
 
-Toplamda, bu üç bölge, her bölgenin tam bir malzeme ailesini implement ettiği malzeme aileleri oluşturur.
-
-# Building the ingredient factories
-
-Şimdi, malzemelerimizi oluşturmak için bir factory inşa edeceğiz; factory, malzeme ailesindeki her malzemeyi
-oluşturmaktan sorumlu olacak. Diğer bir deyişle, factory hamur, sos, peynir vb. oluşturmak için gerekecek... Bölgesel
-farkları nasıl ele alacağımızı yakında göreceksiniz.
-
-Hadi başlayalım ve tüm malzemelerimizi oluşturacak olan factory için bir interface tanımlayalım:
+Şimdi malzemelerimizi oluşturmak için bir factory kuracağız; factory, malzeme ailesindeki her bir malzemeyi
+oluşturmaktan sorumlu olacak. Başka bir deyişle, factory'nin hamur, sos, peynir ve benzerlerini yaratması gerekecek...
+Bölgesel farklılıkları nasıl ele alacağımızı birazdan göreceksiniz. Tüm malzemelerimizi oluşturacak factory için bir
+interface tanımlayarak başlayalım:
 
 ```
 public interface PizzaIngredientFactory {
+    
+    /* Her malzeme için arayüzümüzde bir create methodu tanımlıyoruz. Burada her malzeme için bir tane olmak üzere çok 
+    sayıda yeni sınıf var. */
     Dough createDough(); // hamur
     Sauce createSauce(); // sos
     Cheese createCheese(); // peynir
@@ -1046,14 +1049,21 @@ public interface PizzaIngredientFactory {
 }
 ```
 
-Her malzeme için interface'imizde bir "create" methodu tanımlıyoruz.
+Her factory instance'in da implement edilecek bazı ortak "makinelerimiz" olsaydı, bunu abstract bir sınıf haline
+getirebilirdik...
 
-Burada birçok yeni sınıf var, her biri bir malzeme(ingredient) için.
+### Yapacağımız şey şu;
 
-Eğer her factory instance'inda implement edilmesi gereken ortak "makine"ye sahip olsaydık, bunu bir abstract sınıf
-haline getirebilirdik.
+* Her bölge için bir factory oluşturun. Bunu yapmak için, her create methodunu implement eden bir PizzaIngredientFactory
+  subclass'ı oluşturacaksınız
 
-**Dough interface'i tüm concrete Dough'lar için;**
+* ReggianoCheese, RedPeppers ve ThickCrustDough gibi Factory ile kullanılacak bir dizi malzeme sınıfını implement edin.
+  Bu sınıflar uygun olduğunda bölgeler arasında paylaşılabilir.
+
+* Daha sonra, yeni malzeme factory'lerimizi eski PizzaStore kodumuzla çalıştırarak tüm bunları birbirine bağlamamız
+  gerekiyor.
+
+**Dough interface'i tüm concrete Dough'lar için**
 
 ```
 public interface Dough {
@@ -1061,7 +1071,7 @@ public interface Dough {
 }
 ```
 
-**Sauce interface'i tüm concrete Sauce'lar için;**
+**Sauce interface'i tüm concrete Sauce'lar için**
 
 ```
 public interface Sauce {
@@ -1069,7 +1079,7 @@ public interface Sauce {
 }
 ```
 
-**Cheese interface'i tüm concrete Cheese'ler için;**
+**Cheese interface'i tüm concrete Cheese'ler için**
 
 ```
 public interface Cheese {
@@ -1077,7 +1087,7 @@ public interface Cheese {
 }
 ```
 
-**Veggies interface'i tüm concrete Veggies'ler için;**
+**Veggies interface'i tüm concrete Veggies'ler için**
 
 ```
 public interface Veggies {
@@ -1085,7 +1095,7 @@ public interface Veggies {
 }
 ```
 
-**Pepperoni interface'i tüm concrete Pepperoni'ler için;**
+**Pepperoni interface'i tüm concrete Pepperoni'ler için**
 
 ```
 public interface Pepperoni {
@@ -1093,7 +1103,7 @@ public interface Pepperoni {
 }
 ```
 
-**Clams interface'i tüm concrete Clams'ler için;**
+**Clams interface'i tüm concrete Clams'ler için**
 
 ```
 public interface Clams {
@@ -1101,23 +1111,16 @@ public interface Clams {
 }
 ```
 
-### Yapacağımız şey şu;
+# Building the New York ingredient factory (New York malzeme factory'sinin inşası)
 
-* Her bölge için bir factory oluşturmak. Bunu yapmak için, her "create" methodunu implements eden
-  PizzaIngredientFactory'nin bir alt sınıfını oluşturacaksınız.
-
-* Factory ile kullanılacak bir dizi malzeme sınıfı implement edin, örneğin ReggianoCheese, RedPeppers ve ThickCrustDough
-  gibi. Bu sınıflar, uygun olduğunda bölgeler arasında paylaşılabilir.
-
-* Bu aşamada, yeni malzeme factory'lerimizi eski PizzaStore kodumuza entegre etmek için çalışmamız gerekiyor.
-
-# Building the New York ingredient factory
-
-New York malzeme factory'si için implementasyonunu buraya ekleyebilirsiniz. Bu factory Marinara Sauce, Reggiano Cheese,
-Fresh Clams gibi özel Product'lar üretmektedir.
+Tamam, işte New York malzeme factory'si için implementasyon. Bu Cactory Marinara sosu, Reggiano Peyniri, Taze
+İstiridye... gibi özel Product'lar üretmektedir.
 
 ```
+/* NY malzeme fabrikası, tüm malzeme factory'leri için interface'i implement eder */
 public class NYPizzaIngredientFactory implements PizzaIngredientFactory{
+    
+    /* Malzeme ailesindeki her bir malzeme için New York versiyonunu oluşturuyoruz */
     @Override
     public Dough createDough() {
         return new ThinCrustDough();
@@ -1133,16 +1136,21 @@ public class NYPizzaIngredientFactory implements PizzaIngredientFactory{
         return new ReggianoCheese();
     }
 
+    /* Sebzeler için bir dizi Veggies döndürüyoruz. Burada sebzeleri sabit kodladık. Bunu daha karmaşık hale 
+    getirebiliriz, ancak bu factory modelini öğrenmeye gerçekten bir şey katmaz, bu yüzden basit tutacağız */
     @Override
     public Veggies[] createVeggies() {
         return new Veggies[]{new Garlic(), new Onion(),new Mushroom(),new RedPepper()};
     }
 
+    /* En iyi dilimlenmiş pepperoni. Bu New York ve Chicago arasında paylaşılır. Chicago factory'sini kendiniz implement 
+    ettiğinizde bir sonraki sayfada kullandığınızdan emin olun */
     @Override
     public Pepperoni createPepperoni() {
         return new SlicedPepperoni();
     }
 
+    /* New York deniz kıyısında; taze istiridye alıyor. Chicago dondurulmuşla yetinmek zorunda */
     @Override
     public Clams createClam() {
         return new FreshClams();
@@ -1234,16 +1242,7 @@ public class FreshClams implements Clams {
 }
 ```
 
-Her malzeme (ingredient) ailesindeki malzeme (ingredient) için New York sürümünü oluşturuyoruz.
-
-Veggies'ler için, bir Veggies dizisi döndürüyoruz. Burada sebzeleri sabit olarak belirledik. Daha karmaşık bir yapı
-oluşturabiliriz, ancak bu, factory desenini öğrenme konusuna çok fazla katkıda bulunmaz, bu yüzden basit tutmaya devam
-edeceğiz.
-
-En iyi Sliced Pepperoni. Bu, New York ve Chicago arasında paylaşılır. Chicago factory'sini implement etmeye geçtiğinizde
-kullanmayı unutmayın.
-
-# Building the Chicago ingredient factory
+# Building the Chicago ingredient factory (Chicago malzeme fabrikasının inşası)
 
 ```
 public class ChicagoPizzaIngredientFactory implements PizzaIngredientFactory{
@@ -1326,14 +1325,17 @@ public class Spinach implements Veggies {
 }
 ```
 
-# Reworking the pizzas...
+# Reworking the pizzas... (Pizzalar yeniden hazırlanıyor...)
 
-Factory'lerimizi devreye aldık ve kaliteli malzemeler üretmeye hazırız; şimdi sadece pizzalarımızı factory üretimi
-malzemeleri kullanacak şekilde yeniden düzenlememiz gerekiyor. İlk olarak abstract Pizza sınıfımızla başlayalım:
+Factory'lerimizi çalıştırdık ve kaliteli malzemeler üretmeye hazır hale getirdik; şimdi tek yapmamız gereken
+Pizzalarımızı sadece factory'de üretilen malzemeleri kullanacak şekilde yeniden düzenlemek. Abstract Pizza sınıfımızla
+başlayacağız:
 
 ```
 public abstract class Pizza {
     private String name;
+    
+    /* Her pizza, hazırlanmasında kullanılan bir dizi malzemeye sahiptir */
     Dough dough;
     Sauce sauce;
     Veggies[] veggies;
@@ -1341,8 +1343,11 @@ public abstract class Pizza {
     Pepperoni pepperoni;
     Clams clams;
 
+    /* Şimdi prepare methodunu abstract hale getirdik. Burası pizza için gerekli malzemeleri toplayacağımız yerdir, 
+    tabii ki bunlar malzeme fabrikasından gelecektir */
     abstract void prepare();
 
+    /* prepare() methodu haricinde diğer methodlarımız aynı kalmaktadır */
     void bake(){
         System.out.println("Bake for 25 minutes at 350");
     }
@@ -1365,30 +1370,29 @@ public abstract class Pizza {
 }
 ```
 
-Şimdi "prepare" methodunu abstract hale getirdik. İşte pizza için gereken malzemeleri toplayacağımız yer burasıdır ve bu
-malzemeler tabii ki malzeme factory'den gelecektir.
+# Reworking the pizzas, continued... (Pizzalar üzerinde çalışmaya devam ediyoruz...)
 
-# Reworking the pizzas, continued...
-
-Artık abstract bir Pizza sınıfını çalışma noktanız olarak aldığınıza göre, New York ve Chicago tarzı Pizzaları oluşturma
-zamanı geldi - bu sefer malzemelerini doğrudan factory'den alacaklar. Şubelerin malzeme tasarrufu yapma günleri sona
-erdi!
-
-Factory Method kodunu yazdığımızda, NYCheesePizza ve ChicagoCheesePizza sınıfımız vardı. İki sınıfa bakarsanız, tek fark
-bölgesel malzemelerin kullanımıdır. Pizzalar aynı şekilde yapılır (hamur + sos + peynir). Diğer pizzalar için de aynı
-durum geçerlidir: Veggie, Clam vb. Hepsi aynı hazırlık adımlarını takip ederler; sadece farklı malzemelere sahiptirler.
-Bu nedenle, her pizza için gerçekten iki sınıfa ihtiyacımız olmadığını göreceksiniz; malzeme factory'si bölgesel
-farkları bizim için ele alacaktır. İşte Cheese Pizza:
+Artık üzerinde çalışabileceğiniz abstract bir Pizza'nız olduğuna göre, sıra New York ve Chicago tarzı Pizzalar yaratmaya
+geldi - ancak bu sefer malzemelerini doğrudan factory'den alacaklar. Franchise alanların malzeme konusunda cimrilik
+yaptığı günler sona erdi! Factory Method kodunu yazdığımızda, bir NYCheesePizza ve bir ChicagoCheesePizza sınıfımız
+vardı. İki sınıfa bakarsanız, farklı olan tek şeyin bölgesel malzemelerin kullanımı olduğunu görürsünüz. Pizzalar aynı
+şekilde yapılır (hamur + sos + peynir). Aynı şey diğer pizzalar için de geçerli: Sebzeli, İstiridyeli vb. Hepsi aynı
+hazırlık adımlarını izler; sadece farklı malzemelere sahiptirler. Yani, her pizza için iki sınıfa ihtiyacımız olmadığını
+göreceksiniz; malzeme factory'si bölgesel farklılıkları bizim için halledecek. İşte Cheese Pizza:
 
 ```
 public class CheesePizza extends Pizza{
 
     PizzaIngredientFactory ingredientFactory;
 
+    /* Şimdi bir pizza yapmak için, malzemeleri sağlayacak bir factory'e ihtiyacımız var. Böylece her Pizza sınıfı, 
+    constructor'ına bir factory geçirir ve bu factory bir instance variable'da saklanır */
     public CheesePizza(PizzaIngredientFactory ingredientFactory) {
         this.ingredientFactory = ingredientFactory;
     }
 
+    /* İşte sihrin gerçekleştiği yer. prepare() methodu peynirli bir pizza oluşturmak için adım adım ilerler ve bir
+    malzemeye her ihtiyaç duyduğunda factory'den onu üretmesini ister */
     @Override
     void prepare() {
         System.out.println("Preparing " + name);
@@ -1399,24 +1403,24 @@ public class CheesePizza extends Pizza{
 }
 ```
 
-Şimdi bir pizza yapmak için malzemeleri sağlayacak bir factory'e ihtiyacımız var. Bu nedenle her Pizza sınıfına bir
-factory, constructor methoduna iletilir ve bir instance variable'da saklanır.
+### Code up close (Kod yakından)
 
-"prepare()" methodu, bir peynirli pizza oluşturma adımlarını takip eder ve her malzemeye ihtiyaç duyduğunda, factory'den
-onu üretmesini ister.
-
-Pizza kodu, içeri aldığı factory'i kullanarak pizzada kullanılan malzemeleri üretir. Üretilen malzemeler, hangi
-factory'i kullandığımıza bağlıdır. Pizza sınıfı umursamaz; pizzaların nasıl yapılacağını bilir. Şimdi bölgesel malzeme
-farklarından bağımsızdır ve Rockies, Pacific Northwest ve ötesi için factory'ler olduğunda kolayca yeniden
-kullanılabilir.
+Pizza kodu, pizzada kullanılan malzemeleri üretmek için birlikte oluşturulduğu factory'i kullanır. Üretilen malzemeler
+hangi factory'i kullandığımıza bağlıdır. Pizza sınıfının umurunda değil; o nasıl pizza yapılacağını biliyor. Şimdi,
+bölgesel malzemelerdeki farklılıklardan ayrılmıştır ve Rockies, Pasifik Kuzeybatı ve ötesi için factory'ler olduğunda
+kolayca yeniden kullanılabilir.
 
 ```sauce = ingredientFactory.createSauce();```
 
-ingredientFactory, Bu bizim malzeme factory'mizdir. Pizza, hangi factory'nin kullanıldığını umursamaz, yeter ki bir
-malzeme factory'si olsun.
+```sauce``` Pizza instance variable'ını, bu pizzada kullanılan özel sosa atıfta bulunacak şekilde ayarlıyoruz.
 
-"createSauce()" methodu, bulunduğu bölgede kullanılan sostan döner. Eğer bu bir New York malzeme factory'si ise,
-marinara sosu alırız.
+```ingredientFactory``` Bu bizim malzeme factory'miz. Pizza, bir malzeme factory'si olduğu sürece hangi factory'nin
+kullanıldığını önemsemez.
+
+```createSauce()``` methodu kendi bölgesinde kullanılan sosu döndürür. Bu bir NY malzeme factory'si ise, marinara sosu
+elde ederiz.
+
+### ClamPizza'yı da kontrol edelim
 
 ```
 public class ClamPizza extends Pizza {
@@ -1438,6 +1442,8 @@ public class ClamPizza extends Pizza {
 }
 ```
 
+### VeggiePizza'yı da kontrol edelim
+
 ```
 public class VeggiePizza extends Pizza {
     PizzaIngredientFactory ingredientFactory;
@@ -1456,6 +1462,8 @@ public class VeggiePizza extends Pizza {
     }
 }
 ```
+
+### PepperoniPizza'yı da kontrol edelim
 
 ```
 public class PepperoniPizza extends Pizza {
@@ -1477,11 +1485,10 @@ public class PepperoniPizza extends Pizza {
 }
 ```
 
-# Revisiting our pizza stores
+# Revisiting our pizza stores (Pizza dükkanlarımızı yeniden ziyaret ediyoruz)
 
-Neredeyse tamamladık; şimdi sadece franchise mağazalarımıza kısa bir ziyaret yapmamız gerekiyor ve doğru Pizzaları
-kullanıp kullanmadıklarını kontrol etmeliyiz. Ayrıca onlara kendi yerel malzeme factory'lerine bir referans vermemiz
-gerekiyor:
+Neredeyse tamamladık; sadece doğru Pizzaları kullandıklarından emin olmak için franchise mağazalarımıza hızlı bir
+ziyaret yapmamız gerekiyor. Ayrıca onlara local malzeme factory'leri için bir referans vermemiz gerekiyor:
 
 ```
 public abstract class PizzaStore {
@@ -1501,14 +1508,22 @@ public abstract class PizzaStore {
 }
 ```
 
+### PizzaStore'dan extends edilen NYPizzaStore
+
 ```
 public class NYPizzaStore extends PizzaStore{
     @Override
     protected Pizza createPizza(String item) {
         Pizza pizza = null;
+        
+        /* NY Mağazası bir NY pizza malzemesi factory'sinden oluşmaktadır. Bu factory tüm NY tarzı pizzaların 
+        malzemelerini üretmek için kullanılacak */
         PizzaIngredientFactory factory = new NYPizzaIngredientFactory();
+        
         switch (item) {
             case "cheese" -> {
+                /* Şimdi her pizzaya, malzemelerini üretmek için kullanılması gereken factory'i veriyoruz. Her Pizza 
+                türü için yeni bir Pizza oluşturuyoruz ve ona malzemelerini alması için gereken factory'i veriyoruz */
                 pizza = new CheesePizza(factory);
                 pizza.setName("New York Style Cheese Pizza");
             }
@@ -1530,209 +1545,266 @@ public class NYPizzaStore extends PizzaStore{
 }
 ```
 
-NYPizzaStore, NY pizza malzeme factory'si ile composed edilmiştir. Bu, tüm NY tarzı pizzalar için malzemeleri üretmek
-için kullanılacaktır.
+# What have we done? (Biz ne yaptık)
 
-Şimdi her pizzaya, malzemelerini üretmek için kullanılması gereken factory'i iletiyoruz. Her tür Pizza için yeni bir
-Pizza instance'i oluşturuyoruz ve ona malzemelerini alması gereken factory'i veriyoruz.
+Bu bir dizi kod değişikliğiydi; tam olarak ne yaptık? Abstract Factory adı verilen yeni bir factory tProductü tanıtarak
+pizzalar için bir malzeme ailesi oluşturmanın bir yolunu sağladık. Abstract Factory bize bir Product ailesi oluşturmak
+için bir interface sağlar. Bu interface'i kullanan kod yazarak, kodumuzu Product'ları oluşturan gerçek factory'den
+ayırırız. Bu, farklı bölgeler, farklı işletim sistemleri veya farklı görünüm ve hisler gibi farklı bağlamlara yönelik
+Product'lar üreten çeşitli factory'leri implement etmemize olanak tanır. Kodumuz gerçek Product'lardan ayrıldığı için,
+farklı behavior'lar elde etmek için farklı factory'leri değiştirebiliriz (plum tomatoes yerine marinara elde etmek gibi)
 
-# What have we done?
-
-Oldukça fazla kod değişikliği oldu; tam olarak ne yaptık?
-
-Pizzalar için bir malzeme ailesi oluşturmanın bir yolunu, bir Abstract Factory olarak adlandırılan yeni bir tür factory
-tanıtarak sağladık. Bir Abstract Factory, Product ailesini oluşturmak için bir interface sağlar. Bu interface'i kullanan
-kod yazarak, kodumuzu Product'ları yaratan gerçek factory'den ayırırız. Bu, farklı bağlamlar için (farklı bölgeler,
-farklı işletim sistemleri veya farklı görünüm ve hisler gibi) Product'lar üreten çeşitli factory'lerı implement etmemize
-olanak tanır.
-
-Kodumuz gerçek Product'lardan bağımsız olduğu için farklı behavior'lar elde etmek için farklı factory'leri
-kullanabiliriz (örneğin, plum tomatoes yerine marinara elde etmek gibi).
-
-Bir Abstract Factory, bir Product ailesi için bir interface sağlar. Aile nedir? Bizim durumumuzda bir pizza yapmak için
-ihtiyaç duyduğumuz her şeydir: dough, sauce, cheese, meats ve veggies gibi.
+Abstract Factory, bir Product ailesi için bir interface sağlar. Aile nedir? Bizim durumumuzda pizza yapmak için
+ihtiyacımız olan her şey: dough, sauce, cheese, meats ve veggies
 
 ![img_17.png](../Images/FactoryDesignPattern/img_17.png)
 
-Abstract factory'den, aynı Product'ları farklı implementasyonlar ile üreten bir veya daha fazla concrete factory
-türetiyoruz.
+**Objectville Abstract Ingredient Factory** : Interface'i tanımlar. Abstract factory'den, aynı Product'ları üreten ancak
+farklı implementasyonlara sahip bir veya daha fazla concrete factory türetiriz.
 
-NewYork ve Chicago Product'lar için implementasyonlar sağlar.
+**New York - Chicago** : Product'lar için implementasyonları sağlar.
 
-Ardından kodumuzu Product'ları oluşturmak için factory'i kullanacak şekilde yazıyoruz. Çeşitli factory'leri ileterek, bu
+Daha sonra kodumuzu, Product'ları oluşturmak için factory'i kullanacak şekilde yazarız. Çeşitli factory'ler geçerek, bu
 Product'ların çeşitli implementasyonlarını elde ederiz. Ancak client kodumuz aynı kalır.
+
+# More pizza for Ethan and Joel (Ethan ve Joel için biraz daha pizza)
+
+Ethan ve Joel Objectville Pizza'ya doyamıyor! Bilmedikleri şey ise siparişlerinin artık yeni malzeme factory'lerini
+kullandıklarıdır. Yani artık sipariş verdiklerinde...
+
+Sipariş sürecinin ilk kısmı hiç değişmedi. Ethan'ın siparişini tekrar takip edelim:
+
+1 - Önce bir NY PizzaStore'a ihtiyacımız var:
+
+```PizzaStore nyPizzaStore = new NYPizzaStore();``` NYPizzaStore'un bir instance'ini oluşturur.
+
+2 - Artık bir mağazamız olduğuna göre, sipariş alabiliriz:
+
+```nyPizzaStore.orderPizza(“cheese”);``` nyPizzaStore instance'i üzerinde orderPizza() methodu çağrılır
+
+3 - orderPizza() methodu ilk olarak createPizza() methodunu çağırır:
+
+```Pizza pizza = createPizza(“cheese”);```
+
+### Buradan sonra işler değişiyor, çünkü bir malzeme factory'si kullanıyoruz
+
+4 - createPizza() methodu çağrıldığında, malzeme factory'miz devreye girer:
+
+```Pizza pizza = new CheesePizza(nyIngredientFactory);```
+
+New York malzeme factory'si ile oluşturulmuş bir Pizza instance'i oluşturur
+
+```nyIngredientFactory``` Malzeme factory'si seçilir ve PizzaStore'da instatiated edilir ve ardından her pizzanın
+constructor'ına aktarılır
+
+5 - Daha sonra pizzayı hazırlamamız gerekiyor. prepare() methodu çağrıldığında, factory'den malzemeleri hazırlaması
+istenir:
+
+```
+void prepare() {
+    /* Ethan'ın pizzası için New York malzeme factory'si kullanılıyor ve böylece NY malzemeleri elde ediyoruz */
+    dough = factory.createDough(); //thin crust
+    sauce = factory.createSauce(); // Marinara
+    cheese = factory.createCheese(); // Reggiano
+}
+```
+
+6 - Sonunda elimizde hazırlanmış pizza var ve orderPizza() methodu pizzayı pişiriyor, kesiyor ve kutuluyor.
 
 # Abstract Factory Pattern defined
 
-Desen ailesine başka bir factory deseni daha ekliyoruz, Product ailesi oluşturmamıza izin veren bir desen. Hadi bu desen
-için resmi tanımına bakalım:
+Kalıp ailemize, Product aileleri oluşturmamızı sağlayan bir factory kalıbı daha ekliyoruz. Bu kalıbın resmi tanımına göz
+atalım:
 
 ![img_18.png](../Images/FactoryDesignPattern/img_18.png)
 
-Abstract Factory Pattern, related (ilişkili) veya dependent (bağımlı) nesne ailelerini oluşturmak için interface sağlar
-ve bu nesnelerin concrete sınıflarını belirtmeden yapar.
+Abstract Factory Pattern, concrete sınıflarını belirtmeden related (ilgili) veya dependent (bağımlı) nesne aileleri
+oluşturmak için bir interface sağlar.
 
-Kesinlikle, Abstract Factory, bir client'in abstract bir interface'i kullanarak ilgili Product grubunu oluşturmasına ve
-aslında üretilen concrete product'lar hakkında bilgi sahibi olmadan veya umursamadan kullanmasına izin verir. Bu
-şekilde, client concrete product'ların özelliklerinden bağımsız hale gelir. İşte bunun nasıl bir arada tutulduğunu
-görmek için sınıf diyagramına bakalım:
+Abstract Factory'nin, bir client'in gerçekte üretilen concrete product'ları bilmeden (veya önemsemeden) bir dizi ilgili
+Product oluşturmak için abstract bir interface kullanmasına izin verdiğini kesinlikle gördük. Bu şekilde, client
+concrete product'ların herhangi bir özelliğinden ayrılmış olur. Tüm bunların nasıl bir araya geldiğini görmek için sınıf
+diyagramına bakalım:
 
 ![img_19.png](../Images/FactoryDesignPattern/img_19.png)
 
-* AbstractFactory, tüm concrete factory'lerin implement gereken interface'i tanımlar ve Product'lar üretmek için bir
-  dizi method içerir.
+**AbstractFactory** : tüm Concrete factory'lerin implement etmesi gereken ve Product üretmek için bir dizi methoddan
+oluşan interface'i tanımlar.
 
-* Client, abstract factory ile yazılır ve ardından çalışma zamanında gerçek bir factory ile composed edilir.
+**ConcreteFactory** : Factory'ler farklı Product ailelerini implement ederler. Client bir Product oluşturmak için bu
+factory'lerden birini kullanır, böylece hiçbir zaman bir Product nesnesi instantiate etmek zorunda kalmaz
 
-* AbstractProductA, AbstractProductB Bu Product ailesidir. Her concrete factory, tam bir Product seti üretebilir.
+**Client** : Abstract Factory'e göre yazılır ve daha sonra runtime'da gerçek bir factory ile composed edilir
 
-* ConcreteFactory1, ConcreteFactory2 Concrete factory'ler farklı Product ailelerini implement ederler. Bir Product
-  oluşturmak için client bu factory'lerden birini kullanır, bu nedenle bir Product nesnesi instatiate edilmesi gerekmez.
+**AbstractProductA - AbstractProductB** : Bu Product ailesidir. Her concrete factory bir dizi Product'ın tamamını
+üretebilir
+
+### Bu oldukça karmaşık bir sınıf diyagramı; şimdi tüm bunlara PizzaStore'umuz açısından bakalım:
 
 ![img_20.png](../Images/FactoryDesignPattern/img_20.png)
 
-Abstract PizzaIngredientFactory, ilişkili Product grubunu oluşturmanın nasıl yapılacağını tanımlayan interface'dir - bir
-pizza yapmak için ihtiyacımız olan her şey.
+**Abstract PizzaIngredientFactory** : bir pizza yapmak için ihtiyaç duyduğumuz her şey olan ilgili Product ailesinin
+nasıl yapılacağını tanımlayan interface'dir. Abstract Factory'deki her methodun aslında bir Factory Methodu gibi
+göründüğünü fark ettim (createDough(), createSauce(), vb.). Her method abstract olarak bildirilir ve subclass'lar bir
+nesne oluşturmak için bunu override eder. Bu Factory Method değil mi? Abstract Factory'nin içinde gizlenen bir Factory
+Methodu mu? İyi yakaladın! Evet, genellikle bir Abstract Factory'nin methodları factory methodları olarak implement
+edilir. Bu mantıklı, değil mi? Abstract Factory'nin görevi, bir dizi Product oluşturmak için bir interface
+tanımlamaktır. Bu interface'de ki her method concrete bir product oluşturmaktan sorumludur ve bu implementasyonları
+sağlamak için Abstract Factory'nin bir subclass'ını implement ederiz. Dolayısıyla, factory methodları, Product
+methodlarınızı abstract factory'leriniz de implement etmenin doğal bir yoludur.
 
-Concrete pizza factory'lerinin görevi pizza malzemeleri üretmektir. Her factory, kendi bölgesi için doğru nesneleri
-nasıl oluşturacağını bilir. (NYPizzaIngerientFactory, ChicagoPizzaIngredientFactory)
+**NYPizzaIngredientFactory - ChicagoPizzaIngredientFactory** : Concrete pizza factory'lerinin işi pizza malzemeleri
+yapmaktır. Her factory kendi bölgesi için doğru nesneleri nasıl yaratacağını bilir.
+
+**Pizza** : Abstract Factory'nin client'ları, Pizza abstract sınıfının concrete instance'larıdır
 
 Her factory, Product ailesi için farklı bir implementasyon üretir.
 
-Her method aslında bir Factory Methodu gibi görünüyor (createDough(), createSauce() vb.). Her method abstract olarak
-bildirilir ve alt sınıflar bu methodu bazı nesneler oluşturmak için override eder.
-
-Bu, Abstract Factory içinde gizlenmiş bir Factory Methodu mu?
-
-İyi yakaladınız! Evet, genellikle Abstract Factory'nin methodları factory methodları olarak implemente edilir. Bu
-mantıklı, değil mi? Abstract Factory'nin görevi bir Product kümesi oluşturmak için bir interface tanımlamaktır. Bu
-interfacedeki her method, concrete bir Product oluşturmakla sorumludur ve bu implementasyonları sağlamak için Abstract
-Factory'nin alt sınıfını implement ederiz. Bu nedenle factory methodları, abstract factory'lerinizde ki Product
-methodlarınızı implements etmenin doğal bir yoludur.
-
 --**DIALOGS**--
 
-Factory Method : Evet, Abstract Factory ile aynı kategoriye konulmayı pek sevdiğim söylenemez, bilirsiniz. Sadece her
-ikimiz de factory desenleri olduğumuz için kendi röportajlarımızı yapmamamız gerektiği anlamına gelmez.
+HeadFirst: Vay canına, aynı anda iki desenle röportaj! Bu bizim için bir ilk.
 
-HeadFirst: Gerçekten benzerlikleriniz var ve insanların sizi bazen karıştırdığını duydum.
+Factory Method : Evet, Abstract Factory ile aynı kefeye konulmaktan hoşlandığımdan pek emin değilim. İkimizin de factory
+pattern olması, kendi röportajlarımızı yapmamamız gerektiği anlamına gelmez.
 
-Abstract Factory: Doğru, bazen Factory Method ile karıştırıldığım zamanlar oldu ve biliyorum ki sen de benzer sorunlar
-yaşadın, Factory Method. Her ikimiz de implementasyonları belirli implementasyonlardan ayırma konusunda gerçekten
-iyiyiz, sadece farklı yollarla yapıyoruz. Bu yüzden insanların bizi zaman zaman karıştırabileceğini anlayışla
-karşılıyorum.
+HeadFirst : Kızmayın, sizinle birlikte röportaj yapmak istedik, böylece okuyucular için kimin kim olduğu konusunda
+herhangi bir karışıklığı gidermeye yardımcı olabiliriz. Benzerlikleriniz var ve insanların bazen sizi karıştırdığını
+duydum.
 
-Factory Method: Sonuçta, ben sınıfları oluştururken sen nesneleri kullanıyorsun; bu tamamen farklı!
+Abstract Factory : Factory Method ile karıştırıldığım zamanlar oldu ve sizin de benzer sorunlar yaşadığınızı biliyorum,
+Factory Method. İkimiz de implementasyonları belirli implementasyonlardan ayırma konusunda gerçekten iyiyiz; sadece bunu
+farklı şekillerde yapıyoruz. Bu yüzden insanların bazen bizi neden karıştırdıklarını anlayabiliyorum.
 
-HeadFirst: Daha fazla açıklama yapabilir misiniz, Factory Method?
+Factory Method : Sonuçta ben create etmek için sınıfları kullanıyorum ve siz nesneleri kullanıyorsunuz; bu tamamen
+farklı!
 
-Factory Method: Tabii ki. Hem Abstract Factory hem de ben nesneler oluşturuyoruz - bu işimiz. Ama ben bunu inheritance
-aracılığıyla yaparım...
+HeadFirst : Factory Method hakkında daha fazla bilgi verebilir misiniz?
 
-Abstract Factory: ...ve ben bunu nesne composition aracılığıyla yaparım.
+Factory Method : Elbette. Hem Abstract Factory hem de ben nesne yaratıyoruz - bu bizim işimiz. Ama ben bunu inheritance
+yoluyla yapıyorum...
 
-Factory Method: Doğru. Yani, Factory Method kullanarak nesneler oluşturmak için bir sınıfı extends etmeli ve bir factory
-methodunu override etmelisiniz
+Abstract Factory : ...ve bunu nesne composition yoluyla yapıyorum.
 
-HeadFirst: Ve bu factory method ne yapıyor?
+Factory Method : Doğru. Yani, Factory Method'unu kullanarak nesne oluşturmak için bir sınıfı extends etmeniz ve bir
+Factory Method'unu override etmeniz gerekir.
 
-Factory Method: Tabii ki nesneler oluşturuyor! Yani, Factory Method Pattern'nin tam amacı, yaratma işlemini bir alt
-sınıfta yapmanızı sağlamaktır. Bu şekilde, client'lar sadece kullandıkları abstract türü bilmelidir, alt sınıf concrete
-türle ilgilenir. Yani başka bir deyişle, client'ları concrete türlerden ayırıyorum.
+HeadFirst : Peki bu Factory Method'u ne yapıyor?
 
-Abstract Factory: Ve ben de öyle yapıyorum, sadece farklı bir şekilde yapıyorum.
+Factory Method : Elbette nesneler yaratır! Demek istediğim, Factory Method Kalıbının tüm amacı, yaratma işlemini sizin
+yerinize yapması için bir subclass kullanmanızdır. Bu şekilde, client'ların yalnızca kullandıkları abstract türü
+bilmeleri gerekir, subclass ise concrete türle ilgilenir. Yani başka bir deyişle, client'ları concrete tiplerden ayrı
+tutuyorum.
 
-HeadFirst: Devam et, Abstract Factory... Nesne composition'ı hakkında bir şeyler söylediniz, değil mi?
+Abstract Factory : Ben de yapıyorum, sadece farklı bir şekilde yapıyorum
 
-Abstract Factory: Product ailesi oluşturmak için abstract bir tür sağlarım. Bu type'ın alt sınıfları bu Product'ların
-nasıl üretileceğini tanımlar. Factory'i kullanmak için bir tane instatiate edilir ve bunu abstract tür ile yazılmış olan
-bazı kodlara iletilir. Yani, Factory Method gibi, benim Client'larım kullanılan gerçek concrete Product'lardan
-bağımsızdır.
+HeadFirst : Devam et, Abstract Factory... Nesne composition'ı hakkında bir şeyler söylemiştin?
 
-HeadFirst: Anladım, yani başka bir avantaj, ilişkili Product'ları bir araya getirmenizdir.
+Abstract Factory : Bir Product ailesi oluşturmak için abstract bir tür sağlıyorum. Bu tProduct subclass'ları, bu
+Product'ların nasıl üretildiğini tanımlar. Factory'i kullanmak için bir tane instantiate edilir ve abstract tip ile
+yazılan bazı kodlara iletilir. Böylece, Factory Method gibi, client'larım kullandıkları gerçek concrete Product'lardan
+ayrılmış oluyor.
+
+HeadFirst : Anlıyorum, bir başka avantaj da bir dizi ilgili Product'ı bir araya getirmeniz.
 
 Abstract Factory : Bu doğru
 
-HeadFirst: Related (İlişkili) Product grubunu extends etmeniz gerektiğinde, başka birini eklemek gibi, interface'inizi
-değiştirmeniz gerekmeyecek mi?
+HeadFirst : Bu related (ilgili) Product'lar kümesini extends etmeniz, örneğin bir tane daha eklemeniz gerekirse ne olur?
+Bu interface'inizi değiştirmenizi gerektirmez mi?
 
-Abstract Factory: Bu doğru; eğer yeni Product'lar eklenirse, interface'im değişmek zorunda kalır, ki biliyorum ki
-insanlar bunu pek sevmezler...
+Abstract Factory : Bu doğru; yeni Product'lar eklendiğinde interface'imin değişmesi gerekiyor ki insanların bunu
+yapmaktan hoşlanmadığını biliyorum....
 
-Abstract Factory: Ne için kıkır kıkır gülüyorsun, Factory Method?
+Factory Method : Alaylı bir gülüş...
 
-Factory Method: Oh, hadi canım, bu büyük bir mesele! Interface'i değiştirmek, her alt sınıfın interface'ini değiştirmen
-gerektiği anlamına gelir! Bu çok fazla iş gibi görünüyor.
+Abstract Factory : Ne diye kıs kıs gülüyorsun, Factory Method?
 
-Abstract Factory: Evet, ama ben tam Product ailelerini oluşturmak için kullanılıyorum, bu yüzden büyük bir interface'e
-ihtiyaç duyuyorum. Sadece bir Product oluşturuyorsun, bu yüzden gerçekten büyük bir interface'e ihtiyacın yok, sadece
-bir methoda ihtiyacın var.
+Factory Method : Oh, hadi ama, bu büyük bir mesele! Interface'ini değiştirmek, her subclass'ın interface'ini
+değiştirmeniz gerektiği anlamına gelir! Kulağa çok fazla iş gibi geliyor.
 
-HeadFirst: Abstract Factory, sık sık concrete factory'lerini implement etmek için factory methodlarını kullandığını
-duydum, doğru mu?
+Abstract Factory : Evet, ama büyük bir interface'e ihtiyacım var çünkü tüm Product ailelerini oluşturmaya alışkınım. Siz
+sadece tek bir Product yaratıyorsunuz, bu yüzden büyük bir interface'e ihtiyacınız yok, sadece bir methoda ihtiyacınız
+var
 
-Abstract Factory: Evet, kabul edeyim, concrete factory'lerim genellikle Product'larını oluşturmak için bir factory
-methodu implement ederler. Benim durumumda, onlar yalnızca Product'ları oluşturmak için kullanılırlar...
+HeadFirst : Abstract Factory, concrete factory'lerinizi implement etmek için genellikle Factory methodlarını
+kullandığınızı duydum?
 
-Factory Method: ...benim durumumda ise genellikle abstract creator'da, alt sınıfların oluşturduğu concrete türleri
-kullanan kodları implement ederim.
+Abstract Factory : Evet, itiraf ediyorum, concrete factory'lerim genellikle Product'larını oluşturmak için bir Factory
+Method'u implement ediyor. Benim durumumda, sadece Product yaratmak için kullanılıyorlar...
 
-HeadFirst: Sanki her ikisi de yapmaları gereken işi iyi yapıyorlar gibi görünüyor. Eminim insanlar seçenekleri
-seviyordur; sonuçta factory'ler çok kullanışlıdır, her türlü farklı durumda kullanmak isteyeceklerdir. Her ikisi de
-nesne oluşturmayı implementasyonlardan dependent (bağımsız) ve implementasyonları application'lara daha loosely coupled
-tutmak için encapsulate ederler, bu gerçekten harika bir şeydir, Factory Method veya Abstract Factory kullanıyor olmanız
-fark etmez.
+Factory Method : ...benim durumumda ise genellikle subclass'ların oluşturduğu concrete türleri kullanan abstract
+creator'da kod implement ederim
 
-Abstract Factory: Teşekkür ederim. Beni hatırla, Abstract Factory, ait oldukları Product ailelerini oluşturmanız
-gerektiğinde ve istediğinizde client'larınızın bir arada olması gereken Product'ları oluşturduğundan emin olmak
-istediğinizde beni kullanın.
+HeadFirst : Görünüşe göre ikiniz de yaptığınız işte iyisiniz. Eminim insanlar bir seçeneğe sahip olmaktan hoşlanıyordur;
+sonuçta factory'ler çok kullanışlıdır, onları her türlü farklı durumda kullanmak isteyeceklerdir. Her ikiniz de
+uygulamaları gevşek bir şekilde bağlanmış ve implementasyonları daha az bağımlı tutmak için nesne oluşturmayı
+encapsulate ediyorsunuz, bu da ister Factory Method ister Abstract Factory kullanıyor olun gerçekten harika.
 
-Factory Method: Client kodunuzu instantiate etmeniz gereken concrete sınıflardan ayırmak için veya ihtiyacınız olacak
-tüm concrete sınıfları önceden bilmiyorsanız beni kullanın. Beni kullanmak için, sadece beni alt sınıflayın ve factory
-methodumu implement edin!
+Abstract Factory : Teşekkürler. Beni hatırlayın, Abstract Factory ve oluşturmanız gereken Product aileleri olduğunda ve
+client'larınızın birbirine ait Product'lar oluşturduğundan emin olmak istediğinizde beni kullanın.
+
+Factory Method : Client kodunuzu instatiate etmeniz gereken concrete sınıflardan ayırmak için veya ihtiyacınız olacak
+tüm concrete sınıfları önceden bilmiyorsanız beni kullanın. Beni kullanmak için, sadece beni subclass'layın ve factory
+methodunu implemente edin
 
 # Factory Method and Abstract Factory compared
 
-### Factory Method
-
 ![img_21.png](../Images/FactoryDesignPattern/img_21.png)
 
-"PizzaStore" Factory Method olarak implement edilmiştir çünkü bölgeye göre değişen bir Product oluşturabilmek istiyoruz.
-Factory Method ile her bölge kendi concrete factory'sini alır ve bu bölge için uygun olan pizzaları nasıl yapacağını
-bilir. Bir Product oluşturmak için abstact bir interface sağlar.
+**PizzaStore** : Bir Product oluşturmak için Abstract bir Interface sağlar. PizzaStore bir Factory Method olarak
+implement edilmiştir çünkü bölgeye göre değişen bir Product yaratabilmek istiyoruz. Factory Method ile her bölge,
+bölgeye uygun pizzaların nasıl yapılacağını bilen kendi Concrete Factory'sine sahip olur.
 
-"NYPizzaStore, ChicagoPizzaStore" : Her alt sınıf hangi concrete sınıfın instantiate edileceğine karar verir.
+**NYPizzaStore - ChicagoPizzaStore** : Factory Method'lar.
 
-NYPizzaStore alt sınıfı yalnızca NY tarzı pizzaları instantiate eder. ChicagoPizzaStore alt sınıfı yalnızca Chicago
-tarzı pizzaları instantiate eder.
+**NYPizzaStore** : subclass'ı yalnızca NY tarzı pizzaları instantiate eder. createPizza() methodu pizza type'ına göre
+parametrelendirilir, böylece birçok pizza Product type'ını döndürebiliriz.
 
-"Pizza" : Bu PizzaStore'un Product'ıdır. Client'lar yalnızca bu abstract türe güvenir.
+![img_13.png](../Images/FactoryDesignPattern/img_13.png)
+
+**ChicagoPizzaStore** : subclass'ı yalnızca Chicago tarzı pizzaları instantiate eder. createPizza() methodu pizza
+type'ına göre parametrelendirilir, böylece birçok pizza Product type'ını döndürebiliriz.
 
 ![img_22.png](../Images/FactoryDesignPattern/img_22.png)
 
-Yukarıda görüldüğü üzere Alt sınıflar Factory Methodları tarafından instantiate edilirler.
+Yukarıda görüldüğü üzere subclass'lar Factory Methodları tarafından instantiate edilirler.
 
-createPizza() methodu pizza type'ına göre parametrelendirilir, böylece birçok pizza Product type'ını döndürebiliriz.
-
-### Abstract Factory
+**Pizza** : Bu PizzaStore'un Product'ıdır. Client'lar yalnızca bu abstract türe güvenir.
 
 ![img_23.png](../Images/FactoryDesignPattern/img_23.png)
 
-"PizzaIngredientFactory," Abstract Factory olarak implement edilmiştir çünkü Product aileleri (yani ingredient)
-oluşturmamız gerekiyor. Her alt sınıf, kendi bölgesel tedarikçilerini kullanarak ingredient'ları (malzemeleri) implement
-eder. Bir Product ailesi oluşturmak için abstract bir interface sağlar.
+**PizzaIngredientFactory** : Bir Product ailesi oluşturmak için Abstract bir Interface sağlar. PizzaIngredientFactory
+bir Abstract Factory olarak implement edilmektedir çünkü Product aileleri (malzemeler) oluşturmamız gerekmektedir. Her
+subclass kendi bölgesel tedarikçilerini kullanarak malzemeleri implement eder
 
-NYPizzaIngredientFactory - ChicagoPizzaIngredientFactory : Her concrete alt sınıf, bir Product ailesi oluşturur. Bir
-Abstract Factory içinde Product'ları oluşturmak için kullanılan methodlar genellikle Factory Method ile implement
-edilir...
+**NYPizzaIngredientFactory** : Örneğin, subclass dough (hamurun) type'ına karar verir... Her concrete subclass bir
+Product ailesi oluşturur.
 
 ![img_24.png](../Images/FactoryDesignPattern/img_24.png)
 
-Örneğin, alt sınıf Dough'un type'ını belirler...
+Yukarıda ki resimde görüleceği üzere Abstract bir Factory'de Product oluşturma methodları genellikle bir Factory Method
+ile implement edilir...
 
 ![img_25.png](../Images/FactoryDesignPattern/img_25.png)
 
-Her malzeme, Abstract Factory'deki bir Factory Method tarafından üretilen bir Product'ı temsil eder.
+Her bir malzeme, Abstract Factory'deki bir Factory Method tarafından üretilen bir Product'ı temsil eder.
+
+Product subclass'ları, Product ailelerinin paralel kümelerini oluşturur. Burada bir New York içerik ailesi ve bir
+Chicago ailesi var.
+
+# Tools for your Design Toolbox
+
+Bu bölümde, araç kutunuza iki araç daha ekledik: Factory Method ve Abstract Factory. Her iki kalıp da nesne oluşturmayı
+encapsulate eder ve kodunuzu concrete türlerden ayırmanıza olanak tanır.
+
+"Depend on abstractions. Do not depend on concrete classes (Abstraction'lara bağlı kalın. Concrete sınıflara bağlı
+kalmayın)"
+
+**Abstract Factory** : Concrete sınıflarını belirtmeden related (ilgili) veya dependent (bağımlı) nesne aileleri
+oluşturmak için bir interface sağlayın
+
+**Factory Method** : Bir nesne oluşturmak için bir interface tanımlayın, ancak hangi sınıfın instantiate edileceğine
+subclass'ların karar vermesine izin verin. Factory Method, bir sınıfın instance oluşturmayı subclass'lara defer etmesini
+sağlar.
 
 --**BULLET POINTS**--
 
@@ -1741,7 +1813,7 @@ Her malzeme, Abstract Factory'deki bir Factory Method tarafından üretilen bir 
 * Simple Factory, gerçek bir tasarım deseni olmasa da, client'larınızı concrete sınıflardan ayırmak için basit bir
   yoldur.
 
-* Factory Method inheritance'a dayanır: nesne oluşturma, alt sınıflara devredilir ve nesneleri oluşturmak için factory
+* Factory Method inheritance'a dayanır: nesne oluşturma, subclass'lara devredilir ve nesneleri oluşturmak için factory
   methodu implement edilir
 
 * Abstract Factory nesne composition'ına dayanır: nesne oluşturma, factory interface'inde sunulan methodlarda implement
@@ -1749,12 +1821,11 @@ Her malzeme, Abstract Factory'deki bir Factory Method tarafından üretilen bir 
 
 * Tüm factory pattern'leri, uygulamanızın concrete sınıflara olan bağımlılığını azaltarak loosely coupled'a teşvik eder.
 
-* Factory Method'un amacı, bir sınıfın nesne oluşturmayı alt sınıflarına defer (ertelemesine) etmesine izin vermektir.
+* Factory Method'un amacı, bir sınıfın nesne oluşturmayı subclass'larına defer (ertelemesine) etmesine izin vermektir.
 
-* Abstract Factory'nin amacı, ilgili nesnelerin ailelerini oluşturmak için onların concrete sınıflarına bağımlı olmadan
-  nesneleri yaratmaktır.
+* Abstract Factory'nin amacı, concrete sınıflarına bağımlı olmak zorunda kalmadan ilgili nesne aileleri oluşturmaktır
 
 * The Dependency Inversion Principle, concrete type'lar üzerindeki bağımlılıklardan kaçınmamızı ve abstraction'ları
-  hedeflememizi yönlendirir.
+  hedeflememize yönlendirir.
 
-* Factory'ler, abstraction'lara kod yazmak için güçlü bir tekniktir, concrete sınıflara değil.
+* Factory'ler, concrete sınıflara değil abstraction'lara kodlama yapmak için güçlü bir tekniktir
