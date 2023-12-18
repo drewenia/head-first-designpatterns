@@ -1,66 +1,63 @@
 # Being Adaptive
 
-Bu bölümde, bir kare pimi yuvarlak bir deliğe koyma gibi imkansız görünen görevleri denemeye çalışacağız. İmkansız gibi
-mi geliyor? Design Patterns (Tasarım Şablonları) olduğunda değil. Decorator Pattern'i hatırlıyor musunuz? Nesneleri yeni
-sorumluluklar vermek için wrap ettik. Şimdi bazı nesneleri farklı bir amaçla wrap etmeye gidiyoruz: interface'lerini
-oldukları gibi göstermek yerine başka bir şey gibi göstermek için. Neden böyle yaparız? Böylece bir interface'i bekleyen
-bir tasarımı, farklı bir interface'i implemente eden bir sınıfa uyarlayabiliriz. İşte bu kadar değil; bu süreçte,
-nesneleri interface'lerini basitleştirmek için wrap eden başka bir şablonu da inceleyeceğiz.
+Bu bölümde, kare bir çiviyi yuvarlak bir deliğe sokmak gibi imkansız bir işe kalkışacağız. Kulağa imkansız mı geliyor?
+Tasarım Kalıplarımız varken değil. Decorator Desenini hatırlıyor musunuz? Nesnelere yeni sorumluluklar vermek için
+onları wrap ettik. Şimdi bazı nesneleri farklı bir amaçla wrap edeceğiz: interface'lerini olmadıkları bir şey gibi
+göstermek için. Bunu neden yapacağız? Böylece bir interface bekleyen bir tasarımı farklı bir interface implement eden
+bir sınıfa adapt edebiliriz. Hepsi bu kadar değil; hazır başlamışken, interface'lerini basitleştirmek için nesneleri
+wrap eden başka bir kalıba bakacağız.
 
-# Adapters all around us
+# Adapters all around us (Etrafımızdaki adaptörler)
 
-OO adapter nedir konusunu anlamanızda hiçbir zorluk yaşamayacaksınız, çünkü gerçek dünya onlarla doludur. İşte bir
-örnek: Avrupa ülkesinde bir Amerikan yapımı dizüstü bilgisayar kullanmanız gerekti mi? O zaman muhtemelen bir AC güç
-adapterüne ihtiyacınız olmuştur...
+Bir OO adaptörünün ne olduğunu anlamakta zorlanmayacaksınız çünkü gerçek dünya bunlarla doludur. Şöyle bir örnek
+verelim: Hiç ABD yapımı bir dizüstü bilgisayarı bir Avrupa ülkesinde kullanmanız gerekti mi? O zaman muhtemelen bir AC
+güç adaptörüne ihtiyacınız olmuştur...
 
 ![img.png](../Images/AdapterFacade/img.png)
 
-European prizleri, bir şeyi takmak için bir interface sağlarlar.
+**European Wall Outlet** : güç almak için bir interface sunar
 
-AC Power Adapter, bir interface'i başka bir interface'e dönüştürür.
+**AC Power Adapter** : bir interface'i başka bir interface'e dönüştürür.
 
-ABD yapımı dizüstü bilgisayar, başka bir interface'i bekler.
+**Standart AC Plug** : ABD dizüstü bilgisayarı başka bir interface bekliyor.
 
-Adapterün ne yaptığını biliyorsunuz: Dizüstü bilgisayarınızın fişi ile Avrupa AC prizi arasına yerleşir; görevi Avrupa
-prizini, dizüstü bilgisayarınızı takabileceğiniz ve güç alabileceğiniz bir hale getirmektir. Veya şöyle
-düşünebilirsiniz: adapter, prizin interface'ini dizüstü bilgisayarınızın beklediği bir interface'e dönüştürür.
-
-Bazı AC adapterleri basittir - sadece prizin şeklini değiştirirler, böylece fişinizle uyumlu hale gelirler ve AC akımını
-doğrudan geçirirler - ancak diğer adapterler daha karmaşıktır ve içeriden gücü yükseltmek veya düşürmek gerekebilir,
-böylece cihazlarınızın ihtiyaçlarına uygun hale getirirler.
-
-Peki, gerçek dünya adapterleri neyse, nesne tabanlı adapterler (OO adapterleri) nasıl işler? İşte, OO adapterlerimiz
-gerçek dünya benzerlerinin aynı rolünü oynarlar: Bir interface alır ve bir client'in beklediği bir interface'e
-uyarlarlar.
+Adaptörün ne işe yaradığını biliyorsunuz: dizüstü bilgisayarınızın fişi ile Avrupa AC prizi arasında yer alır; görevi,
+dizüstü bilgisayarınızı prize takıp güç alabilmeniz için Avrupa prizini uyarlamaktır. Ya da şöyle düşünün: adaptör
+prizin interface'ini dizüstü bilgisayarınızın beklediği interface'e dönüştürür. Bazı AC adaptörleri basittir - sadece
+prizin şeklini fişinize uyacak şekilde değiştirirler ve AC akımını doğrudan geçirirler - ancak diğer adaptörler dahili
+olarak daha karmaşıktır ve cihazlarınızın ihtiyaçlarını karşılamak için gücü artırıp azaltmaları gerekebilir. Tamam, bu
+gerçek dünya, peki ya nesne yönelimli adaptörler? OO adaptörlerimiz gerçek dünyadaki benzerleriyle aynı rolü oynarlar:
+bir interface'i alırlar ve onu bir client'in beklediği interface'e adapte ederler.
 
 # Object oriented adapters
 
-Varsayalım ki mevcut bir yazılım sisteminiz var ve yeni bir vendor sınıf kütüphanesini bu sisteme entegre etmeniz
-gerekiyor, ancak yeni vendor önceki vendordan farklı bir şekilde interface'leri tasarladı:
+Diyelim ki yeni bir Vendor sınıf kütüphanesini çalıştırmanız gereken mevcut bir yazılım sisteminiz var, ancak yeni
+Vendor interface'leri bir önceki Vendor'dan farklı tasarladı:
 
 ![img_1.png](../Images/AdapterFacade/img_1.png)
 
-Vendor class'ının interface'i, kodunuzu yazdığınız interface ile eşleşmiyor. Bu şekilde çalışmayacak!
+Interface'leri, kodunuzu yazdığınız interface ile eşleşmiyor. Bu işe yaramayacak!
 
-Peki, mevcut kodunuzu değiştirme şansınız yoksa (ve vendor'un kodunu da değiştiremiyorsanız) sorunu çözmek için ne
-yapabilirsiniz? İşte, yeni vendor interface'ini beklediğiniz interface'e dönüştüren bir sınıf yazabilirsiniz.
+Tamam, mevcut kodunuzu değiştirerek sorunu çözmek istemiyorsunuz (ve Vendor'un kodunu değiştiremezsiniz). Peki ne
+yapacaksınız? Yeni vendor interface'ini beklediğiniz interface'e adapt eden bir sınıf yazabilirsiniz.
 
 ![img_2.png](../Images/AdapterFacade/img_2.png)
 
-Adapter, sınıflarınızın beklediği interface'i uygular, Ve Vendor interface'ine erişerek request'leri işler.
+Adapter, sınıflarınızın beklediği interface'i implement eder. Ve talebinize hizmet vermek için Vendor interface'i ile
+konuşur
 
-Adapter, client'dan gelen request'leri alır ve bunları Vendor sınıflarında anlamlı hale getiren request'lere
-dönüştürerek aracılık eder.
+Adapter, client'dan gelen istekleri alarak ve bunları Vendor sınıflarında anlamlı olan isteklere dönüştürerek arabulucu
+görevi görür.
 
 ![img_3.png](../Images/AdapterFacade/img_3.png)
 
 Yeni Vendor sınıflarını entegre etmek için HERHANGİ bir ek kod yazmanızı gerektirmeyen bir çözüm düşünebiliyor musunuz?
-Vendor'un adapter sınıfını arz etmesine ne dersiniz?
+Vendor'un adapter sınıfını tedarik etmesine ne dersiniz?
 
 # If it walks like a duck and quacks like a duck,then it must might be a duck turkey wrapped with a duck adapter...
 
-Şimdi bir adapter'in işlevini görmenin zamanı geldi. İlk bölümdeki Duck'ları hatırlıyor musunuz? Duck interface'leri
-ve sınıflarının hafifçe basitleştirilmiş bir versiyonunu gözden geçirelim:
+Bir adapter'i iş başında görmenin zamanı geldi. Bölüm 1'deki Duck'ları hatırlıyor musunuz? Duck interface'lerinin ve
+sınıflarının biraz basitleştirilmiş bir versiyonunu gözden geçirelim:
 
 ```
 public interface Duck {
@@ -69,9 +66,10 @@ public interface Duck {
 }
 ```
 
-Bu sefer duck'larımız, duck'ların quack ve fly'ına izin veren Duck interface'ini uyguluyorlar.
+Bu sefer duck'larımız, duck'ların quack (vakvaklamasına) ve fly (uçmasına) izin veren bir Duck interface'ini implement
+ediyorlar
 
-İşte Duck sınıfının bir alt sınıfı olan MallardDuck
+İşte Duck sınıfının bir subclass'ı olan MallardDuck
 
 ```
 public class MallardDuck implements Duck{
@@ -87,15 +85,15 @@ public class MallardDuck implements Duck{
 }
 ```
 
-Şimdi bloktaki en yeni kümes hayvanıyla tanışma zamanı:
+Şimdi bloktaki en yeni kümes hayvanıyla tanışma zamanı (hindi):
 
 ```
 public interface Turkey {
 
-    // glu glu sesi
+    // Hindiler quack (vakvaklamaz) glu glu sesi çıkartır
     void gobble();
 
-    //Hindi kuşları uçabilirler, ancak sadece kısa mesafeler için uçabilirler.
+    //Hindi kuşları uçabilirler, ancak sadece kısa mesafeler için uçabilirler
     void fly();
 }
 ```
@@ -103,6 +101,7 @@ public interface Turkey {
 WildTurkey class;
 
 ```
+/* İşte Turkey'in concrete bir implementasyonu */
 public class WildTurkey implements Turkey{
     @Override
     public void gobble() {
@@ -116,24 +115,31 @@ public class WildTurkey implements Turkey{
 }
 ```
 
-Şimdi, Duck nesnelerinizden eksik olduğunuz bir durumda ve onların yerine bazı Turkey nesnelerini kullanmak
-istiyorsunuz. Açıkçası, Turkey nesnelerini doğrudan kullanamayız çünkü farklı bir interface'e sahipler. Bu nedenle, bir
-Adapter yazalım:
+Şimdi, diyelim ki Duck nesneleriniz yetersiz ve onların yerine bazı Turkey nesneleri kullanmak istiyorsunuz. Açıkçası
+Turkey'leri doğrudan kullanamayız çünkü farklı bir interface'leri vardır. Öyleyse, bir Adapter yazalım:
 
 ```
+/* İlk olarak, uyarladığınız türün interface'ini implemente etmeniz gerekir. Bu, client'in görmeyi beklediği 
+interface'dir */
 public class TurkeyAdapter implements Duck{
 
     Turkey turkey;
 
     public TurkeyAdapter(Turkey turkey) {
+        /* Daha sonra, adapting nesneye bir referans almamız gerekir; burada bunu constructor aracılığıyla yaparız */
         this.turkey = turkey;
     }
 
+    /* Şimdi interface'de ki tüm methodları implement etmemiz gerekiyor; sınıflar arasında quack() çevirisi kolaydır: 
+    sadece gobble() methodunu çağırın */
     @Override
     public void quack() {
         turkey.gobble();
     }
 
+    /* Her iki interface'in de bir fly() methodu olmasına rağmen, Turkey kısa aralıklarla uçar - Duck gibi uzun mesafeli 
+    uçuş yapamazlar. Duck'ların fly() methodu ile Turkey'lerin fly() methodu arasında eşleme yapmak için Turkey'lerin 
+    fly() methodunu beş kez çağırmamız gerekir */
     @Override
     public void fly() {
         for (int i = 0; i < 5; i++) {
@@ -142,19 +148,6 @@ public class TurkeyAdapter implements Duck{
     }
 }
 ```
-
-İlk olarak, uyum sağladığınız türün interface'ini implemente etmeniz gerekmektedir. Bu, client'in beklediği interface'
-dir.
-
-Sonraki adım olarak, uyarladığımız nesneye bir başvuru almalıyız; bu işlemi genellikle constructor üzerinden
-gerçekleştiririz.
-
-Şimdi interface'deki tüm methodları implemente etmemiz gerekiyor; sınıflar arasındaki quack() çevirisi kolaydır: sadece
-gobble() methodunu çağırın.
-
-Her iki interface'in de bir fly() methodu olsa da, Turkey kuşları kısa süreli uçabilirler - Duck'lar gibi uzun mesafe
-uçamazlar. Bir Duck'ın fly() methodu ile bir Turkey'in fly() methodu arasında bağlantı kurmak için, Turkey fly()
-methodunun bu eksikliği telafi etmek için beş kez çağırmamız gerekmektedir.
 
 # Test drive the adapter
 
@@ -174,11 +167,12 @@ public class DuckTestDrive {
         wildTurkey.gobble();
         wildTurkey.fly();
 
-        /* Şimdi testDuck() methodunu çağırarak Duck'ı test edelim. Bu method bir Duck nesnesi bekler. */
+        /* Şimdi aşağıdaki static testDuck() methodunu çağırarak Duck'ı test edelim. Bu method bir Duck nesnesi 
+        bekler */
         System.out.println("\nThe Duck says");
         testDuck(mallardDuck);
 
-        /* Şimdi büyük bir test: Turkey kuşunu bir Duck gibi geçirmeye çalışıyoruz...*/
+        /* Şimdi büyük bir test: Turkey'i bir Duck gibi geçirmeye çalışıyoruz...*/
         System.out.println("\nThe, TurkeyAdapter says");
         testDuck(turkeyAdapter);
     }
@@ -192,157 +186,187 @@ public class DuckTestDrive {
 
 ![img_4.png](../Images/AdapterFacade/img_4.png)
 
-# The Adapter Pattern explained
+# The Adapter Pattern explained (Adapter Kalıbı Açıklaması)
 
-Şimdi bir Adapter'in ne olduğu hakkında bir fikir edindik, şimdi geri çekilip tüm parçalara tekrar bir göz atalım.
+Artık Adapter'in ne olduğu hakkında bir fikrimiz olduğuna göre, bir adım geri çekilip tüm parçalara tekrar bakalım.
 
 ![img_5.png](../Images/AdapterFacade/img_5.png)
 
-Client, target interface'e karşı implemente edilmektedir
+**Client** : target interface'e karşı implemente edilmektedir
 
-Adapter, target interface'i implemente eder ve Adaptee'nin bir instance'ini tutar.
+**Adapter** : target interface'i implemet eder ve Adaptee'nin bir instance'ini tutar.
 
-TurkeyAdapter, target interface'i (Duck) implemente etmiştir
+**TurkeyAdapter** : target interface'i (Duck) implemente etmiştir
 
-Turkey, adapte edilen interface'dir (Adaptee)
+**Turkey** : adaptee edilen interface'dir
 
-### Here’s how the Client uses the Adapter
+### Here’s how the Client uses the Adapter (Client'in Adapter'i nasıl kullandığı aşağıda açıklanmıştır)
 
-* Client, target interface'i kullanarak adapter'a bir request'de bulunur ve bunu çağırarak adapter üzerinde bir method
-  çağırır.
+1 - Client, target interface'i kullanarak adapter'a bir method çağrısı yaparak istekte bulunur.
 
-* Adapter, request'i adapte edilen interface (Adaptee) üzerinde bir veya daha fazla çağrıya çevirir.
+2 - Adapter, adaptee interface'ini kullanarak talebi adaptee üzerinde bir veya daha fazla çağrıya dönüştürür.
 
-* Client, çağrının sonuçlarını alır ve çeviri yapan bir adapter olduğunu asla bilmez.
+3 - Client çağrının sonuçlarını alır ve çeviriyi yapan bir adapter olduğunu asla bilmez.
 
-Not : Dikkat edilmesi gereken bir diğer nokta, Client ve Adaptee'nin (uyarlanan) birbirinden bağımsız olduğudur - ikisi
-de diğerinden habersizdir.
+Not : Client ve Adaptee'nin (uyarlanan) birbirinden ayrıldığına dikkat edin - ikisi de diğeri hakkında bilgi sahibi
+değildir.
+
+# Diyelim ki Duck'ı Turkey'ye dönüştüren bir Adapter'a da ihtiyacımız var. Buna DuckAdapter adını verelim */
+
+```
+/* Şimdi Turkey'leri Duck'lara uyarlıyoruz, bu yüzden Turkey interface'ini implement ediyoruz */
+public class DuckAdapter implements Turkey {
+    Duck duck;
+    Random rand;
+    
+    public DuckAdapter(Duck duck) {
+        /* Adapting ettiğimiz Duck'a bir referans saklıyoruz */
+        this.duck = duck;
+        /* Ayrıca random bir nesneyi yeniden yaratıyoruz; nasıl kullanıldığını görmek için fly() methoduna bakın */
+        rand = new Random();
+    }
+
+  public void gobble() {
+      /* Bir gobble sadece bir quack (vakvak) olur.
+      duck.quack();
+  }
+
+  public void fly() {
+      /* Duck'lar Turkey'lerden çok daha uzun süre uçtukları için, Duck'ı ortalama beş seferden birinde uçurmaya karar 
+      verdik */
+      if (rand.nextInt(5) == 0) {
+          duck.fly();
+      }
+  }
+}
+```
 
 --**DIALOGS**--
 
-Q : Bir adapter ne kadar "adapting" olmalıdır? Büyük bir target interface'i implemente etmem gerekiyorsa, oldukça
-fazla işim olabilir gibi görünüyor.
+Q : Bir adapter'in ne kadar "adapting" yapması gerekir? Büyük bir target interface'i implemente etmem gerekirse, elimde
+ÇOK fazla iş olabilir gibi görünüyor.
 
-A : Kesinlikle öyle olabilir. Bir adapter'i implemente etmenin gerçekten de target interface'imizi desteklemek
-istediğiniz interface boyutuyla orantılı olduğunu söyleyebiliriz. Ancak seçeneklerinizi düşünün. Tüm client tarafı
-çağrılarınızı interface'de yeniden şekillendirebilirsiniz, bu da oldukça fazla inceleme işi ve kod değişiklikleri
-gerektirir. Veya, tüm değişiklikleri tek bir sınıfta encapsulate eden temiz bir şekilde bir sınıf sağlayabilirsiniz
+A : Kesinlikle yapabilirsiniz. Bir adapter'ı implement etmenin işi gerçekten de target interface'iniz olarak
+desteklemeniz gereken interface'in boyutuyla orantılıdır. Ancak seçeneklerinizi düşünün. Interface'e yönelik tüm client
+tarafı çağrılarınızı elden geçirebilirsiniz, bu da çok fazla araştırma çalışması ve kod değişikliğine neden olur. Ya da
+tüm değişiklikleri tek bir sınıfta toplayan bir sınıfı temiz bir şekilde sağlayabilirsiniz.
 
 Q : Bir adapter her zaman bir ve yalnızca bir sınıfı mı wrap eder?
 
-A : Adapter Deseni'nin rolü bir interface'i başka bir interface'e dönüştürmektir. Adapter deseninin çoğu örneği bir
-adapter'in bir adaptee'yi wrap ettiğini gösterse de, dünya genellikle biraz daha karışık olabilir. Bu nedenle, target
-interface'i implement etmek için gereken iki veya daha fazla adaptee'ye sahip olan durumlarla karşılaşabilirsiniz. Bu,
-başka bir modele olan bir ilgiyi çağrıştırır, Facade Deseni olarak adlandırılan; insanlar genellikle ikisini karıştırır.
-Bu konuya bu bölümün sonraki kısımlarında facadeler hakkında konuştuğumuzda tekrar döneceğiz.
+A : Adapter Kalıbının rolü, bir interface'i diğerine dönüştürmektir. Adapter modelinin çoğu örneğinde bir adapter'in bir
+adaptee'yi wrap ettiği görülse de, dünyanın genellikle biraz daha dağınık olduğunu ikimiz de biliyoruz. Bu nedenle, bir
+adapter'in target interface'i implement etmek için gerekli olan iki veya daha fazla adaptee'yi tuttuğu durumlar
+olabilir. Bu, Facade Deseni adı verilen başka bir desenle ilgilidir; insanlar genellikle ikisini karıştırır. Bu bölümün
+ilerleyen kısımlarında facadeler hakkında konuşurken bu noktaya tekrar döneceğimizi hatırlatırız.
 
-Q : Eğer sistemimde eski ve yeni parçalarım varsa, eski parçalar eski Vendor interface'ini bekliyor ancak yeni
-parçaları yeni Vendor interface'ini kullanacak şekilde yazmışsak, burada bir adapter kullanmak ve orada unwrapped
-interface'i kullanmak kafa karıştırıcı olabilir. Adapter'i kullanmak yerine eski kodumu yazıp adapter'ı unutmazsam daha
-iyi bir seçenekte olmaz mı?
+Q : Sistemimin eski ve yeni parçaları varsa, eski parçalar eski Vendor interface'ini bekliyorsa, ancak yeni parçaları
+yeni Vendor interface'ini kullanacak şekilde zaten yazmışsak ne olur? Burada bir Adapter ve orada unwrapped
+interface kullanmak kafa karıştırıcı olacaktır. Sadece eski kodumu yazıp Adapter'i unutmam daha iyi olmaz mı?
 
-A : Bu her zaman gerekli değil. Yapabileceğiniz şeylerden biri, her iki interface'i de destekleyen bir Two Way Adapter
-oluşturmaktır. Bir Two Way Adapter oluşturmak için sadece ilgili her iki interface'i de implemente etmeniz yeterlidir,
-böylece adapter eski bir interface veya yeni bir interface olarak hareket edebilir.
+A : Şart değil. Yapabileceğiniz bir şey, her iki interface'i de destekleyen bir Two Way Adapter oluşturmaktır. Two Way
+Adapter oluşturmak için, ilgili her iki interface'i de implemente edin, böylece adapter eski bir interface veya yeni bir
+interface olarak hareket edebilir.
 
 # Adapter Pattern defined
 
-Adapter Deseni, bir sınıfın interface'ini Client'ların beklediği başka bir interface'e dönüştürür. Adapter, uyumsuz
-interface'ler nedeniyle aksi takdirde çalışamayan sınıfların birlikte çalışmasını sağlar
+![img_19.png](../Images/AdapterFacade/img_19.png)
 
-Bu desenin, dönüşümü gerçekleştiren bir Adapter oluşturarak Client'i uyumsuz bir interface'le kullanmamıza izin
-verdiğini biliyoruz. Bu, Client'i implemente edilen interface'den ayırır ve interface'in zamanla değişmesini
-bekliyorsak, adapter değişikliği encapsulate eder, böylece Client'in farklı bir interface'e karşı çalışması gerektiğinde
-her seferinde değiştirilmesi gerekmez. Desenin çalışma zamanı davranışına bir göz attık; şimdi sınıf diyagramına da bir
-göz atalım;
+Adapter Kalıbı, bir sınıfın interface'ini Client'ların beklediği başka bir interface'e dönüştürür. Adapter, aksi
+takdirde uyumsuz interface'ler nedeniyle birlikte çalışamayan sınıfların birlikte çalışmasını sağlar.
+
+Şimdi, bu modelin, dönüşümü yapan bir Adapter oluşturarak uyumsuz bir interface'e sahip bir Client'i kullanmamıza izin
+verdiğini biliyoruz. Bu, Client'i implemente edilen interface'den ayırma işlevi görür ve interface'in zaman içinde
+değişmesini bekliyorsak, adapter bu değişikliği encapsulate eder, böylece Client'in farklı bir interface'e karşı
+çalışması gerektiğinde her seferinde değiştirilmesi gerekmez. Kalıbın runtime davranışına bir göz attık; şimdi de sınıf
+diyagramına bir göz atalım:
 
 ![img_6.png](../Images/AdapterFacade/img_6.png)
 
-Client yalnızca Target interface'i görür.
+**Client** : yalnızca Target interface'i görür.
 
-Adapter Target Interface'i implemente eder
+**Adapter** : Target Interface'i implemente eder. Adapter, Adaptee ile **composed** edilir
 
-Adapter, Adaptee ile composed edilir
+**Adaptee** : Tüm request'ler, Adaptee'ye delege edilir
 
-Tüm request'ler, Adaptee'ye delege edilir
+Adapter Kalıbı iyi OO tasarım ilkeleriyle doludur: adaptörü değiştirilmiş bir arayüzle sarmak için nesne bileşiminin
+kullanımına göz atın. Bu yaklaşım, adaptörün herhangi bir alt sınıfı ile bir adaptör kullanabilmemiz gibi ek bir
+avantaja sahiptir.
 
-Adapter Deseni, iyi nesne yönelimli tasarım prensipleriyle doludur: adaptee'yi değiştirilmiş bir interface'le wrap etmek
-için object composition kullanımına bakın. Bu yaklaşım, adaptee'nin herhangi bir alt sınıfını bir adapter'la
-kullanabilme avantajına sahiptir. Ayrıca desenin Client'i bir implementasyon ile değil bir interface ile bağladığına
-dikkat edin; farklı backend sınıflarını dönüştüren her bir adapter'i kullanabiliriz. Ya da, yeni implementasyonları
-sonradan ekleyebiliriz, yeter ki Target interface'e uyulsun.
+Adapter Tasarım Deseni, iyi nesne yönelimli tasarım prensipleriyle doludur: adaptee edileni değiştirilmiş bir
+interface'le wrap etmek için nesne composition'ı kullanmayı inceleyin. Bu yaklaşımın ek avantajı, adaptee edilenin
+herhangi bir subclass'ını bir Adapter'le kullanabilme olanağı sunmasıdır. Ayrıca kalıbın Client'i bir implementasyona
+değil bir interface'e nasıl bağladığına da bakın; her biri farklı bir backend sınıf kümesini dönüştüren birkaç adapter
+kullanabiliriz. Ya da Target interface'ine bağlı kaldıkları sürece sonradan yeni implementasyonlar ekleyebiliriz.
 
 # Object and class adapters
 
-Şu anda tanımış olduğumuz desene rağmen, size hala tam hikayeyi anlatmadık. Aslında iki tür adapter bulunmaktadır:
-object adapters ve class adapters. Bu bölüm object adapters'larını ele almıştır ve önceki sayfadaki sınıf diyagramı bir
-object adapters'in diyagramıdır. Peki, class adapters nedir ve neden hakkında size bilgi vermedik? Çünkü onu implemente
-etmek için için birden fazla inheritance gerekmektedir ve bu, Java'da mümkün değildir. Ancak bu, en sevdiğiniz birden
-fazla kalıtım dilini kullanırken ileride class adapters'a ihtiyaç duyabileceğiniz anlamına gelmez! Birden fazla
-inheritance için sınıf diyagramına bir göz atalım.
+Şimdi kalıbı tanımlamış olmamıza rağmen, size henüz tüm hikayeyi anlatmadık. Aslında iki tür adapter vardır: nesne
+adapter'ları ve sınıf adapter'ları. Bu bölümde nesne adapter'ları ele alınmıştır ve bir önceki sayfadaki sınıf diyagramı
+bir nesne adapter'ının diyagramıdır.
+
+Peki sınıf adapter'ı nedir ve neden size bundan bahsetmedik? Çünkü bunu implemente etmek için multi inheritance'a
+ihtiyacınız vardır ve bu Java'da mümkün değildir. Multi inheritance için sınıf diyagramına bakalım.
 
 ![img_7.png](../Images/AdapterFacade/img_7.png)
 
-Tek fark, class adapter ile Target ve Adaptee'yi alt sınıf yaparken, object adapter ile request'leri bir Adaptee'ye
-iletmek için composition'ı kullanmamızdır.
+Adapter, Adaptee'yi uyarlamak için composition kullanmak yerine artık Adaptee ve Target sınıflarının subclass'larına
+sahiptir.
 
---**Class Adapter Example**--
+# Class Adapter Example
 
 ![img_8.png](../Images/AdapterFacade/img_8.png)
 
-Not: Class adapter, multi inheritance kullanır, bu nedenle Java'da yapamazsınız...
+**Not** : Class adapter, multi inheritance kullanır, bu nedenle Java'da yapamazsınız...
 
-Client, bir Duck ile konuştuğunu düşünüyor.
+**Client** : bir Duck ile konuştuğunu düşünüyor.
 
-Target, Duck sınıfıdır. Bu, client tarafından methodların çağrıldığı nesnedir
+**<<interface>> Target** : Duck sınıfıdır. Bu, Client'in methodları çağırdığı şeydir.
 
-Adapter, her iki sınıfı da (Duck ve Turkey) extends ederek Turkey'in bir Duck üzerindeki request'lere yanıt vermesini
+**Adapter** : her iki sınıfı da (Duck ve Turkey) extend ederek Turkey'in bir Duck üzerindeki isteklere yanıt vermesini
 sağlar.
 
-Turkey sınıfı, Duck ile aynı methodlara sahip değil, ancak Adapter, Duck methodu çağrılarını alabilir ve ardından Turkey
-üzerinde method çağrıları yapabilir.
+**Adaptee** : Turkey sınıfı Duck ile aynı methodlara sahip değildir, ancak Adapter Duck method çağrılarını alabilir ve
+dönüp Turkey üzerindeki methodları çağırabilir
 
---**Object Adapter Example**--
+# Object Adapter Example
 
 ![img_9.png](../Images/AdapterFacade/img_9.png)
 
-Client, bir Duck ile konuştuğunu sanıyor.
+**Client** : bir Duck ile konuştuğunu düşünüyor.
 
-<<interface>> Target : Class Adapter ile olduğu gibi, Target Duck sınıfıdır. İşte client'in methodlarını çağırdığı nesne
-budur.
+**<<interface>> Target** : Tıpkı Class Adapter'da olduğu gibi, Target Duck sınıfıdır. Bu, client'in methodları çağırdığı
+şeydir.
 
-Adapter, Duck interface'ini implement eder, ancak bir method çağrısı aldığında bu çağrıları bir Turkey nesnesine
-delege eder.
+**Adapter** : Duck interface'ini implement eder, ancak bir method çağrısı aldığında geri döner ve çağrıları bir
+Turkey'ye delege eder
 
-Turkey sınıfı, Duck ile aynı interface'e sahip değildir. Başka bir deyişle, Turkey'lerde quack() gibi methodlar
-bulunmaz.
-
-Adapter sayesinde, Turkey (Adaptee), client'in Duck interface'inde yaptığı çağrıları alacaktır.
+**Adaptee** : Turkey sınıfı Duck ile aynı interface'e sahip değildir. Başka bir deyişle, Turkey'lerin quack() methodları
+vb. yoktur. Adapter sayesinde Turkey (Adaptee), Client'in Duck interface'inde yaptığı çağrıları alacaktır
 
 --**DIALOGS**--
 
-Object Adapter : Composition kullandığım için avantajım var. Bir adaptee edilen sınıfı değil, aynı zamanda alt
-sınıflarını da adapt edebilirim.
+**Object Adapter** : Composition kullandığım için avantajlıyım. Yalnızca bir adaptee sınıfını değil, onun herhangi bir
+subclass'ını da adapt edebilirim.
 
-Class Adapter : Bu doğru, ben belirli bir adaptee edilen sınıfa bağlı olduğum için bazı sıkıntılar yaşayabilirim. Ancak
-adaptee etmem gereken sınıfın tamamını yeniden implemente etmem gerekmediği için büyük bir avantajım var. Ayrıca,
-ihtiyaç duyarsam adaptee edilen nesnenin davranışını override edebilirim çünkü sadece alt sınıfı oluşturuyorum.
+**Class Adapter** : Bu doğru, belirli bir adaptee sınıfına bağlı olduğum için bu konuda sorun yaşıyorum, ancak büyük bir
+avantajım var çünkü tüm adaptee'mi yeniden implemente etmem gerekmiyor. Gerekirse adaptee'min behavior'unu da override
+edebilirim çünkü sadece subclassing yapıyorum.
 
-Object Adapter : Benim bulunduğum dünyada, inheritance yerine composition'ı tercih etmeyi seviyoruz; belki birkaç satır
-kodu kurtarıyorsunuz, ama ben sadece adaptee edene delege etmek için biraz kod yazıyorum. Esnekliği korumayı tercih
-ediyoruz.
+**Object Adapter** : Benim dünyamda, inheritance yerine composition'ı kullanmayı severiz; birkaç satır koddan tasarruf
+ediyor olabilirsiniz, ancak tek yaptığım, adaptee edene delegate etmek için küçük bir kod yazmaktır. Biz işleri esnek
+tutmayı seviyoruz.
 
-Class Adapter : Esnek olabilir, ancak verimli mi? Hayır. Class Adapter kullanarak sadece ben varım, bir adapter ve bir
-adaptee edilen yok.
+**Class Adapter** : Esnek olabilir, verimli mi? Bir Class Adapter kullanarak sadece bir tane ben varım, bir adapter ve
+bir adaptee değil.
 
-Object Adapter : Sadece küçük nesneye mi endişeleniyorsunuz? Belki bir methodu hızlıca override edebilirsiniz, ancak
-benim adapter koduma eklediğim herhangi bir behavior, adaptee edilen sınıfım ve tüm alt sınıfları ile çalışır.
+**Object Adapter** : Küçük bir nesne için mi endişeleniyorsunuz? Bir methodu hızlıca override edebilirsiniz, ancak
+adapter koduma eklediğim herhangi bir behavior, adaptee sınıfım ve tüm subclass'ları ile çalışır.
 
-Class Adapter : Evet, fakat adaptee edilen sınıfın bir alt sınıfı yeni bir behavior eklerse, o zaman ne olur?
+**Class Adapter** : Evet, ama ya adaptee'nin bir subclass'ı yeni bir behavior eklerse. O zaman ne olur?
 
-Object Adapter : Hey, anlayış göster, sadece alt sınıf ile compose etmem gerekiyor, böylece o işe yarar hale gelir.
+**Object Adapter** : Hey, anlayış göster, sadece subclass ile compose etmem gerekiyor, böylece o işe yarar hale gelir.
 
-# Real world adapters
+# Real world adapters (Gerçek dünya adapter'ları)
 
 ### Old world Enumerators
 
@@ -452,73 +476,67 @@ public class EnumerationIterator implements Iterator {
 
 --**DIALOGS**--
 
-Decorator : Görevim tamamen responsibility ilgilidir - bir Decorator devreye girdiğinde, tasarımınıza eklenen
-bazı yeni responsibilities veya behavior'lar olacağını bilirsiniz.
+**Decorator** : Benim işim tamamen responsibility (sorumlulukla) ilgili - bir Decorator işin içine girdiğinde
+tasarımınıza bazı yeni sorumluluklar veya behavior'lar ekleneceğini bilirsiniz.
 
-Adapter : Kirli işi yapan siperlerdeyiz: interface'leri dönüştürüyoruz. İşlerimiz cazip olmayabilir, ancak
+**Adapter** : Kirli işi yapan siperlerdeyiz: interface'leri dönüştürüyoruz. İşlerimiz cazip olmayabilir, ancak
 client'larımız kesinlikle hayatlarını daha basit hale getirmemizi takdir ediyorlar.
 
-Decorator : Bu doğru olabilir, ama çalışmadığımızı düşünmeyin. Büyük bir interface'i decorate etmemiz gerektiğinde, vay
-canına, bu oldukça fazla kod gerektirebilir.
+**Decorator** : Bu doğru olabilir, ancak çok çalışmadığımızı düşünmeyin. Büyük bir interface'i decorate etmemiz
+gerektiğinde, vay canına, bu çok fazla kod gerektirebilir.
 
-Adapter : Client'in beklediği interface'i sunmak için bir araya getirmeniz gereken birkaç sınıf olduğunda bir adapter
-olmayı deneyin. İşte o zaman zorlu bir durum olabilir. Ancak bizim bir deyişimiz vardır: "an uncoupled client is a happy
-client"
+**Adapter** : Client'ların beklediği interface'i sağlamak için birkaç sınıfı bir araya getirmeniz gerektiğinde bir
+adapter olmayı deneyin. İşte bu zordur. Ama bir sözümüz vardır: "an uncoupled client is a happy client."
 
-Decorator : bazen sadece bir decorator'ım ve kim bilir kaç tane başka decorator tarafından wrap edilmiş olabilirim. Bir
-method çağrısı size delegate edildiğinde, o methodun kaç tane başka decorator tarafından daha önce ele alındığını
-bilemezsiniz ve çabanızın talebi karşılamak için fark edilip edilmeyeceğini bilemezsiniz.
+**Decorator** : Çok şirin. Tüm övgüyü bizim aldığımızı düşünmeyin; bazen kim bilir kaç tane başka decorator tarafından
+wrap edilen tek bir decorator oluyorum. Bir method çağrısı size delege edildiğinde, kaç tane başka decorator'ın bu
+çağrıyla ilgilendiğini bilemezsiniz ve bu isteğe hizmet etme çabalarınızın fark edilip edilmeyeceğini de bilemezsiniz.
 
-Adapter : Evet, eğer adapter'ler görevlerini iyi yapıyorlarsa, client'larımız bizi asla fark etmez. Ama adapter'ler
-hakkındaki harika şey, client'lara herhangi bir kod değişikliği yapmadan yeni kütüphaneleri ve alt kümeleri kullanma
-imkanı tanıyor olmamız.
+**Adapter** : Hey, eğer adapter'ler işlerini yapıyorlarsa, client'larımız orada olduğumuzu asla bilmezler. Ancak, biz
+adapter'ların en güzel yanı, client'ların herhangi bir kod değişikliği yapmadan yeni kütüphaneleri ve alt kümeleri
+kullanmalarına izin vermemizdir, sadece onlar için dönüşümü yapmamıza güvenirler
 
-Decorator : Decorator'ler olarak biz de aynısını yapıyoruz, yalnızca mevcut kodu değiştirmeden sınıflara yeni
-behavior'lar eklemenize izin veriyoruz. Hala adapter'lerin sadece şık decorator'lar olduğunu söylüyorum - yani, bizim
-gibi, bir nesneyi wrap ediyorlar.
+**Decorator** : Biz Decorator'lar de bunu yapıyoruz, sadece mevcut kodu değiştirmeden sınıflara yeni behavior'lar
+eklenmesine izin veriyoruz. Ben hala adapter'lerin sadece süslü decorator'lar olduğunu söylüyorum - yani, tıpkı bizim
+gibi, bir nesneyi wrap edersiniz.
 
-Adapter : Hayır, hayır, hayır, hiç de öyle değil. Biz her zaman wrap ettiğimiz şeyin interface'ini dönüştürürüz, siz
-asla yapmazsınız. Bir decorator'ın bir adapter gibi olduğunu söyleyebilirim; sadece siz interface'i değiştirmezsiniz!
+**Adapter** : Hayır, hayır, hayır, hiç de değil. Biz her zaman wrap ettiğimiz şeyin interface'ini dönüştürürüz, siz asla
+dönüştürmezsiniz. Bir decorator'in bir adapter gibi olduğunu söyleyebilirim; sadece interface'i değiştirmezsiniz!
 
-Decorator : Hayattaki görevimiz sadece bilgi geçişi yapmak değil, wrap ettiğimiz nesnelerin behavior'larını veya
-responsibility'lerini extend etmektir.
+**Decorator** : Hayır. Hayattaki işimiz, wrap ettiğimiz nesnelerin behavior'larını veya responsibility'lerini extend
+etmektir.
 
-Adapter : Hey, kimi sadece bilgi geçişi yapan biri olarak adlandırıyorsun? Gelin ve birkaç interface dönüştürme işlemini
-ne kadar süreyle yapabildiğinizi görelim!
+**Adapter** : Hey, sen kime basit bir geçiş diyorsun? Aşağı gelin ve birkaç interface dönüştürmeye ne kadar
+dayanabileceğinizi görelim!
 
-# And now for something different...
+# And now for something different... (Ve şimdi farklı bir şey için...)
 
-### There’s another pattern in this chapter.
+### There’s another pattern in this chapter (Bu bölümde başka bir model daha var)
 
-Sizler Adapter Tasarım Deseni'nin, bir sınıfın interface'ini bir client'in beklediği interface'e dönüştürdüğünü
-gördünüz.
-
-Ayrıca, bu işlemi Java'da gerçekleştirdiğimizi, uyumsuz bir interface'e sahip bir nesneyi, doğru interface'i implement
-eden bir nesneyle wrap ederek başardığımızı biliyorsunuz.
-
-Şimdi, farklı bir nedenle bir interface'i değiştiren bir deseni inceleyeceğiz: interface'i basitleştirmek. Bu desen, bir
-veya daha fazla sınıfın karmaşıklığını temiz, aydınlık bir cephenin arkasında gizleyen bir model olarak adlandırılan
-"Facade Pattern" olarak adlandırılır.
+Adapter Pattern'in bir sınıfın interface'ini bir client'in beklediği interface'e nasıl dönüştürdüğünü gördünüz. Java'da
+bunu, uyumsuz bir arayüze sahip nesneyi doğru interface'i implemente eden bir nesneyle wrap ederek başardığımızı da
+biliyorsunuz. Şimdi bir interface'i değiştiren bir kalıba bakacağız, ancak farklı bir nedenle: interface'i
+basitleştirmek için. Bu kalıba uygun bir şekilde Facade Kalıbı adı verilmiştir çünkü bu kalıp bir veya daha fazla
+sınıfın tüm karmaşıklığını temiz, iyi aydınlatılmış bir facade'in arkasına gizler.
 
 # Home Sweet Home Theater
 
-Araştırmanızı yaptınız ve bir DVD oynatıcı, bir projektör video sistemi, otomatik bir perde, çevresel ses ve hatta bir
-patlamış mısır patlatıcısı dahil, etkileyici bir sistem oluşturdunuz. Bir araya getirdiğiniz tüm component'lere bir göz
-atalım:
+Araştırmanızı yaptınız ve bir DVD oynatıcı, bir projeksiyon video sistemi, otomatik bir ekran, surround ses ve hatta bir
+patlamış mısır patlatıcısı ile tamamlanmış harika bir sistem kurdunuz. Bir araya getirdiğiniz tüm component'lere göz
+atın:
 
 ![img_14.png](../Images/AdapterFacade/img_14.png)
 
-Evet, bu birçok sınıf, birçok etkileşim ve öğrenilip kullanılması gereken büyük bir interface kümesidir. Bu tür karmaşık
-sistemlerde yönetim ve kullanım zor olabilir.
+Bu çok sayıda sınıf, çok sayıda etkileşim ve öğrenilmesi ve kullanılması gereken çok sayıda interface anlamına gelir.
 
-Haftalarca kablo döşemek, projektörü monte etmek, tüm bağlantıları yapmak ve ince ayar yapmak için harcadınız. Şimdi her
-şeyi harekete geçirme zamanı geldi ve bir filmi keyifle izlemek için hazırsınız...
+Haftalarca kablo döşediniz, projektörü monte ettiniz, tüm bağlantıları ve ayarları yaptınız. Şimdi her şeyi harekete
+geçirme ve bir filmin keyfini çıkarma zamanı...
 
-# Watching a movie (the hard way)
+# Watching a movie (the hard way) (Bir film izlemek (zor yoldan))
 
 1 - Patlamış mısır makinesini açın.
 
-2 - Makineyi patlamaya başlatın.
+2 - Popper'ı patlatmaya başlayın
 
 3 - Işıkları kısın
 
@@ -581,92 +599,92 @@ dvd.play(movie);
 
 ### Ama daha fazlası var...
 
-* Film bittiğinde, her şeyi nasıl kapatırsınız? Her şeyi tersine çevirerek tekrar yapmanız gerekebilir, değil mi?
+* Film bittiğinde, her şeyi nasıl kapatıyorsunuz? Tüm bunları tersten tekrar yapmanız gerekmez mi?
 
-* CD veya radyo dinlemek de aynı derecede karmaşık olmaz mı?
+* Bir CD ya da radyo dinlemek kadar karmaşık olmaz mıydı?
 
-* Sisteminizi yükseltmeye karar verirseniz, muhtemelen biraz farklı bir işlem öğrenmeniz gerekecektir.
+* Sisteminizi yükseltmeye karar verirseniz, muhtemelen biraz farklı bir prosedür öğrenmeniz gerekecektir.
 
-Peki, ne yapmalı? Ev sinema sisteminizin kullanım karmaşıklığı ortaya çıkıyor gibi görünüyor! Facade Pattern'ın bizi bu
-karmaşıklıktan nasıl kurtarabileceğini görelim
+Peki ne yapmalı? Ev sinema sisteminizi kullanmanın karmaşıklığı ortaya çıkıyor! Bakalım Facade Deseni bizi bu karmaşadan
+nasıl kurtaracak, böylece filmin tadını çıkarabileceğiz...
 
-# Lights, Camera, Facade!
+# Lights, Camera, Facade! (Işıklar, Kamera, Facade!)
 
-Bir Facade, ihtiyacınız olan şey tam olarak budur: Facade Deseni ile complex bir subsystem alabilir ve bir
-veya daha fazla mantıklı interface sağlayan bir Facade sınıfı implemente ederek kullanımını kolaylaştırabilirsiniz.
-Endişelenmeyin; complex subsystem gücüne ihtiyacınız varsa hala kullanılabilir durumda, ancak ihtiyacınız olan tek şey
-doğrudan bir interface ise, Facade sizin için buradadır. Facade'nin nasıl çalıştığına bir göz atalım:
-
-1 - Tamam, şimdi ev sinema sistemi için bir Facade oluşturma zamanı geldi. Bunu yapmak için, watchMovie() gibi basit
-birkaç method sunan yeni bir HomeTheaterFacade sınıfı oluşturuyoruz.
-
-2 - Facade sınıfı, ev sinema componentlerini bir subsystem olarak ele alır ve watchMovie() methodunu implemente etmek
-için subsystem'i çağırır.
+Bir Facade tam da ihtiyacınız olan şeydir: Facade Pattern ile complex bir subsystem alabilir ve daha makul bir interface
+sağlayan bir Facade sınıfını implemente ederek kullanımını kolaylaştırabilirsiniz. Endişelenmeyin; complex subsystem
+gücüne ihtiyacınız varsa, kullanmanız için hala oradadır, ancak ihtiyacınız olan tek şey basit bir interface ise, Facade
+sizin için oradadır. Şimdi Facade'in nasıl çalıştığına bir göz atalım:
 
 ![img_15.png](../Images/AdapterFacade/img_15.png)
 
-3 - Artık client kodunuz, subsystem üzerinde method çağırmak yerine HomeTheaterFacade üzerinde method çağırır. Bu
-sayede bir film izlemek için sadece watchMovie() gibi bir methodu çağırmanız yeterli olur ve bu method aracılığıyla
-ışıklar, DVD oynatıcı, projektör, amplifikatör, perde ve patlamış mısır constructor'ı ile iletişim kurar.
+1 - Pekala, ev sinema sistemi için bir Facade oluşturma zamanı. Bunu yapmak için, watchMovie() gibi birkaç basit methodu
+ortaya çıkaran yeni bir HomeTheaterFacade sınıfı oluşturuyoruz.
+
+2 - Facade sınıfı, ev sineması componentlerini bir subsystem olarak ele alır ve watchMovie() methodunu implemente etmek
+için subsystem'i çağırır.
 
 ![img_16.png](../Images/AdapterFacade/img_16.png)
 
-4 - Facade hala subsystem'in doğrudan kullanılabilir olmasını sağlar. Sub system sınıflarının gelişmiş işlevselliğine
-ihtiyacınız varsa, bunları kullanabilirsiniz.
+3 - Client kodunuz artık subsystem'deki değil, ev sineması Facade'ında ki methodları çağırıyor. Artık bir film izlemek
+için sadece watchMovie() methodunu çağırıyoruz ve bu method bizim için ışıklarla, DVD oynatıcıyla, projektörle,
+amplifikatörle, ekranla ve patlamış mısır makinesiyle iletişim kuruyor.
+
+4 - Facade, subsystem'i doğrudan kullanılmak üzere erişilebilir bırakmaya devam eder. Subsystem sınıflarının gelişmiş
+işlevselliğine ihtiyacınız varsa, bunlar kullanımınıza hazırdır.
 
 Bir facade sadece bir interface'i basitleştirmekle kalmaz, aynı zamanda bir client'i bir component subsystem'indan
 ayırır.
 
-Facades ve adapter'ler birden fazla sınıfı wrap etmiş olabilir, ancak bir Facade'ın amacı basitleştirmekken, bir
-adapter'in amacı interface'i farklı bir şeye dönüştürmektir.
+Facade'ler ve adapter'lar birden fazla sınıfı wrap edebilir, ancak bir facade'in amacı basitleştirmek, bir adapter'in
+amacı ise interface'i farklı bir şeye dönüştürmektir.
 
 --**DIALOGS**--
 
-Q : Eğer Facade, subsystem sınıflarını kapsıyorsa, low-level işlevselliğe ihtiyaç duyan bir client bu işlevselliğe
-nasıl erişir?
+Q : Facade subsystem sınıflarını encapsulate ederse, low-level işlevselliğe ihtiyaç duyan bir client bunlara nasıl
+erişebilir?
 
-A : Facade'lar, subsystem sınıflarını "encapsule etmezler" ya da gizlemezler; yalnızca işlevselliğine basitleştirilmiş
-bir interface sağlarlar. Subsystem sınıfları, daha belirli interface'lere ihtiyaç duyan client'lar tarafından doğrudan
-kullanılmaya devam eder. Bu, Facade Deseni'nin güzel bir özelliğidir: basitleştirilmiş bir interface sunarken, ihtiyaç
-duyanlara sistemdeki tam işlevselliği açıkça sunar.
+A : Facade'ler subsystem sınıflarını "encapsule etmezler"; sadece işlevlerine basitleştirilmiş bir interface sağlarlar.
+Subsystem sınıfları, daha spesifik interface'ler kullanması gereken client'lar tarafından doğrudan kullanılmaya devam
+eder. Bu, Facade Pattern'in güzel bir özelliğidir: basitleştirilmiş bir interface sağlarken, sistemin tüm işlevselliğini
+ihtiyaç duyabilecek kişilere sunmaya devam eder.
 
-Q : Facade, işlev ekler mi yoksa her request'i sadece subsystem'lara ileterek mi çalışır?
+Q : Facade herhangi bir işlevsellik ekliyor mu yoksa sadece her isteği subsystem'e mi aktarıyor?
 
-A : Facade, subsystem'ları kullanmanın yanı sıra kendi 'smarts' veya özelliklerini eklemekte özgürdür. Örneğin,
-HomeTheaterFacade, yeni bir behavior implemente etmez, ancak patlamış mısır yapıcısının önce açılması gerektiğini (ve
-bir film gösterimini nasıl başlatılacağı gibi ayrıntıları) bilecek kadar zekidir.
+A : Bir Facade, subsystem'i kullanmanın yanı sıra kendi "smarts özelliklerini" eklemekte özgürdür. Örneğin, ev sineması
+facade'imiz herhangi bir yeni behavior implement etmese de, patlamış mısırın patlamadan önce açılması gerektiğini
+bilecek kadar akıllıdır (ayrıca bir film gösteriminin nasıl açılacağı ve sahneleneceği ile ilgili ayrıntılar).
 
 Q : Her subsystem'in yalnızca bir facade'i mi olur?
 
-A : Her zaman gerekli değil. Desen kesinlikle belirli bir subsystem için oluşturulacak birçok facade'nin oluşturulmasına
-izin verir
+A : Zorunlu değildir. Desen, belirli bir subsystem için herhangi bir sayıda facade oluşturulmasına kesinlikle izin
+verir.
 
-Q : Facade sadece daha basit bir interface'e sahip olmamın dışında hangi faydaları sağlar?
+Q : Artık daha basit bir interface'e sahip olduğum gerçeğinden başka Facade'in faydası nedir?
 
-A : Facade Deseni ayrıca client implementasyonunu herhangi bir subsystem'den bağımsız hale getirmenize de olanak tanır.
-Diyelim ki büyük bir maaş artışı aldınız ve ev sinemanızı farklı interface'lere sahip tamamen yeni componentlere
-yükseltmeye karar verdiniz. Eğer client'inizi subsystem yerine facade'a kodladıysanız, client kodunuzun değişmesi
-gerekmez, sadece facade (ve umarım üretici bunu sağlıyordur!) yeterli olur
+A : Facade Pattern ayrıca client implementasyonunuzu herhangi bir subsystem'den ayırmanıza olanak tanır. Örneğin, büyük
+bir zam aldığınızı ve ev sinema sisteminizi farklı interface'lere sahip tüm yeni componentlere yükseltmeye karar
+verdiğinizi varsayalım. Client'inizi subsystem yerine facade'a kodlarsanız, client kodunuzun değişmesi gerekmez,
+sadece facade değişir (ve umarım Vendor bunu sağlar!).
 
-Q : Adapter Pattern ile Facade Pattern arasındaki farkı anlamanın yolu, adapter'in bir sınıfı wrap ettiği ve
-facade'ların birçok sınıfı temsil edebileceğidir, öyle mi?
+Q : Yani Adapter Kalıbı ile Facade Kalıbı arasındaki farkı söylemenin yolu, adapter'in bir sınıfı wrap etmesi ve facade'
+ın birçok sınıfı temsil edebilmesi mi?
 
-A : Hayır! Adapter Deseni, bir veya daha fazla sınıfın interface'ini, bir client'in beklediği bir interface'e dönüştüren
-desendir. Çoğu teorik örnekte adapter, bir sınıfı dönüştürüyor gibi görünse de, client'in kodlandığı bir interface
-sağlamak için birçok sınıfı dönüştürmeniz gerekebilir. Benzer şekilde, bir Facade, çok karmaşık bir interface'e
-sahip bir tek sınıfa basitleştirilmiş bir interface sağlayabilir. İkisi arasındaki fark, ne kadar çok sınıfı "
-wrap ettikleri" ile ilgili değil, ama niyetleriyle ilgilidir. Adapter Deseni'nin niyeti, bir interface'i değiştirerek
-client2in beklediği bir interface ile eşleştirmektir. Facade Deseni'nin niyeti ise bir subsystem'e basitleştirilmiş bir
-interface sağlamaktır.
+A : Hayır! Unutmayın, Adapter Kalıbı bir veya daha fazla sınıfın interface'ini bir client'in beklediği tek bir
+interface'e dönüştürür. Çoğu ders kitabı örneği adapter'in bir sınıfı adapting (uyarladığını) ettiğini gösterse de, bir
+client'in kodlandığı interface'i sağlamak için birçok sınıfı adapting (uyarlamanız) etmeneniz gerekebilir. Benzer
+şekilde, bir Facade çok karmaşık bir interface'e sahip tek bir sınıfa basitleştirilmiş bir interface sağlayabilir. İkisi
+arasındaki fark, kaç sınıfı "wrap ettikleri" değil, amaçlarıdır. Adapter Kalıbının amacı, bir interface'i bir client'in
+beklediği interface ile eşleşecek şekilde değiştirmektir. Facade Pattern'in amacı ise bir subsystem'a basitleştirilmiş
+bir interface sağlamaktır.
 
-# Constructing your home theater facade
+# Constructing your home theater facade (Ev sinema sisteminizin facade'inin oluşturulması)
 
-"HomeTheaterFacade" oluşturulmasını adım adım inceleyelim: İlk adım, facade'da subsystem'in tüm componentlere erişimin
-olabilmesi için composition'ı kullanmaktır.
+HomeTheaterFacade'in yapımını adım adım inceleyelim: İlk adım, facade'in subsystem'in tüm componentlerine erişebilmesi
+için composition kullanmaktır:
 
 ```
 public class HomeTheaterFacade {
-    /* İşte composition; bunlar kullanacağımız subsystem component'lerin tamamıdır.*/
+    /* İşte composition; bunlar kullanacağımız subsystem'in tüm componentleri */
     Ampilifier ampilifier;
     Tuner tuner;
     DvdPlayer dvdPlayer;
@@ -676,8 +694,8 @@ public class HomeTheaterFacade {
     Screen screen;
     PopcornPopper popper;
 
-    /* Facade, constructor'ında subsystem component'lerinin her birine bir referans alır. Ardından, facade her birini
-    karşılık gelen instance variable'a atar.*/
+    /* Facade'a, constructor'ında subsystem'in her bir component'ine bir referans aktarılır. Facade daha sonra her 
+    birini ilgili instance variable'a atar */
     public HomeTheaterFacade(Ampilifier ampilifier,
                              Tuner tuner,
                              DvdPlayer dvdPlayer,
@@ -697,13 +715,12 @@ public class HomeTheaterFacade {
         this.popper = popper;
     }
 
-    /* Şimdi subsystem'in component'lerini birleştirip birleşik bir interface'e getirme zamanı geldi.
-    "watchMovie()" ve "endMovie()" methodlarını uygulayalım.*/
+    /* Şimdi subsystem'in component'lerini birleşik bir interface'de bir araya getirmenin zamanı geldi. 
+    watchMovie() ve endMovie() methodlarını implement edelim */
     public void watchMovie(String movie){
-        /* "watchMovie()" methodu, daha önce manuel olarak yapmak zorunda kaldığımız işlem sırasını takip eder,
-        ancak tüm işi yapacak kullanışlı bir methoda sarar. Her görev için subsystem'da ki ilgili componente
-        sorumluluğu devrettiğimize dikkat edin.*/
 
+        /* watchMovie() daha önce elle yapmak zorunda kaldığımız aynı sırayı takip eder, ancak tüm işi yapan kullanışlı 
+        bir methodla tamamlar. Her görev için sorumluluğu subsystem'daki ilgili componente devrettiğimize dikkat edin */
         System.out.println("Get ready to watch a movie");
 
         popper.on();
@@ -725,10 +742,9 @@ public class HomeTheaterFacade {
         dvdPlayer.play(movie);
     }
 
+    /* Ve endMovie() bizim için her şeyi kapatmaya özen gösterir. Yine, her görev subsystem'daki uygun componente 
+    devredilir */
     public void endMovie(){
-        /* "endMovie()" methodu ise her şeyi kapatmakla ilgilenir. Yine, her görev subsystem'da ki uygun componente
-        devredilir.*/
-
         System.out.println("shutting movie theater down");
 
         popper.off();
@@ -748,7 +764,7 @@ public class HomeTheaterFacade {
 }
 ```
 
-# Time to watch a movie (the easy way)
+# Time to watch a movie (the easy way) (Film izleme zamanı (kolay yol))
 
 ```
 public class App {
@@ -762,53 +778,62 @@ public class App {
         Tuner tuner = new Tuner();
         CdPlayer cd = new CdPlayer();
 
+        /* İlk olarak Facade'i subsystem'da ki tüm componentlerler birlikte instantiate ederiz */
         HomeTheaterFacade facade = new HomeTheaterFacade(
           amp,tuner,dvd,cd,projector,lights,screen,popper
         );
 
+        /* Filmi önce başlatmak ve sonra kapatmak için basitleştirilmiş interface'i kullanın */
         facade.watchMovie("Raiders of the Lost Ark");
         facade.endMovie();
     }
 }
 ```
 
+![img_20.png](../Images/AdapterFacade/img_20.png)
+
 # Facade Pattern defined
 
-Facade Deseni'ni kullanmak için, bir subsystem'de bulunan daha complex sınıfları basitleştiren ve birleştiren bir sınıf
-oluştururuz. Birçok desenin aksine, Facade oldukça açıktır; kafanızı karıştıracak karmaşık abstraction'ları yoktur.
-Ancak bu, onun ne kadar güçlü olduğunu azaltmaz: Facade Deseni, client'lar ve subsystem'ler arasındaki tight coupling'i
-önlememize ve yeni bir nesne yönelimli prensibe uymamıza yardımcı olur.
+Facade Kalıbını kullanmak için, bazı subsystem'lere ait daha complex sınıflar kümesini basitleştiren ve birleştiren bir
+sınıf yaratırız. Pek çok kalıbın aksine, Facade oldukça basittir; kafanızı kurcalayacak akıl almaz abstractionlar
+yoktur. Ancak bu onu daha az güçlü yapmaz: Facade Kalıbı, client'lar ve subsystem'ler arasındaki tight coupling (sıkı
+bağlantıdan) kaçınmamızı sağlar ve birazdan göreceğiniz gibi, yeni bir nesne yönelimli ilkeye bağlı kalmamıza da
+yardımcı olur. Bu yeni prensibi tanıtmadan önce, kalıbın resmi tanımına bir göz atalım:
 
-Bu yeni prensibi tanıtmadan önce, desenin resmi tanımına bir göz atalım:
+![img_21.png](../Images/AdapterFacade/img_21.png)
 
 Facade Pattern, bir subsystem'deki bir dizi interface'e tek bir interface sağlar. Facade, subsystem'in kullanımını
-kolaylaştıran daha üst düzey bir interface tanımlar.
+kolaylaştıran daha higher-level bir interface tanımlar.
 
-Burada zaten bilmediğiniz çok şey yok, ancak bir desenin en önemli özelliklerinden biri niyetidir. Bu tanım, bize Facade
-Deseni'nin amacının, bir subsystem'i basitleştirilmiş bir interface aracılığıyla daha kolay kullanılabilir hale getirmek
-olduğunu açıkça belirtir. Bu, desenin sınıf diyagramında da gözlemlenebilir:
+Burada zaten bilmediğiniz pek bir şey yok, ancak bir kalıp hakkında hatırlanması gereken en önemli şeylerden biri
+amacıdır. Bu tanım bize açık ve net bir şekilde facade'in amacının basitleştirilmiş bir interface aracılığıyla bir
+subsystem'in kullanımını kolaylaştırmak olduğunu söylüyor. Bunu modelin sınıf diyagramında görebilirsiniz:
 
 ![img_17.png](../Images/AdapterFacade/img_17.png)
 
-Facade : Daha kolay kullanılabilen birleşik Interface.
+**Client** : Facade sayesinde işi kolaylaşan mutlu müşteri
 
-# The Principle of Least Knowledge
+**Facade** : Kullanımı daha kolay olan birleşik Interface
+
+# The Principle of Least Knowledge (En Az Bilgi İlkesi)
 
 En Az Bilgi İlkesi (The Principle of Least Knowledge), nesneler arasındaki etkileşimleri yalnızca birkaç yakın "friends"
 arasında sınırlamamızı önerir. Bu principle genellikle şöyle ifade edilir:
 
-En Az Bilgi İlkesi (The Principle of Least Knowledge) - Sadece doğrudan friends'ler ile konuşun.
+![img_22.png](../Images/AdapterFacade/img_22.png)
 
-Ancak bu gerçek anlamda ne ifade ediyor? Bu, bir sistem tasarlarken, herhangi bir nesnenin etkileşimde bulunduğu sınıf
-sayısına ve bu sınıflarla nasıl etkileşimde bulunduğuna dikkat etmeniz gerektiği anlamına gelir. Bu principle,
-sistemdeki bir
-bölümde yapılan değişikliklerin diğer bölümlere yayılmasını engeller. Birçok sınıf arasında çok sayıda bağımlılık
-oluşturduğunuzda, bakımı maliyetli ve diğer insanlar için anlaşılması karmaşık bir sistem oluşturuyorsunuz.
+En Az Bilgi İlkesi (The Principle of Least Knowledge) - sadece yakın arkadaşlarınızla konuşun
 
-# How NOT to Win Friends and Influence Objects
+Peki bu gerçek anlamda ne anlama geliyor? Bir sistem tasarlarken, herhangi bir nesne için, etkileşime girdiği sınıfların
+sayısına ve bu sınıflarla nasıl etkileşime girdiğine dikkat edin anlamına gelir.Bu ilke, çok sayıda sınıfın birbirine
+bağlı olduğu tasarımlar oluşturmamızı engeller, böylece sistemin bir bölümündeki değişiklikler diğer bölümlere de
+yansır. Birçok sınıf arasında çok fazla bağımlılık oluşturduğunuzda, bakımı maliyetli ve başkalarının anlaması için
+karmaşık olacak kırılgan bir sistem inşa etmiş olursunuz.
 
-Peki, bunu nasıl önlersiniz? Principle bazı yönergeler sunar: herhangi bir nesneyi alalım; şimdi bu nesnenin herhangi
-bir methodundan, principle bize sadece aşağıdaki sınıflara ait methodları çağırmamız gerektiğini söyler:
+# How NOT to Win Friends and Influence Objects (Nasıl Arkadaş Kazanmaz ve Nesneleri Etkilemezsin)
+
+Peki, ama bunu yapmaktan nasıl kaçınırsınız? İlke bazı yönergeler sağlar: herhangi bir nesneyi alın; şimdi bu nesnedeki
+herhangi bir methoddan, ilke bize yalnızca nesneye ait methodları çağırmamız gerektiğini söyler:
 
 * Object'in kendisi
 
@@ -819,44 +844,37 @@ bir methodundan, principle bize sadece aşağıdaki sınıflara ait methodları 
 * Object için herhangi bir component
 
 Bu yönergelerin bize başka methodların çağrılmasıyla döndürülen nesneler üzerindeki methodları çağırmamamızı söylediğine
-dikkat edin!
-
-Bir "component'i", bir instance variable tarafından referans verilen herhangi bir nesne olarak düşünün. Başka bir
-deyişle bunu bir HAS-A ilişkisi olarak düşünün.
-
-Bu kulağa biraz katı geliyor, değil mi? Başka bir çağrıdan geri aldığımız bir nesnenin metodunu çağırmanın ne zararı
-var? Eğer bunu yaparsak, başka bir nesnenin alt parçasından istekte bulunmuş oluruz (ve doğrudan bildiğimiz nesnelerin
-sayısını artırmış oluruz). Bu gibi durumlarda, priciple bizi nesneden bizim için istekte bulunmasını istemeye zorlar; bu
-şekilde onun component nesneleri hakkında bilgi sahibi olmak zorunda kalmayız(ve friends çevremizi küçük tutuyoruz).
-Örneğin:
+dikkat edin! Bir "component'i", bir instance variable tarafından referans verilen herhangi bir nesne olarak düşünün.
+Başka bir deyişle bunu bir HAS-A ilişkisi olarak düşünün. Bu kulağa biraz katı geliyor, değil mi? Başka bir çağrıdan
+geri aldığımız bir nesnenin methodunu çağırmanın ne zararı var? Eğer bunu yaparsak, başka bir nesnenin subpart'ından
+istekte bulunmuş oluruz (ve doğrudan bildiğimiz nesnelerin sayısını artırmış oluruz). Bu gibi durumlarda, ilke bizi
+nesneden bizim için istekte bulunmasını istemeye zorlar; bu şekilde onun component nesnelerini bilmek zorunda kalmayız (
+ve arkadaş çevremizi küçük tutarız). Örneğin:
 
 ### Without the principle
 
 ```
 public float getTemp() {
+    /* Burada station'dan termometre nesnesini alıyoruz ve ardından getTemperature() methodunu kendimiz çağırıyoruz */
     Thermometer thermometer = station.getThermometer();
     return thermometer.getTemperature();
 }
 ```
 
-Burada station'dan Thermometer nesnesini alıyoruz ve ardından getTemperature() methodunu kendimiz çağırıyoruz.
-
 ### With the principle
 
 ```
 public float getTemp() {
+    /* Prensibi uyguladığımızda, Station sınıfına bizim için termometreye istekte bulunan bir method ekleriz. Bu, 
+    bağımlı olduğumuz sınıf sayısını azaltır */
     return station.getTemperature();
 }
 ```
 
-Prensibi uyguladığımızda, Station sınıfına bizim için termometreye request'de bulunan bir method ekleriz. Bu, bağımlı
-olduğumuz sınıf sayısını azaltır.
+# Keeping your method calls in bounds... (Method çağrılarınızı sınırlar içinde tutmak...)
 
-# Keeping your method calls in bounds...
-
-Burada, methodları çağırabileceğiniz ve yine de Principle of Least Knowledge principlesine bağlı kalabileceğiniz tüm
-yolları
-gösteren bir Car sınıfı var:
+Burada, methodları çağırabileceğiniz ve yine de Principle of Least Knowledge prensiplerine bağlı kalabileceğiniz tüm
+yolları gösteren bir Car sınıfı var:
 
 ```
 public class Car {
@@ -886,30 +904,39 @@ public class Car {
         }
     }
 
+    /* local method */
     public void updateDashboardDisplay(){
         // update display
     }
 }
 ```
 
+* Sınıfın Component'i üzerinde ki bir methodu çağırabilirsiniz
+
+* Parametre olarak geçirilen bir nesne üzerinde bir method çağırabilirsiniz
+
+* Object içinde local bir method çağırabilirsiniz
+
+* Oluşturduğunuz veya instantiate ettiğiniz bir nesne üzerinde bir method çağırabilirsiniz
+
 --**DIALOGS**--
 
-Q : Başka bir Principle'a da "Law Of Demeter" denir; bunlar nasıl ilişkilidir?
+Q : Başka bir Principle'a da "Law Of Demeter" denir; bunların birbiri ile ilişkisi nedir?
 
-A : İkisi de aynıdır ve bu terimler sık sık birbirine karışır. Priciple of Least Knowledge kullanmayı tercih ediyoruz ve
-bunun birkaç nedeni vardır:
+A : İkisi bir ve aynıdır ve bu terimlerin birbirine karıştırıldığını göreceksiniz. Birkaç nedenden dolayı Priciple of
+Least Knowledge kullanmayı tercih ediyoruz
 
 1 - isim daha sezgiseldir
 
-2 - "Law" kelimesinin kullanımı, bu priciple'i her zaman uygulamamız gerektiğini ima eder. Aslında hiçbir principle
-kanun değildir, tüm principle'lar yararlı oldukları zaman ve yerde kullanılmalıdır. Tüm tasarımlar denge içerir (
-abstraction vs speed, space vs time vb.) ve principle'lar rehberlik sağlarken, bunları uygulamadan önce tüm faktörler
-dikkate alınmalıdır.
+2 - "Law" kelimesinin kullanılması, bu ilkeyi her zaman uygulamak zorunda olduğumuzu ima etmektedir. Aslında hiçbir
+ilke kanun değildir, tüm ilkeler yararlı oldukları zaman ve yerde kullanılmalıdır. Tüm tasarımlar denge içerir (
+abstraction'lara karşı hız, space'e karşı zaman vb.) ve ilkeler rehberlik sağlarken, bunları uygulamadan önce tüm
+faktörler dikkate alınmalıdır.
 
 Q : Principle of Least Knowledge uygulamanın herhangi bir dezavantajı var mı?
 
-A : Evet; bu principle nesneler arasındaki bağımlılıkları azaltırken ve çalışmalar bunun yazılım bakımını azalttığını
-gösterirken, bu principle'in uygulanmasının diğer component'lere yapılan method çağrılarını işlemek için daha fazla "
+A : Evet; bu ilke nesneler arasındaki bağımlılıkları azaltırken ve çalışmalar bunun yazılım bakımını azalttığını
+gösterirken, bu ilkenin uygulanmasının diğer component'lere yapılan method çağrılarını işlemek için daha fazla "
 wrapper" sınıf yazılmasına neden olduğu da bir gerçektir. Bu da karmaşıklığın ve geliştirme süresinin artmasının
 yanı sıra çalışma zamanı performansının düşmesine neden olabilir.
 
@@ -922,12 +949,11 @@ public House {
     WeatherStation station;
     // other methods and constructor
     public float getTemp() {
+        /* Principle of Least Knowledge İhlal Ediyor! Başka bir çağrıdan dönen bir nesnenin methodunu çağırıyorsunuz */
         return station.getThermometer().getTemperature();
     }
 }
 ```
-
-Principle of Least Knowledge İhlal Ediyor! Başka bir çağrıdan dönen bir nesnenin methodunu çağırıyorsunuz.
 
 ```
 public class House {
@@ -949,19 +975,17 @@ public class House {
 Aykırı değil! Bu, principle'i çevreleyerek bir yol bulma gibi görünüyor. Gerçekten de sadece çağrıyı başka bir methoda
 taşıdığımızdan beri ne değişti?
 
-# The Facade and the Principle of Least Knowledge
+# The Facade and the Principle of Least Knowledge (Facade ve En Az Bilgi İlkesi)
 
 ![img_18.png](../Images/AdapterFacade/img_18.png)
 
-Bu client'in sadece bir friend'i vardır; HomeTheaterFacade. Nesne tabanlı programlamada, sadece bir friend'in olması
-İYİ bir şeydir!
+**Client** : Bu Client'in yalnızca bir arkadaşı vardır; HomeTheaterFacade. OO programlamada, sadece bir arkadaşa sahip
+olmak İYİ bir şeydir!
 
-HomeTheaterFacade, client için tüm bu subsystem component'lerini yönetir. Client'i basit ve esnek tutar.
-
-Client'i etkilemeden HomeTheater component'lerini yükseltebiliriz.
-
-Subsystem'ları da Principle of Least Knowledge'a bağlı tutmaya çalışıyoruz. Bu çok karmaşık hale gelirse ve çok fazla
-friend birbirine karışırsa, subsystem katmanları oluşturmak için ek facade'lar ekleyebiliriz.
+**HomeTheaterFacade** : client için tüm bu subsystem component'lerini yönetir. Client'i basit ve esnek tutar. Client'i
+etkilemeden ev sineması component'lerini yükseltebiliriz. Subsystem'leri de Principle of Least Knowledge'a bağlı tutmaya
+çalışıyoruz. Bu çok karmaşık hale gelirse ve çok fazla friend birbirine karışırsa, subsystem katmanları oluşturmak için
+ek facade'lar ekleyebiliriz.
 
 ### Adapter
 
@@ -975,9 +999,10 @@ daha üst düzey bir interface tanımlar.
 
 --**BULLET POINTS**--
 
-* Bir mevcut sınıfı kullanmanız gerektiğinde ve interface'i ihtiyacınız olanla uyuşmuyorsa, bir adapter kullanın.
+* Mevcut bir sınıfı kullanmanız gerektiğinde ve interface'i ihtiyacınız olan interface olmadığında, bir adapter
+  kullanın.
 
-* Büyük bir interface'i veya complex bir interface kümesini basitleştirmeniz ve birleştirmeniz gerektiğinde, bir facade
+* Büyük bir interface'i veya complex interface'ler kümesini basitleştirmeniz ve birleştirmeniz gerektiğinde, bir facade
   kullanın.
 
 * Bir adapter, bir interface'i bir client'in beklediği bir interface'e dönüştürür.
@@ -985,14 +1010,14 @@ daha üst düzey bir interface tanımlar.
 * Bir facade, bir client'i complex bir subsystem'dan ayırır.
 
 * Bir adapter'in implement edilmesi, target interface'in boyutu ve karmaşıklığına bağlı olarak az veya çok çalışma
-  gerektirebilir.
+  gerektirebilir
 
 * Bir facade implement etmek, facade'i subsystem ile birleştirmemizi ve facade'nin işini yapmak için delegation
   kullanmamızı gerektirir.
 
 * Adapter Deseni'nin iki türü vardır: object ve class adapters. Class adapter'lar multi inheritance gerektirir.
 
-* Bir subsystem için birden fazla facade implement edebilirsiniz.
+* Bir subsystem için birden fazla facade implement edebilirsiniz
 
-* Bir adapter, bir nesneyi interface'ini değiştirmek için wrap eder, bir decorator yeni behavior'lar ve responsibility'
-  ler eklemek için bir nesneyi wrap eder ve bir facade bir küme nesneyi basitleştirmek için "wrap eder".
+* Bir adapter interface'ini değiştirmek için bir nesneyi wrap eder, bir decorator yeni behavior'lar ve sorumluluklar
+  eklemek için bir nesneyi wrap eder ve bir facade basitleştirmek için bir dizi nesneyi "wrap eder".
