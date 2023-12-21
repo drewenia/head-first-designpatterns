@@ -5,7 +5,7 @@ Pizzaları encapsule ettik... sırada ne olabilir? Algoritma parçalarını enca
 subclass'lar istedikleri zaman kendilerini doğrudan bir hesaplamaya bağlayabilecekler. Hatta Hollywood'dan esinlenen bir
 tasarım ilkesini bile öğreneceğiz.
 
-# It’s time for some more caffeine
+# It’s time for some more caffeine (Biraz daha kafein zamanı)
 
 Bazı insanlar kahvesiz, bazıları çaysız yaşayamaz. Ortak içerik? Elbette kafein! Ama dahası var; çay ve kahve çok benzer
 şekillerde yapılır. Hadi bir bakalım:
@@ -14,28 +14,24 @@ Bazı insanlar kahvesiz, bazıları çaysız yaşayamaz. Ortak içerik? Elbette 
 
 Kahve tarifi çay tarifine çok benziyor, değil mi?
 
-# Whipping up some coffee and tea classes (in Java)
+# Whipping up some coffee and tea classes (in Java) (Kahve ve çay dersleri)
 
 Hadi "coding baristası" oynayalım ve kahve ve çay oluşturmak için biraz kod yazalım. İşte kahve:
 
 ```
 public class Coffee {
+
+    /* İşte kahve tarifimiz, doğrudan eğitim kılavuzundan */
     void prepareReceipe(){
-
-        /*
-            Adımların her biri ayrı bir method olarak uygulanır
-        */
-
+        /* Adımların her biri ayrı bir method olarak implement edilir */
         boilWater();
         brewCoffeeGrinds();
         pourInCup();
         addSugarAndMilk();
     }
 
-    /*
-        Bu methodların her biri algoritmanın bir adımını uygular. Suyu kaynatmak, kahveyi demlemek, kahveyi bir fincana
-        dökmek ve şeker ve süt eklemek için bir method vardır.
-    */
+    /* Bu methodların her biri algoritmanın bir adımını implement eder. Suyu kaynatmak, kahveyi demlemek, kahveyi bir 
+    fincana dökmek, şeker ve süt eklemek için bir method vardır */
     private void boilWater() {
         System.out.println("Boiling water");
     }
@@ -54,25 +50,25 @@ public class Coffee {
 }
 ```
 
-# and now the Tea...
+# and now the Tea... (Ve şimdi çay..)
 
 ```
 public class Tea {
     void prepareReceipe(){
-        /*
-            Bu, az önce Coffee'de implemente ettiğimize çok benziyor; ikinci ve dördüncü adımlar farklı, ancak
-            temelde aynı tarif.
-
-            steepToBag() ve addLemon() methodları Tea'ye özgü methodlardır
-        */
+    
+        /* Bu, az önce Coffee'de implement ettiğimize çok benziyor; ikinci ve dördüncü adımlar farklı, ancak temelde 
+        aynı tarif */
         boilWater();
+        /* steepToBag() Tea'ye özgü methoddur */
         steepTeaBag();
         pourInCup();
+        /* addLemon() methodu Tea'ye özgü methoddur */
         addLemon();
     }
-
+    
     /* boilWater() ve pourInCup() Bu iki methodun Coffee'de olduğu gibi tamamen aynı olduğuna dikkat edin! Yani
-    burada kesinlikle bazı kod tekrarları söz konusu.*/
+    burada kesinlikle bazı code duplication söz konusu.*/
+
     private void boilWater() {
         System.out.println("Boiling water");
     }
@@ -94,25 +90,26 @@ public class Tea {
 Kod tekrarları olduğunda, bu tasarımı temizlememiz gerektiğine dair iyi bir işarettir. Coffee ve Tea birbirine çok
 benzediği için burada ortaklığı bir base class'a abstract'lamamız gerekiyor gibi görünüyor?
 
-# Sir, may I abstract your Coffee, Tea?
+# Sir, may I abstract your Coffee, Tea? (Efendim, kahvenizi ya da çayınızı soyutlamama izin verir misiniz?)
 
-İlk iyileştirme şu şekilde olabilir;
+Görünüşe göre Kahve ve Çay sınıfları ile elimizde oldukça basit bir tasarım alıştırması var. İlk kesiminiz buna benzer
+bir şey olabilir:
 
 ![img_1.png](../Images/TemplateDesignPattern/img_1.png)
 
-prepareRecipe() methodu her subclass'ta farklılık gösterir, bu nedenle abstract olarak tanımlanır
+**prepareRecipe()** : methodu her subclass'da farklılık gösterir, bu nedenle Abstract olarak tanımlanmıştır.
 
-boilWater() ve pourInCup() methodları her iki subclass tarafından paylaşılır, bu nedenle superclass'da tanımlanırlar.
+**boilWater()** ve **pourInCup()** methodları her iki subclass tarafından paylaşılır, bu nedenle superclass'da
+tanımlanırlar.
 
-Her subclass kendi tarifini implement eder.
+**Coffee - Tea** : Her subclass kendi tarifini implement eder. Her subclass prepareRecipe() methodunu override ve kendi
+tarifini implemente eder
 
-Her subclass prepareRecipe() methodunu override ve kendi tarifini implemente eder
+Coffee ve Tea'ye özgü methodlar subclasslarda kalır (brewCoffeeGrinds(),addSugarAndMilk(),steepTeaBag(),addLemon())
 
-Coffee ve Tea'ye özgü methodlar subclasslarda kalır.
+# Taking the design further... (Tasarımı daha da ileri götürerek...)
 
-# Taking the design further...
-
-Peki Coffee ve Tea'nin başka ne gibi ortak noktaları var? Tariflerle başlayalım.
+Peki Coffee ve Tea'nin başka ne gibi ortak noktaları var? Recipe'ler ile başlayalım.
 
 ![img_2.png](../Images/TemplateDesignPattern/img_2.png)
 
@@ -132,10 +129,10 @@ Her iki tarifin de aynı algoritmayı izlediğine dikkat edin:
 
 Peki, prepareRecipe() işlevini de abstract etmenin bir yolunu bulabilir miyiz? Evet, hadi öğrenelim...
 
-# Abstracting prepareRecipe()
+# Abstracting prepareRecipe() (prepareRecipe() methodunu soyutlama)
 
-prepareRecipe() işlevini her bir subclass'tan (yani Coffee ve Tea sınıflarından) abstracting ile adım adım
-ilerleyelim...
+Her subclass'dan (yani, Coffee ve Tea sınıflarından) prepareRecipe() methodunu abstracting adına adımları takip
+edelim..."
 
 1 - İlk sorunumuz Coffee'nin brewCoffeeGrinds() ve addSugarAndMilk() methodlarını kullanırken Tea'nin steepTeaBag() ve
 addLemon() methodlarını kullanmasıdır.
@@ -143,11 +140,10 @@ addLemon() methodlarını kullanmasıdır.
 ![img_3.png](../Images/TemplateDesignPattern/img_3.png)
 
 Şöyle düşünelim: steeping ve brewing çok farklı değildir; oldukça benzerdirler. O halde yeni bir metot adı belirleyelim,
-örneğin brew(), ve ister Coffee demliyor ister Tea demliyor olalım aynı adı kullanacağız.
-
-Aynı şekilde, sugar ve milk eklemek de lemon eklemekle hemen hemen aynıdır: her ikisi de içeceğe çeşni eklemektir.
-Ayrıca bu işlemi gerçekleştirmek için addCondiments() adında yeni bir method oluşturalım. Böylece, yeni prepareRecipe()
-metodumuz şu şekilde görünecektir:
+örneğin brew(), ve ister Coffee demliyor ister Tea demliyor olalım aynı adı kullanacağız. Aynı şekilde, şeker ve süt
+eklemek de limon eklemekle hemen hemen aynıdır: her ikisi de içeceğe çeşni eklemektir. Ayrıca bu işlemi gerçekleştirmek
+için addCondiments() adında yeni bir yöntem oluşturalım. Böylece, yeni prepareRecipe() metodumuz şu şekilde
+görünecektir:
 
 ```
 void prepareReceipe(){
@@ -162,17 +158,16 @@ void prepareReceipe(){
 CaffeineBeverage superclass'ı ile başlayacağız:
 
 ```
+/* CaffeineBeverage, tıpkı sınıf tasarımında olduğu gibi abstract'dır */
 public abstract class CaffeineBeverage {
 
-    /*
-        Şimdi, hem Tea hem de Coffee yapmak için aynı prepareRecipe() methodu kullanılacaktır. prepareRecipe() final
-        olarak bildirilmiştir çünkü subclass'larımızın bu methodu override etmesini ve tarifi değiştirmesini
-        istemiyoruz! brew() ve addCondiments() için 3. ve 4. adımları genelleştirdik.
-    */
+    /*Şimdi, hem Tea hem de Coffee yapmak için aynı prepareRecipe() methodu kullanılacaktır. prepareRecipe() final 
+    olarak bildirilmiştir çünkü subclass'larımızın bu methodu override etmesini ve tarifi değiştirmesini istemiyoruz! 
+    brew() ve addCondiments() için 2. ve 4. adımları genelleştirdik */
     final void prepareReceipe(){
         boilWater();
-        pourInCup();
         brew();
+        pourInCup();
         addCondiments();
     }
 
@@ -201,7 +196,7 @@ güveniyorlar, bu yüzden sadece brewing ve condiments'leri işlemeleri gerekiyo
 
 ```
 /* Tasarımımızda olduğu gibi, Tea ve Coffee artık CaffeinBeverage'i extend ediyor .*/
-public class Tea extends CaffeineBeverage{
+public class Tea extends CaffeineBeverage {
 
     /* Tea öğesinin, CaffeineBeverage öğesinin iki abstract methodu olan brew() ve addCondiments() öğelerini tanımlaması
     gerekir.*/
@@ -235,28 +230,28 @@ public class Coffee extends CaffeineBeverage{
 }
 ```
 
-# What have we done?
+# What have we done? (Biz ne yaptık?)
+
+![img_4.png](../Images/TemplateDesignPattern/img_4.png)
 
 Bazı adımlar farklı implementasyonlar gerektirse de iki tarifin temelde aynı olduğunu fark ettik. Bu yüzden tarifi
 genelleştirdik (generalized) ve Base Class'a yerleştirdik.
 
-![img_4.png](../Images/TemplateDesignPattern/img_4.png)
-
 CaffeineBeverage tarifin adımlarını bilir ve kontrol eder ve 1. ve 3. adımları kendisi gerçekleştirir, ancak 2. ve 4.
-adımlar için Tea veya Coffee'ye güvenir
+adımları gerçekleştirmek için Tea veya Coffee'ye güvenir.
 
-# Meet the Template Method
+# Meet the Template Method (Template Yöntemiyle Tanışın)
 
 Temel olarak Template Method Modelini implemente ettik. Nedir o? CaffeineBeverage sınıfının yapısına bakalım; gerçek
 "template metodu" içeriyor:"
 
 ![img_5.png](../Images/TemplateDesignPattern/img_5.png)
 
-prepareRecipe() bizim template methodumuzdur. Neden?
+**prepareRecipe()** : bizim **template methodumuzdur**. Neden?
 
 1 - Sonuçta bu bir method.
 
-2 - Bir algoritma için, bu durumda caffeinated içecekler yapmak için, bir algoritma için bir template görevi görür.
+2 - Bir algoritma için, bu durumda kafeinli içecekler yapmak için, bir algoritma için bir template görevi görür.
 
 Template'de, algoritmanın her adımı bir methodla temsil edilir.
 
@@ -266,10 +261,18 @@ Bazı methodlar bu sınıf tarafından ele alınır...
 
 Bir subclass tarafından sağlanması gereken methodlar abstract olarak bildirilir
 
+```
+abstract void brew();
+abstract void addCondiments();
+```
+
 Template Method bir algoritmanın adımlarını tanımlar ve subclass'ların bir veya daha fazla adım için implementasyon
 sağlamasına izin verir.
 
-# Let’s make some tea...
+# Let’s make some tea... (Hadi biraz çay yapalım.)
+
+Bir çay yaparak şablon yönteminin nasıl çalıştığını izleyelim. Şablon yönteminin algoritmayı kontrol ettiğini
+göreceksiniz; algoritmanın belirli noktalarında, alt sınıfın adımların uygulanmasını sağlamasına izin verir...
 
 Bir Tea yaparak template methodunun nasıl çalıştığını izleyelim. Template Methodunun algoritmayı kontrol ettiğini
 göreceksiniz; algoritmanın belirli noktalarında, subclass'ın adımların implementasyonu sağlamasına izin verir...
@@ -292,6 +295,8 @@ tea.prepareReceipe();
 
 ![img_6.png](../Images/TemplateDesignPattern/img_6.png)
 
+Kafeinli içecekler yapmak için kullanılan algoritmayı takip eden...
+
 prepareRecipe() methodu algoritmayı kontrol eder, kimse bunu değiştiremez ve implementasyonun bir kısmını veya tamamını
 sağlamak için subclass'lara güvenir.
 
@@ -301,7 +306,7 @@ sağlamak için subclass'lara güvenir.
 boilWater();
 ```
 
-CoffeineBeverage'da gerçekleşen;
+CaffeineBeverage'de olur.
 
 ![img_7.png](../Images/TemplateDesignPattern/img_7.png)
 
@@ -329,7 +334,7 @@ addCondiments();
 
 ![img_7.png](../Images/TemplateDesignPattern/img_7.png)
 
-# What did the Template Method get us?
+# What did the Template Method get us? (Template Methodu bize ne kazandırdı?)
 
 ### Yetersiz Tea & Coffee Implementasyonu
 
@@ -357,32 +362,33 @@ addCondiments();
 * CaffeineBeverage sınıfı algoritma hakkındaki bilgiyi yoğunlaştırır ve eksiksiz implementasyonlar sağlamak için
   subclass'lara güvenir.
 
-# Template Method Pattern defined
+# Template Method Pattern defined (Template Method Pattern açıklaması)
 
 Tea ve Coffee örneğimizde Template Method Pattern'in nasıl çalıştığını gördünüz; şimdi resmi tanımına göz atın ve tüm
 ayrıntıları öğrenin:
+
+![img_18.png](../Images/TemplateDesignPattern/img_18.png)
 
 Template Method Pattern, bir algoritmanın iskeletini bir methodda tanımlar ve bazı adımları subclass'lara devreder.
 Template Method, subclass'ların algoritmanın yapısını değiştirmeden algoritmanın belirli adımlarını yeniden
 tanımlamasına olanak tanır.
 
-Bu model tamamen bir algoritma için template oluşturmakla ilgilidir. Template nedir? Gördüğünüz gibi sadece bir
-methoddur; daha spesifik olarak, bir algoritmayı bir dizi adım olarak tanımlayan bir methoddur. Bu adımlardan biri veya
-daha fazlası abstract olarak tanımlanır ve bir subclass tarafından implement edilir. Bu, subclasslar implementasyonun
-bir kısmını sağlarken algoritmanın yapısının değişmeden kalmasını sağlar.
-
-Class diagramına bakalım;
+Bu model tamamen bir algoritma için şablon oluşturmakla ilgilidir. Şablon nedir? Gördüğünüz gibi sadece bir yöntemdir;
+daha spesifik olarak, bir algoritmayı bir dizi adım olarak tanımlayan bir yöntemdir. Bu adımlardan biri veya daha
+fazlası soyut olarak tanımlanır ve bir alt sınıf tarafından uygulanır. Bu, alt sınıflar uygulamanın bir kısmını
+sağlarken algoritmanın yapısının değişmeden kalmasını sağlar. Sınıf diyagramına göz atalım:
 
 ![img_8.png](../Images/TemplateDesignPattern/img_8.png)
 
-AbstractClass template methodu içerir. ...ve template methodunda kullanılan operation'ların abstract sürümlerini içerir.
+**AbstractClass** : template methodu içerir. ...ve template methodunda kullanılan operation'ların abstract sürümlerini
+içerir.
 
-Template method, bir algoritmayı implement etmek için primitiveOperations'ı kullanır. Bu operations'ların gerçek
-implementasyonundan ayrılmıştır.
+**primitiveOperation()** : Template method, bir algoritmayı implement etmek için primitiveOperations'ı kullanır. Bu
+operations'ların gerçek implementasyonundan ayrılmıştır. ConcreteClass abstract operation'ları implemente eder ve
+templateMethod() bunlara ihtiyaç duyduğunda çağrılır.
 
-Her biri template method'un gerektirdiği tüm operation'ları implement eden çok sayıda ConcreteClass olabilir
-
-ConcreteClass abstract işlemleri implemente eder ve templateMethod() bunlara ihtiyaç duyduğunda çağrılır.
+**ConcreteClass** : Her biri template method'un gerektirdiği tüm operation'ları implement eden çok sayıda ConcreteClass
+olabilir
 
 # Code up close...
 
@@ -397,13 +403,15 @@ tarafından subclass'lara ayrılması amaçlanmıştır.
 Template method. Subclass'ların algoritmadaki adımlar dizisini yeniden işlemesini önlemek için final olarak
 bildirilmiştir.
 
+```final void templateMethod()```
+
 Template method, her biri bir methodla temsil edilen adımlar dizisini tanımlar.
 
 Bu örnekte, primitive operation'lardan ikisi concrete subclass'lar tarafından implement edilmelidir.
 
-Ayrıca abstract sınıfta tanımlanmış concrete bir operation'da de var. Bu tür methodlar hakkında daha fazla bilgi için...
+Ayrıca abstract sınıfta tanımlanmış concrete bir operation'da var
 
-# Code Way Up Close
+# Code Way Up Close (Kodu yakından inceleyelim)
 
 Şimdi Abstract sınıfa girebilecek method türlerine daha da yakından bakacağız:
 
@@ -421,19 +429,20 @@ primitiveOperation2();
 Abstract sınıfta concrete bir işlem tanımlanmıştır. Bu, subclass'ların override edememesi için final olarak bildirilir.
 Template methodda doğrudan kullanılabilir veya subclasslar tarafından kullanılabilir.
 
-```void hook() {}``` Concrete bir method, ancak hiçbir şey yapmıyor
+```final void concreteOperation()```
 
 Varsayılan olarak hiçbir şey yapmayan concrete methodlarımız da olabilir; bunlara "hooks" diyoruz. Subclass'lar bunları
 override etmekte özgürdür ancak bunu yapmak zorunda değildir. Bir sonraki sayfada bunların nasıl yararlı olduğunu
 göreceğiz.
 
+```void hook() {}``` Concrete bir method, ancak hiçbir şey yapmıyor
+
 # Hooked on Template Method...
 
-Hook, abstract sınıfta bildirilen, ancak yalnızca boş veya varsayılan bir implementasyon verilen bir methoddur. Bu,
-subclass'lara isterlerse algoritmaya çeşitli noktalarda "hook into (bağlanma)" olanağı verir; bir subclass hook'u yok
-saymakta da özgürdür.
-
-Hookların çeşitli kullanımları vardır; şimdi bir tanesine göz atalım. Diğer birkaç kullanımdan daha sonra bahsedeceğiz:
+Kanca, varsayılan bir implementasyon sağlayan abstract sınıfta bildirilen, ancak yalnızca boş veya varsayılan bir
+implementasyon verilen bir methoddur. Bu, subclass'lara isterlerse algoritmaya çeşitli noktalarda "hook into (bağlanma)"
+olanağı verir; bir subclass hook'u yok saymakta da özgürdür. Hookların çeşitli kullanımları vardır; şimdi bir tanesine
+göz atalım. Diğer birkaç kullanımdan daha sonra bahsedeceğiz:
 
 ```
 public abstract class CoffeineBeverageWithHook {
@@ -470,7 +479,7 @@ public abstract class CoffeineBeverageWithHook {
 }
 ```
 
-# Using the hook
+# Using the hook (Hook kullanma)
 
 Hook'u kullanmak için, subclass'ımızda onu override ederiz. Burada hook, CaffeineBeverage'ın algoritmanın belirli bir
 bölümünü değerlendirip değerlendirmediğini, yani içeceğe condiment ekleyip eklemediğini kontrol eder. Müşterinin
@@ -498,7 +507,6 @@ public class CoffeeWithHook extends CoffeineBeverageWithHook{
 
     private String getUserInput() {
         String answer = null;
-
         System.out.println("Would you like milk and sugar with your coffee (y/n) ?");
 
         /* Bu kod kullanıcıya milk ve sugar isteyip istemediğini sorar ve command line'dan inputunu alır.*/
@@ -520,6 +528,8 @@ public class CoffeeWithHook extends CoffeineBeverageWithHook{
 
 # Let's run the TestDrive
 
+Tamam, su kaynıyor... İşte sıcak bir çay ve sıcak bir kahve oluşturduğumuz test kodu
+
 ```
 public class BeverageTestDrive {
     public static void main(String[] args) {
@@ -530,6 +540,8 @@ public class BeverageTestDrive {
     }
 }
 ```
+
+Şimdi, müşteriye sormak gibi işlevlerin tüm subclass'lar tarafından kullanılabileceğini düşünebilirdim?
 
 Ne var biliyor musunuz? Size katılıyoruz. Ancak bunu düşünmeden önce bunun, abstract sınıftaki algoritmanın flow'unu
 koşullu olarak kontrol etmek için bir hook'un nasıl kullanılabileceğine dair oldukça güzel bir örnek olduğunu kabul
@@ -576,13 +588,10 @@ Sizin için başka bir tasarım prensibimiz daha var; buna Hollywood Principle d
 
 Siz bizi aramayın, biz sizi ararız.
 
-Hatırlaması kolay, değil mi? Ama bunun OO tasarımıyla ne ilgisi var?
-
-Hollywood principle bize "dependency rot (bağımlılık çürümesini)" önlemenin bir yolunu sunar. Dependency rot, low-level
-componentlere bağlı yan componentlere bağlı high-level componentlere bağlı low-level componentlere bağlı high-level
-componentlere sahip olduğunuzda meydana gelir ve bu böyle devam eder. Rots başladığında, hiç kimse bir sistemin
-nasıl tasarlandığını kolayca anlayamaz.
-
+Hatırlaması kolay, değil mi? Ama bunun OO tasarımıyla ne ilgisi var? Hollywood principle bize "dependency rot (
+bağımlılık çürümesini)" önlemenin bir yolunu sunar. Dependency rot, low-level componentlere bağlı yan componentlere
+bağlı high-level componentlere bağlı low-level componentlere bağlı high-level componentlere sahip olduğunuzda meydana
+gelir ve bu böyle devam eder. Rots başladığında, hiç kimse bir sistemin nasıl tasarlandığını kolayca anlayamaz.
 Hollywood Principle ile low-level componentlerin kendilerini bir sisteme bağlamalarına izin veririz, ancak ne zaman ve
 nasıl ihtiyaç duyulacaklarını high-level componentler belirler. Başka bir deyişle, high-level componentler low-level
 componentlere "don't call us, we'll call you (siz bizi aramayın, biz sizi ararız)" muamelesi yapar.
@@ -604,14 +613,11 @@ tasarımımıza bir kez daha göz atalım:
 ![img_13.png](../Images/TemplateDesignPattern/img_13.png)
 
 CaffeineBeverage bizim high-level componentimizdir. Recipe'in algoritması üzerinde kontrol sahibidir ve subclass'ları
-yalnızca bir methodun implementasyonu için gerekli olduklarında çağırır.
+yalnızca bir methodun implementasyonu için gerekli olduklarında çağırır. Beverages client'ları, concrete bir Tea veya
+Coffee yerine CaffeineBeverage abstraction'ına bağlı olacak ve bu da genel sistemdeki bağımlılıkları azaltacaktır.
 
-Beverages client'ları, concrete bir Tea veya Coffee yerine CaffeineBeverage abstraction'ına bağlı olacak ve bu da genel
-sistemdeki bağımlılıkları azaltacaktır.
-
-Subclass'lar sadece implementasyon detaylarını sağlamak için kullanılır.
-
-Tea ve Coffee, önce "called (çağrılmadan)" abstract sınıfı asla doğrudan çağırmaz
+Coffee - Tea Subclass'ları sadece implementasyon detaylarını sağlamak için kullanılır. Tea ve Coffee, önce "called (
+çağrılmadan)" abstract sınıfı asla doğrudan çağırmaz
 
 --**QUESTIONS & ANSWERS**--
 
@@ -620,12 +626,10 @@ Q : Hollywood Principle'in birkaç bölüm önce öğrendiğimiz Dependency Inve
 A : Dependency Inversion Principle bize concrete sınıfların kullanımından kaçınmayı ve bunun yerine mümkün olduğunca
 abstraction'lar ile çalışmayı öğretir. Hollywood Principle, low-level componentlerin hesaplamaya bağlanabilmesi, ancak
 lower-level componentler ile higher-level layer'lar arasında bağımlılık yaratmaması için framework'ler veya componentler
-oluşturmaya yönelik bir tekniktir.
-
-Yani her ikisi de ayrıştırma hedefine sahiptir, ancak Dependency Inversion Principle tasarımda bağımlılıklardan nasıl
-kaçınılacağı konusunda çok daha güçlü ve genel bir açıklama yapar. Hollywood Principle bize, low-level yapıların
-birlikte çalışmasına izin verirken diğer sınıfların bunlara çok fazla bağımlı olmasını önleyen tasarımlar oluşturmak
-için bir teknik sunar.
+oluşturmaya yönelik bir tekniktir. Yani her ikisi de ayrıştırma hedefine sahiptir, ancak Dependency Inversion Principle
+tasarımda bağımlılıklardan nasıl kaçınılacağı konusunda çok daha güçlü ve genel bir açıklama yapar. Hollywood Principle
+bize, low-level yapıların birlikte çalışmasına izin verirken diğer sınıfların bunlara çok fazla bağımlı olmasını önleyen
+tasarımlar oluşturmak için bir teknik sunar.
 
 Q : Low-level bir component'in daha higher-level bir component'deki bir methodu çağırmasına izin verilmez mi?
 
@@ -633,57 +637,48 @@ A : Pek sayılmaz. Aslında, low-level bir component genellikle sadece inheritan
 üzerinde tanımlanan bir methodu çağıracaktır. Ancak low-level componentler ile high-level componentler arasında açık
 circular dependencies yaratmaktan kaçınmak istiyoruz.
 
-# Template Methods in the Wild
+# Template Methods in the Wild (Doğada template method)
 
 Template Method Kalıbı çok yaygın bir kalıptır ve vahşi doğada çok sayıda bulabilirsiniz. Yine de keskin bir göze sahip
 olmanız gerekir, çünkü template methodlarının, template'in ders kitabı tasarımına pek benzemeyen birçok implementasyonu
-vardır.
-
-Bu modelin bu kadar sık ortaya çıkmasının nedeni, framework'ün bir şeyin nasıl yapılacağını kontrol ettiği, ancak
+vardır.Bu modelin bu kadar sık ortaya çıkmasının nedeni, framework'ün bir şeyin nasıl yapılacağını kontrol ettiği, ancak
 framework'ün algoritmasının her adımında gerçekte neler olduğuna dair kendi ayrıntılarınızı belirtmek için size (
 framework'ü kullanan kişi) bıraktığı framework'ler oluşturmak için harika bir tasarım aracı olmasıdır. Vahşi doğada (
-tamam, Java API'sinde) birkaç kullanımda küçük bir safariye çıkalım...
+tamam, Java API'sinde) birkaç kullanımda küçük bir safariye çıkalım... Eğitimde klasik pattern'ler üzerinde çalışırız.
+Ancak, gerçek dünyaya çıktığımızda, pattern'lerı context dışında tanımayı öğrenmeliyiz. Ayrıca pattern'lerin
+varyasyonlarını tanımayı da öğrenmeliyiz, çünkü gerçek dünyada kare bir delik her zaman gerçekten kare değildir.
 
-Eğitimde klasik pattern'ler üzerinde çalışırız. Ancak, gerçek dünyaya çıktığımızda, pattern'lerı context dışında
-tanımayı öğrenmeliyiz. Ayrıca pattern'lerin varyasyonlarını tanımayı da öğrenmeliyiz, çünkü gerçek dünyada kare bir
-delik her zaman gerçekten kare değildir.
-
-# Sorting with Template Method
+# Sorting with Template Method (Template Yöntemi ile Sıralama)
 
 Dizilerle sık sık yapmamız gereken şey nedir? Onları sıralamak! Bunun farkında olan Java Arrays sınıfının tasarımcıları
 bize sıralama için kullanışlı bir template methodu sağlamışlardır. Şimdi bu methodun nasıl çalıştığına bir göz atalım:
 
-Aslında burada iki methodumuz var ve sıralama functionality'i sağlamak için birlikte hareket ediyorlar.
+Aslında burada iki methodumuz var ve sort functionality'sini sağlamak için birlikte hareket ediyorlar.
 
 ```
+/* İlk method olan sort(), array'in bir kopyasını oluşturan ve bunu mergeSort() methoduna hedef dizi olarak aktaran bir 
+helper methoddur. Ayrıca array'in uzunluğunu da aktarır ve sıralamanın ilk elemandan başlamasını söyler */
 public static void sort(Object[] obj) {
     Object[] aux = obj.clone();
     mergeSort(aux, obj, 0, obj.length, 0);
 }
 
+/* mergeSort() methodu sıralama algoritmasını içerir ve algoritmayı tamamlamak için compareTo() methodunun bir 
+implementasyonuna dayanır. Bunu Template method olarak düşünün. */
 private static void mergeSort(Object[] src, Object[] dest, int low, int high, int off) {
     for (int i = low; i < high; i++) {
-        for (int j = i; j>low &&
+        for (int j = i; j > low &&
+                /* compareTo(), template methodunu "fill out (doldurmak)" için implement etmemiz gereken methoddur */
                 ((Comparable)dest[j-1]).compareTo(dest[j])>0; j--)
         {
+            /* Bu, Arrays sınıfında zaten tanımlanmış olan concrete bir methoddur */
             swap(dest, j, j-1);
         }
     }
 }
 ```
 
-İlk method olan sort(), dizinin bir kopyasını oluşturan ve bunu mergeSort() methoduna hedef dizi olarak aktaran bir
-helper methoddur. Ayrıca dizinin uzunluğunu da aktarır ve sıralamanın ilk elemandan başlamasını söyler.
-
-mergeSort() methodu sort algoritmasını içerir ve algoritmayı tamamlamak için compareTo() methodunun bir
-implementasyonuna dayanır. Sorting'in nasıl gerçekleştiğiyle ilgileniyorsanız, Sun kaynak koduna göz atmak
-isteyeceksiniz. Bunu template methodu olarak düşünün.
-
-compareTo(), template methodunu "fill out (doldurmak)" için implemente etmemiz gereken methoddur.
-
-swap() Arrays sınıfında zaten tanımlanmış olan concrete bir methoddur.
-
-# We’ve got some ducks to sort...
+# We’ve got some ducks to sort... (ördekleri sıralamamız gerekiyor )
 
 Diyelim ki sort etmek istediğiniz bir Duck Array'iniz var. Bunu nasıl yapacaksınız? Array'deki sort template methodu
 bize algoritmayı verir, ancak Duck'ları nasıl compare edeceğiniz söylemeniz gerekir, bunu da compareTo() methodunu
@@ -715,7 +710,7 @@ duck implementasyonu:
 ```
 /* Unutmayın, gerçekten subclass olmadığımız için Comparable interface'ini implement etmemiz gerekiyor*/
 public class Duck implements Comparable<Object>{
-
+    /* Bir Duck nesnesinin ismi ve ağırlığı olur */
     String name;
     int weight;
 
@@ -724,6 +719,7 @@ public class Duck implements Comparable<Object>{
         this.weight = weight;
     }
 
+    /* İşi basit tutuyoruz; Duck'ların tek yapması gereken isimlerini ve ağırlıklarını yazdırmak */
     @Override
     public String toString() {
         return "Duck{" +
@@ -732,20 +728,26 @@ public class Duck implements Comparable<Object>{
                 '}';
     }
 
+    /* Tamam, işte sıralamanın gereksinimleri */
     @Override
     public int compareTo(Object o) {
+        /* compareTo() methodu THIS Duck karşılaştırmak için başka bir Duck alır.
         Duck otherDuck = (Duck) o;
         
+        /* Duck'ların nasıl compare edileceğini burada belirleriz. Eğer THIS Duck diğer Duck'tan daha hafifse -1 
+        döndürürüz; eğer eşitlerse 0 döndürürüz; ve eğer THIS Duck daha ağırsa 1 döndürürüz */
         return Integer.compare(this.weight, otherDuck.weight);
     }
 }
 ```
 
-# Let's sort some Ducks
+# Let's sort some Ducks (Hadi Duck'ları sıralayalım)
 
 ```
 public class DuckTestDrive {
     public static void main(String[] args) {
+        
+        /* Bir Array Duck'a ihtiyacımız var; bunlar iyi görünüyor */
         Duck[] ducks = {
           new Duck("Daffy",8),
           new Duck("Dewey",2),
@@ -754,13 +756,17 @@ public class DuckTestDrive {
           new Duck("Donald",10),
           new Duck("Huey",2),
         };
-
+        
+        /* İsimlerini ve ağırlıklarını görmek için yazdıralım */
         System.out.println("Before sorting...\n");
         displayDuck(ducks);
 
+        /* Arrays'in static metodunu sort olarak çağırdığımıza ve Ducks'ımızı ona aktardığımıza dikkat edin */
         Arrays.sort(ducks);
 
         System.out.println("After sorting\n");
+        
+        /* İsimlerini ve ağırlıklarını görmek için (tekrar) yazdıralım */
         displayDuck(ducks);
     }
 
@@ -772,7 +778,9 @@ public class DuckTestDrive {
 }
 ```
 
-# The making of the sorting duck machine
+![img_19.png](../Images/TemplateDesignPattern/img_19.png)
+
+# The making of the sorting duck machine (Sıralama Duck makinesinin yapımı)
 
 Arrays sort() template methodunun nasıl çalıştığını izleyelim. Template methodunun algoritmayı nasıl kontrol ettiğini ve
 algoritmanın belirli noktalarında Duck'larımızın bir adımın implementasyonunu nasıl istediğini kontrol edeceğiz...
@@ -928,6 +936,9 @@ Ben kimseye depend (bağımlı) değilim; tüm algoritmayı kendim yapabilirim!
 Template Method ile algoritmalarınızın kontrolünü elinizde tutarken kodu bir profesyonel gibi yeniden kullanabilirsiniz.
 
 ![img_17.png](../Images/TemplateDesignPattern/img_17.png)
+
+Bir algoritmanın iskeletini, bazı adımları subclass'lara erteleyerek bir işlemde tanımlayın. Template method, alt
+sınıfların algoritmanın yapısını değiştirmeden bir algoritmanın belirli adımlarını yeniden tanımlamasına olanak tanır
 
 --**BULLET POINTS**--
 
