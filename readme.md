@@ -13,3 +13,7 @@
 [The Adapter and Facade Patterns](MarkdownFiles/AdapterAndFacadePattern.md)
 
 [Template Design Pattern](MarkdownFiles/TemplateDesignPattern.md)
+
+[Iterator And Composite Pattern](MarkdownFiles/IteratorCompositePattern.md)
+
+
