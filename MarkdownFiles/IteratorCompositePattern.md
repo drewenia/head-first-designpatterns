@@ -634,6 +634,8 @@ public Iterator<MenuItem> createIterator() {
 Ve işte bu kadar, PancakeHouseMenu tamamlandı. Şimdi DinerMenu'nun java.util.Iterator ile çalışmasını sağlayacak
 değişiklikleri yapmamız gerekiyor;
 
+DinerMenuIterator class'ına remove methodunu ekliyorum;
+
 ```
 @Override
 public void remove() {
