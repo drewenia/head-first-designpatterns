@@ -18,6 +18,8 @@
 
 [Iterator Pattern - Tutorials Point Ornegi](src/main/java/IteratorCompositePattern/Example01/readme.md)
 
+[Iterator Pattern - DigitalOcean Ornegi](src/main/java/IteratorCompositePattern/Example02/readme.md)
+
 
 
 
