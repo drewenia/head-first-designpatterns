@@ -20,4 +20,6 @@
 
 [Iterator Pattern - DigitalOcean Ornegi](src/main/java/IteratorCompositePattern/Example02/readme.md)
 
+[Composite Pattern - Derek Banas Ornegi](src/main/java/IteratorCompositePattern/Example04/readme.md)
+
 
