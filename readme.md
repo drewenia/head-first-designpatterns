@@ -22,4 +22,6 @@
 
 [Composite Pattern - Derek Banas Ornegi](src/main/java/IteratorCompositePattern/Example04/readme.md)
 
+[Composite Pattern - Geeks Ornegi](src/main/java/IteratorCompositePattern/Example05/readme.md)
+
 
