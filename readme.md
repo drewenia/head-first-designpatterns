@@ -34,6 +34,8 @@
 
 [Proxy Pattern](MarkdownFiles/ProxyDesignPattern.md)
 
+[Proxy Pattern Baeldung Ornegi](src/main/java/ProxyDesingPattern/Example01/readme.md)
+
 
 
 
