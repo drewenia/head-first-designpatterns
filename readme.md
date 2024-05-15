@@ -36,6 +36,8 @@
 
 [Proxy Pattern Baeldung Ornegi](src/main/java/ProxyDesingPattern/Example01/readme.md)
 
+[Proxy Pattern GeekForGeeks Ornegi](src/main/java/ProxyDesingPattern/Example02/readme.md)
+
 
 
 
