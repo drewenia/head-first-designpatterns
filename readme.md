@@ -38,6 +38,8 @@
 
 [Proxy Pattern GeekForGeeks Ornegi](src/main/java/ProxyDesingPattern/Example02/readme.md)
 
+[Compound Patterns](MarkdownFiles/CompoundPatterns.md)
+
 
 
 
