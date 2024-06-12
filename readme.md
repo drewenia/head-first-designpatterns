@@ -40,6 +40,8 @@
 
 [Compound Patterns](MarkdownFiles/CompoundPatterns.md)
 
+[Pattern'ler Genel Bilgiler](MarkdownFiles/Patterns.md)
+
 
 
 
